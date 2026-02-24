@@ -100,7 +100,7 @@ export default function PagesAdmin() {
         </Select>
       </div>
 
-      <div className="space-y-5 p-6 border border-white/5 bg-teal-dark/70">
+      <div className="space-y-5 p-6 border border-teal-light/20 bg-teal-dark/70">
         {schema.map((field) => (
           <div key={field.key} className="space-y-2">
             <Label className="text-white/70 font-body text-sm">{field.label}</Label>
