@@ -2,10 +2,8 @@ import { useState } from 'react';
 import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
 import { Label } from '../components/ui/label';
-import { Button } from '../components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { toast } from 'sonner';
-import { Send } from 'lucide-react';
 import api from '../lib/api';
 
 export default function ApplicationForm({ title, subtitle, compact = false }) {
@@ -37,66 +35,49 @@ export default function ApplicationForm({ title, subtitle, compact = false }) {
   return (
     <div data-testid="application-form-wrapper">
       {title && (
-        <h2 className="font-heading text-3xl md:text-4xl font-semibold text-white mb-2 text-center">
-          {title}
-        </h2>
+        <h2 className="font-heading text-2xl md:text-3xl font-semibold text-white mb-2 text-center">{title}</h2>
       )}
       {subtitle && (
-        <p className="text-white/50 text-center mb-8 font-body">{subtitle}</p>
+        <p className="text-white/50 text-center mb-6 font-body text-sm">{subtitle}</p>
       )}
-      <form onSubmit={handleSubmit} className={`${compact ? 'space-y-4' : 'space-y-6'}`} data-testid="application-form">
-        {/* Honeypot - hidden from users */}
+      <form onSubmit={handleSubmit} className="space-y-4" data-testid="application-form">
+        {/* Honeypot */}
         <div className="absolute opacity-0 pointer-events-none" aria-hidden="true" tabIndex={-1}>
-          <Input
-            name="honeypot"
-            value={form.honeypot}
-            onChange={(e) => setForm({ ...form, honeypot: e.target.value })}
-            tabIndex={-1}
-            autoComplete="off"
-          />
+          <Input name="honeypot" value={form.honeypot} onChange={(e) => setForm({ ...form, honeypot: e.target.value })} tabIndex={-1} autoComplete="off" />
         </div>
 
-        <div className={`grid ${compact ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'} gap-4`}>
-          <div className="space-y-2">
-            <Label className="text-white/70 text-sm uppercase tracking-wider font-body">
-              Имя <span className="text-red-400">*</span>
-            </Label>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <Label className="text-white/70 text-xs font-body">Ваше имя <span className="text-red-400">*</span></Label>
             <Input
               data-testid="form-name"
               placeholder="Ваше имя"
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="bg-black/50 border-white/10 focus:border-gold text-white placeholder:text-white/30 h-12"
+              className="bg-teal-dark/80 border-teal-light/30 focus:border-gold text-white placeholder:text-white/30 h-11"
               required
             />
           </div>
-          <div className="space-y-2">
-            <Label className="text-white/70 text-sm uppercase tracking-wider font-body">
-              Телефон <span className="text-red-400">*</span>
-            </Label>
+          <div className="space-y-1.5">
+            <Label className="text-white/70 text-xs font-body">Ваш телефон <span className="text-red-400">*</span></Label>
             <Input
               data-testid="form-phone"
               placeholder="+7 (___) ___-__-__"
               value={form.phone}
               onChange={(e) => setForm({ ...form, phone: e.target.value })}
-              className="bg-black/50 border-white/10 focus:border-gold text-white placeholder:text-white/30 h-12"
+              className="bg-teal-dark/80 border-teal-light/30 focus:border-gold text-white placeholder:text-white/30 h-11"
               required
             />
           </div>
         </div>
 
-        <div className="space-y-2">
-          <Label className="text-white/70 text-sm uppercase tracking-wider font-body">
-            Мессенджер для связи
-          </Label>
+        <div className="space-y-1.5">
+          <Label className="text-white/70 text-xs font-body">Мессенджер для связи</Label>
           <Select value={form.messenger} onValueChange={(val) => setForm({ ...form, messenger: val })}>
-            <SelectTrigger
-              data-testid="form-messenger"
-              className="bg-black/50 border-white/10 focus:border-gold text-white h-12"
-            >
+            <SelectTrigger data-testid="form-messenger" className="bg-teal-dark/80 border-teal-light/30 focus:border-gold text-white h-11">
               <SelectValue placeholder="Выберите мессенджер" />
             </SelectTrigger>
-            <SelectContent className="bg-[#0f0f0f] border-white/10">
+            <SelectContent className="bg-teal-dark border-teal-light/30">
               <SelectItem value="telegram">Telegram</SelectItem>
               <SelectItem value="whatsapp">WhatsApp</SelectItem>
               <SelectItem value="viber">Viber</SelectItem>
@@ -105,34 +86,27 @@ export default function ApplicationForm({ title, subtitle, compact = false }) {
           </Select>
         </div>
 
-        <div className="space-y-2">
-          <Label className="text-white/70 text-sm uppercase tracking-wider font-body">
-            Описание ситуации
-          </Label>
+        <div className="space-y-1.5">
+          <Label className="text-white/70 text-xs font-body">Опишите вашу проблему</Label>
           <Textarea
             data-testid="form-description"
             placeholder="Кратко опишите вашу ситуацию..."
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
-            className="bg-black/50 border-white/10 focus:border-gold text-white placeholder:text-white/30 min-h-[120px] resize-none"
+            className="bg-teal-dark/80 border-teal-light/30 focus:border-gold text-white placeholder:text-white/30 min-h-[100px] resize-none"
           />
         </div>
 
-        <Button
+        <p className="text-xs text-white/30 font-body text-center">Данные не будут передаваться третьим лицам</p>
+
+        <button
           type="submit"
           data-testid="form-submit-btn"
           disabled={loading}
-          className="w-full bg-burgundy hover:bg-burgundy-light text-white h-14 text-base uppercase tracking-widest font-body transition-all duration-300 shadow-[0_0_10px_rgba(107,21,37,0.5)] hover:shadow-[0_0_20px_rgba(107,21,37,0.8)]"
+          className="btn-gold w-full py-3 text-base font-body uppercase tracking-wide"
         >
-          {loading ? (
-            <span className="flex items-center gap-2">Отправка...</span>
-          ) : (
-            <span className="flex items-center gap-2">
-              <Send className="w-4 h-4" />
-              Оставить заявку
-            </span>
-          )}
-        </Button>
+          {loading ? 'Отправка...' : 'Получить помощь экстрасенса'}
+        </button>
       </form>
     </div>
   );
