@@ -27,8 +27,8 @@ function Sidebar({ className = '' }) {
   };
 
   return (
-    <div className={`flex flex-col h-full bg-[#0a0a0a] border-r border-white/5 ${className}`}>
-      <div className="p-4 border-b border-white/5">
+    <div className={`flex flex-col h-full bg-teal-darker border-r border-teal-light/20 ${className}`}>
+      <div className="p-4 border-b border-teal-light/20">
         <Link to="/" className="text-gold font-heading text-lg font-semibold" data-testid="admin-logo">
           CMS Панель
         </Link>
