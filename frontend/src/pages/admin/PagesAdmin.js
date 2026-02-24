@@ -89,7 +89,7 @@ export default function PagesAdmin() {
 
       <div className="mb-6">
         <Select value={selectedPage} onValueChange={setSelectedPage}>
-          <SelectTrigger className="w-64 bg-[#0a0a0a] border-white/10 text-white h-10" data-testid="page-select">
+          <SelectTrigger className="w-64 bg-teal-dark/70 border-white/10 text-white h-10" data-testid="page-select">
             <SelectValue />
           </SelectTrigger>
           <SelectContent className="bg-[#0f0f0f] border-white/10">
@@ -100,7 +100,7 @@ export default function PagesAdmin() {
         </Select>
       </div>
 
-      <div className="space-y-5 p-6 border border-white/5 bg-[#0a0a0a]">
+      <div className="space-y-5 p-6 border border-white/5 bg-teal-dark/70">
         {schema.map((field) => (
           <div key={field.key} className="space-y-2">
             <Label className="text-white/70 font-body text-sm">{field.label}</Label>
