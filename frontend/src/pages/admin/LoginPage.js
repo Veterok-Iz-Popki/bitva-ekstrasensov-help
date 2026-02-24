@@ -45,7 +45,7 @@ export default function LoginPage() {
               data-testid="admin-username"
               value={form.username}
               onChange={(e) => setForm({ ...form, username: e.target.value })}
-              className="bg-black/50 border-white/10 focus:border-gold text-white h-12"
+              className="bg-teal-dark/80 border-teal-light/30 focus:border-gold text-white h-12"
               placeholder="admin"
               required
             />
