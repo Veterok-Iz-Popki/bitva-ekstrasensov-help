@@ -60,7 +60,7 @@ export default function ApplicationsAdmin() {
         </Badge>
       </div>
 
-      <div className="border border-white/5 bg-[#0a0a0a] overflow-x-auto">
+      <div className="border border-white/5 bg-teal-dark/70 overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow className="border-white/5 hover:bg-transparent">
@@ -114,7 +114,7 @@ export default function ApplicationsAdmin() {
 
       {/* Detail Dialog */}
       <Dialog open={!!selected} onOpenChange={() => setSelected(null)}>
-        <DialogContent className="bg-[#0a0a0a] border-white/10 max-w-lg">
+        <DialogContent className="bg-teal-dark/70 border-white/10 max-w-lg">
           <DialogHeader>
             <DialogTitle className="font-heading text-white text-xl">Заявка: {selected?.name}</DialogTitle>
           </DialogHeader>
