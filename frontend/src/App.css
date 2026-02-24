@@ -1,34 +1,57 @@
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+/* Gold border utility */
+.border-gold {
+    border-color: rgba(212, 175, 55, 0.2);
+}
+.border-gold-strong {
+    border-color: rgba(212, 175, 55, 0.5);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
+/* Glassmorphism card */
+.glass-card {
+    background: rgba(10, 10, 10, 0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.App-header {
-    background-color: #0f0f10;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+/* Gold text shadow */
+.text-shadow-gold {
+    text-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
 }
 
-.App-link {
-    color: #61dafb;
+/* Hero text shadow */
+.text-shadow-hero {
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+/* Staggered fade-up animations */
+.stagger-1 { animation-delay: 0.1s; opacity: 0; }
+.stagger-2 { animation-delay: 0.2s; opacity: 0; }
+.stagger-3 { animation-delay: 0.3s; opacity: 0; }
+.stagger-4 { animation-delay: 0.4s; opacity: 0; }
+.stagger-5 { animation-delay: 0.5s; opacity: 0; }
+
+/* Participant card hover */
+.participant-card {
+    transition: all 0.5s ease;
+}
+.participant-card:hover {
+    border-color: rgba(212, 175, 55, 0.5);
+    box-shadow: 0 0 30px rgba(107, 21, 37, 0.2);
+}
+
+/* Section separator */
+.section-divider {
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(212, 175, 55, 0.3), transparent);
+}
+
+/* Input focus styles */
+input:focus, textarea:focus, select:focus {
+    outline: none;
+}
+
+/* Admin sidebar active */
+.admin-nav-active {
+    background: rgba(107, 21, 37, 0.3);
+    border-left: 2px solid #d4af37;
 }
