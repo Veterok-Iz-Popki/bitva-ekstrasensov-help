@@ -30,7 +30,7 @@ export default function DashboardPage() {
             <Link
               key={i}
               to={card.link}
-              className="p-6 border border-white/5 bg-teal-dark/70 hover:border-gold/20 transition-colors group"
+              className="p-6 border border-teal-light/20 bg-teal-dark/70 hover:border-gold/20 transition-colors group"
               data-testid={`stat-card-${i}`}
             >
               <div className="flex items-center justify-between mb-4">
@@ -44,7 +44,7 @@ export default function DashboardPage() {
         })}
       </div>
 
-      <div className="p-6 border border-white/5 bg-teal-dark/70">
+      <div className="p-6 border border-teal-light/20 bg-teal-dark/70">
         <h2 className="font-heading text-xl font-semibold text-white mb-4">Быстрые действия</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Link to="/admin/applications" className="flex items-center gap-3 p-3 text-sm font-body text-white/60 hover:text-gold hover:bg-white/5 transition-colors" data-testid="quick-action-applications">
