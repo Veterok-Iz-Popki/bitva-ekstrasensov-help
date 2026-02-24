@@ -51,7 +51,7 @@ export default function FAQAdmin() {
 
       <div className="space-y-3">
         {items.map((item) => (
-          <div key={item.id} className="flex items-start gap-4 p-4 border border-white/5 bg-teal-dark/70 hover:border-gold/20 transition-colors" data-testid={`faq-admin-item-${item.id}`}>
+          <div key={item.id} className="flex items-start gap-4 p-4 border border-teal-light/20 bg-teal-dark/70 hover:border-gold/20 transition-colors" data-testid={`faq-admin-item-${item.id}`}>
             <div className="text-white/20 pt-1"><GripVertical className="w-4 h-4" /></div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
