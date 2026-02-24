@@ -8,21 +8,23 @@ module.exports = {
     theme: {
         extend: {
             fontFamily: {
-                heading: ['"Cormorant Garamond"', 'serif'],
-                body: ['"Manrope"', 'sans-serif'],
+                heading: ['"Playfair Display"', 'serif'],
+                body: ['"Fira Sans"', 'sans-serif'],
             },
             colors: {
                 background: 'hsl(var(--background))',
                 foreground: 'hsl(var(--foreground))',
-                gold: {
-                    DEFAULT: '#d4af37',
-                    light: '#f3cf60',
-                    dark: '#b08d26',
+                teal: {
+                    DEFAULT: '#0d3040',
+                    light: '#1a5060',
+                    dark: '#0a2530',
+                    darker: '#071c28',
                 },
-                burgundy: {
-                    DEFAULT: '#6b1525',
-                    light: '#8a1c30',
-                    dark: '#4a0e1b',
+                gold: {
+                    DEFAULT: '#d4a637',
+                    light: '#e8c356',
+                    dark: '#b08a20',
+                    muted: 'rgba(212,166,55,0.3)',
                 },
                 card: {
                     DEFAULT: 'hsl(var(--card))',
@@ -85,17 +87,12 @@ module.exports = {
                     from: { opacity: '0' },
                     to: { opacity: '1' }
                 },
-                'glow-pulse': {
-                    '0%, 100%': { boxShadow: '0 0 10px rgba(107,21,37,0.3)' },
-                    '50%': { boxShadow: '0 0 25px rgba(107,21,37,0.6)' }
-                }
             },
             animation: {
                 'accordion-down': 'accordion-down 0.2s ease-out',
                 'accordion-up': 'accordion-up 0.2s ease-out',
                 'fade-up': 'fade-up 0.6s ease-out forwards',
                 'fade-in': 'fade-in 0.4s ease-out forwards',
-                'glow-pulse': 'glow-pulse 3s ease-in-out infinite'
             }
         }
     },
