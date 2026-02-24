@@ -28,7 +28,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] flex items-center justify-center px-6" data-testid="admin-login-page">
+    <div className="min-h-screen flex items-center justify-center px-6" style={{background: 'linear-gradient(180deg, #0b2a38 0%, #0d3040 100%)'}} data-testid="admin-login-page">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-14 h-14 border border-gold/30 mb-4">
