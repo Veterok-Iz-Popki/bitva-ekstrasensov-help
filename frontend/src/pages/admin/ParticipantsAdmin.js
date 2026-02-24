@@ -65,10 +65,10 @@ export default function ParticipantsAdmin() {
         </Button>
       </div>
 
-      <div className="border border-white/5 bg-teal-dark/70 overflow-x-auto">
+      <div className="border border-teal-light/20 bg-teal-dark/70 overflow-x-auto">
         <Table>
           <TableHeader>
-            <TableRow className="border-white/5 hover:bg-transparent">
+            <TableRow className="border-teal-light/20 hover:bg-transparent">
               <TableHead className="text-white/40 font-body">Фото</TableHead>
               <TableHead className="text-white/40 font-body">Имя</TableHead>
               <TableHead className="text-white/40 font-body">Звание</TableHead>
@@ -79,7 +79,7 @@ export default function ParticipantsAdmin() {
           </TableHeader>
           <TableBody>
             {items.map((item) => (
-              <TableRow key={item.id} className="border-white/5 hover:bg-white/[0.02]">
+              <TableRow key={item.id} className="border-teal-light/20 hover:bg-white/[0.02]">
                 <TableCell>
                   {item.photo_url ? (
                     <img src={item.photo_url} alt={item.name} className="w-10 h-10 object-cover" />
