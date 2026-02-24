@@ -79,7 +79,7 @@ export default function ParticipantsAdmin() {
           </TableHeader>
           <TableBody>
             {items.map((item) => (
-              <TableRow key={item.id} className="border-teal-light/20 hover:bg-white/[0.02]">
+              <TableRow key={item.id} className="border-teal-light/20 hover:bg-teal/30">
                 <TableCell>
                   {item.photo_url ? (
                     <img src={item.photo_url} alt={item.name} className="w-10 h-10 object-cover" />
@@ -96,10 +96,10 @@ export default function ParticipantsAdmin() {
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end gap-1">
                     <Button variant="ghost" size="icon" onClick={() => openEdit(item)} data-testid={`edit-participant-${item.id}`}>
-                      <Pencil className="w-4 h-4 text-white/40 hover:text-gold" />
+                      <Pencil className="w-4 h-4 text-white/50 hover:text-gold" />
                     </Button>
                     <Button variant="ghost" size="icon" onClick={() => deleteItem(item.id)} data-testid={`delete-participant-${item.id}`}>
-                      <Trash2 className="w-4 h-4 text-white/40 hover:text-red-400" />
+                      <Trash2 className="w-4 h-4 text-white/50 hover:text-red-400" />
                     </Button>
                   </div>
                 </TableCell>

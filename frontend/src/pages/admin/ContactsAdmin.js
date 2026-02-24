@@ -38,14 +38,14 @@ export default function ContactsAdmin() {
           </TableHeader>
           <TableBody>
             {items.map((item) => (
-              <TableRow key={item.id} className="border-teal-light/20 hover:bg-white/[0.02]">
+              <TableRow key={item.id} className="border-teal-light/20 hover:bg-teal/30">
                 <TableCell className="font-body text-white">{item.name}</TableCell>
                 <TableCell className="font-body text-white/70">{item.email}</TableCell>
                 <TableCell className="font-body text-white/50 text-sm">{new Date(item.created_at).toLocaleDateString('ru-RU')}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end gap-1">
-                    <Button variant="ghost" size="icon" onClick={() => setSelected(item)}><Eye className="w-4 h-4 text-white/40 hover:text-gold" /></Button>
-                    <Button variant="ghost" size="icon" onClick={() => deleteItem(item.id)}><Trash2 className="w-4 h-4 text-white/40 hover:text-red-400" /></Button>
+                    <Button variant="ghost" size="icon" onClick={() => setSelected(item)}><Eye className="w-4 h-4 text-white/50 hover:text-gold" /></Button>
+                    <Button variant="ghost" size="icon" onClick={() => deleteItem(item.id)}><Trash2 className="w-4 h-4 text-white/50 hover:text-red-400" /></Button>
                   </div>
                 </TableCell>
               </TableRow>

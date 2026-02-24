@@ -74,7 +74,7 @@ export default function ApplicationsAdmin() {
           </TableHeader>
           <TableBody>
             {items.map((item) => (
-              <TableRow key={item.id} className="border-teal-light/20 hover:bg-white/[0.02]">
+              <TableRow key={item.id} className="border-teal-light/20 hover:bg-teal/30">
                 <TableCell className="font-body text-white">{item.name}</TableCell>
                 <TableCell className="font-body text-white/70">{item.phone}</TableCell>
                 <TableCell className="font-body text-white/70">{item.messenger || '—'}</TableCell>
@@ -96,10 +96,10 @@ export default function ApplicationsAdmin() {
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end gap-1">
                     <Button variant="ghost" size="icon" onClick={() => setSelected(item)} data-testid={`view-app-${item.id}`}>
-                      <Eye className="w-4 h-4 text-white/40 hover:text-gold" />
+                      <Eye className="w-4 h-4 text-white/50 hover:text-gold" />
                     </Button>
                     <Button variant="ghost" size="icon" onClick={() => deleteItem(item.id)} data-testid={`delete-app-${item.id}`}>
-                      <Trash2 className="w-4 h-4 text-white/40 hover:text-red-400" />
+                      <Trash2 className="w-4 h-4 text-white/50 hover:text-red-400" />
                     </Button>
                   </div>
                 </TableCell>

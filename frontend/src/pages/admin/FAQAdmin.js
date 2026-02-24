@@ -62,8 +62,8 @@ export default function FAQAdmin() {
               <p className="text-xs text-white/40 font-body mt-1 line-clamp-2">{item.answer}</p>
             </div>
             <div className="flex items-center gap-1 shrink-0">
-              <Button variant="ghost" size="icon" onClick={() => openEdit(item)}><Pencil className="w-4 h-4 text-white/40 hover:text-gold" /></Button>
-              <Button variant="ghost" size="icon" onClick={() => deleteItem(item.id)}><Trash2 className="w-4 h-4 text-white/40 hover:text-red-400" /></Button>
+              <Button variant="ghost" size="icon" onClick={() => openEdit(item)}><Pencil className="w-4 h-4 text-white/50 hover:text-gold" /></Button>
+              <Button variant="ghost" size="icon" onClick={() => deleteItem(item.id)}><Trash2 className="w-4 h-4 text-white/50 hover:text-red-400" /></Button>
             </div>
           </div>
         ))}
