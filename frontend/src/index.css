@@ -41,8 +41,7 @@
     body {
         @apply text-foreground;
         font-family: 'Fira Sans', sans-serif;
-        background: linear-gradient(180deg, #0b2a38 0%, #0e3346 30%, #0d3040 60%, #0a2530 100%);
-        background-attachment: fixed;
+        background: url('https://customer-assets.emergentagent.com/job_ekstrasensov-sajt/artifacts/o1q1ruoc_IMG_6574.JPEG') center center / cover no-repeat fixed;
         min-height: 100vh;
     }
     h1, h2, h3, h4, h5, h6 {
