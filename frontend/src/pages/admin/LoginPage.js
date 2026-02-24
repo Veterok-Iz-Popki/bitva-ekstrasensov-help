@@ -38,7 +38,7 @@ export default function LoginPage() {
           <p className="text-sm text-white/40 font-body">Панель управления сайтом</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5 p-8 border border-white/5 bg-[#0a0a0a]" data-testid="admin-login-form">
+        <form onSubmit={handleSubmit} className="space-y-5 p-8 teal-card" data-testid="admin-login-form">
           <div className="space-y-2">
             <Label className="text-white/70 text-sm uppercase tracking-wider font-body">Логин</Label>
             <Input
