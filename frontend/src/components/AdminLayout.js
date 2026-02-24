@@ -104,7 +104,7 @@ export default function AdminLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] flex">
+    <div className="min-h-screen bg-teal-darker flex">
       {/* Desktop Sidebar */}
       <div className="hidden md:block w-60 shrink-0">
         <div className="fixed w-60 h-screen">
@@ -115,7 +115,7 @@ export default function AdminLayout() {
       {/* Main Content */}
       <div className="flex-1 min-w-0">
         {/* Mobile Header */}
-        <div className="md:hidden flex items-center justify-between p-4 border-b border-white/5 bg-[#0a0a0a]">
+        <div className="md:hidden flex items-center justify-between p-4 border-b border-teal-light/20 bg-teal-darker">
           <span className="text-gold font-heading font-semibold">CMS</span>
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger asChild>
