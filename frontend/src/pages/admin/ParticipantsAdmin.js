@@ -60,7 +60,7 @@ export default function ParticipantsAdmin() {
     <div data-testid="admin-participants">
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-heading text-3xl font-bold text-white">Участники</h1>
-        <Button onClick={openCreate} className="bg-burgundy hover:bg-burgundy-light text-white font-body" data-testid="add-participant-btn">
+        <Button onClick={openCreate} className="bg-gold text-teal-darker hover:bg-gold text-teal-darker-light text-white font-body" data-testid="add-participant-btn">
           <Plus className="w-4 h-4 mr-2" />Добавить
         </Button>
       </div>
@@ -110,7 +110,7 @@ export default function ParticipantsAdmin() {
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="bg-teal-dark/70 border-white/10 max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-teal-dark/70 border-teal-light/30 max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-heading text-white text-xl">{editId ? 'Редактировать' : 'Добавить'} участника</DialogTitle>
           </DialogHeader>
@@ -118,37 +118,37 @@ export default function ParticipantsAdmin() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-white/70 font-body text-sm">Slug (URL)</Label>
-                <Input data-testid="participant-slug" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} className="bg-black/50 border-white/10 text-white h-10" placeholder="ivan-ivanov" />
+                <Input data-testid="participant-slug" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} className="bg-teal-dark/80 border-teal-light/30 text-white h-10" placeholder="ivan-ivanov" />
               </div>
               <div className="space-y-2">
                 <Label className="text-white/70 font-body text-sm">Имя</Label>
-                <Input data-testid="participant-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="bg-black/50 border-white/10 text-white h-10" placeholder="Иван Иванов" />
+                <Input data-testid="participant-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="bg-teal-dark/80 border-teal-light/30 text-white h-10" placeholder="Иван Иванов" />
               </div>
             </div>
             <div className="space-y-2">
               <Label className="text-white/70 font-body text-sm">Звание / Титул</Label>
-              <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="bg-black/50 border-white/10 text-white h-10" placeholder="Ясновидящая, участник 20 сезона" />
+              <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="bg-teal-dark/80 border-teal-light/30 text-white h-10" placeholder="Ясновидящая, участник 20 сезона" />
             </div>
             <div className="space-y-2">
               <Label className="text-white/70 font-body text-sm">URL фото</Label>
-              <Input value={form.photo_url} onChange={(e) => setForm({ ...form, photo_url: e.target.value })} className="bg-black/50 border-white/10 text-white h-10" placeholder="https://..." />
+              <Input value={form.photo_url} onChange={(e) => setForm({ ...form, photo_url: e.target.value })} className="bg-teal-dark/80 border-teal-light/30 text-white h-10" placeholder="https://..." />
             </div>
             <div className="space-y-2">
               <Label className="text-white/70 font-body text-sm">Краткое описание</Label>
-              <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="bg-black/50 border-white/10 text-white min-h-[80px]" />
+              <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="bg-teal-dark/80 border-teal-light/30 text-white min-h-[80px]" />
             </div>
             <div className="space-y-2">
               <Label className="text-white/70 font-body text-sm">Полное описание</Label>
-              <Textarea value={form.full_description} onChange={(e) => setForm({ ...form, full_description: e.target.value })} className="bg-black/50 border-white/10 text-white min-h-[120px]" />
+              <Textarea value={form.full_description} onChange={(e) => setForm({ ...form, full_description: e.target.value })} className="bg-teal-dark/80 border-teal-light/30 text-white min-h-[120px]" />
             </div>
             <div className="space-y-2">
               <Label className="text-white/70 font-body text-sm">Специализации (через запятую)</Label>
-              <Input value={specText} onChange={(e) => setSpecText(e.target.value)} className="bg-black/50 border-white/10 text-white h-10" placeholder="Ясновидение, Таро, Целительство" />
+              <Input value={specText} onChange={(e) => setSpecText(e.target.value)} className="bg-teal-dark/80 border-teal-light/30 text-white h-10" placeholder="Ясновидение, Таро, Целительство" />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-white/70 font-body text-sm">Порядок</Label>
-                <Input type="number" value={form.order} onChange={(e) => setForm({ ...form, order: parseInt(e.target.value) || 0 })} className="bg-black/50 border-white/10 text-white h-10" />
+                <Input type="number" value={form.order} onChange={(e) => setForm({ ...form, order: parseInt(e.target.value) || 0 })} className="bg-teal-dark/80 border-teal-light/30 text-white h-10" />
               </div>
               <div className="flex items-center gap-3 pt-6">
                 <Switch checked={form.is_active} onCheckedChange={(val) => setForm({ ...form, is_active: val })} data-testid="participant-active-switch" />
@@ -158,7 +158,7 @@ export default function ParticipantsAdmin() {
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setDialogOpen(false)} className="text-white/60 font-body">Отмена</Button>
-            <Button onClick={handleSave} className="bg-burgundy hover:bg-burgundy-light text-white font-body" data-testid="save-participant-btn">Сохранить</Button>
+            <Button onClick={handleSave} className="bg-gold text-teal-darker hover:bg-gold text-teal-darker-light text-white font-body" data-testid="save-participant-btn">Сохранить</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

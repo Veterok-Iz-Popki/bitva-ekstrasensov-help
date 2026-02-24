@@ -80,10 +80,10 @@ export default function ApplicationsAdmin() {
                 <TableCell className="font-body text-white/70">{item.messenger || '—'}</TableCell>
                 <TableCell>
                   <Select value={item.status} onValueChange={(val) => updateStatus(item.id, val)}>
-                    <SelectTrigger className="w-32 h-8 bg-transparent border-white/10 text-xs" data-testid={`status-select-${item.id}`}>
+                    <SelectTrigger className="w-32 h-8 bg-transparent border-teal-light/30 text-xs" data-testid={`status-select-${item.id}`}>
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-[#0f0f0f] border-white/10">
+                    <SelectContent className="bg-teal-dark border-teal-light/30">
                       <SelectItem value="new">Новая</SelectItem>
                       <SelectItem value="in_progress">В работе</SelectItem>
                       <SelectItem value="completed">Завершена</SelectItem>
@@ -114,7 +114,7 @@ export default function ApplicationsAdmin() {
 
       {/* Detail Dialog */}
       <Dialog open={!!selected} onOpenChange={() => setSelected(null)}>
-        <DialogContent className="bg-teal-dark/70 border-white/10 max-w-lg">
+        <DialogContent className="bg-teal-dark/70 border-teal-light/30 max-w-lg">
           <DialogHeader>
             <DialogTitle className="font-heading text-white text-xl">Заявка: {selected?.name}</DialogTitle>
           </DialogHeader>
@@ -138,7 +138,7 @@ export default function ApplicationsAdmin() {
                   data-testid="app-notes-textarea"
                   defaultValue={selected.notes || ''}
                   onBlur={(e) => updateNotes(selected.id, e.target.value)}
-                  className="bg-black/50 border-white/10 text-white placeholder:text-white/30 min-h-[80px]"
+                  className="bg-teal-dark/80 border-teal-light/30 text-white placeholder:text-white/30 min-h-[80px]"
                   placeholder="Добавить заметку..."
                 />
               </div>

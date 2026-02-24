@@ -46,7 +46,7 @@ export default function ReviewsAdmin() {
     <div data-testid="admin-reviews">
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-heading text-3xl font-bold text-white">Отзывы</h1>
-        <Button onClick={openCreate} className="bg-burgundy hover:bg-burgundy-light text-white font-body" data-testid="add-review-btn">
+        <Button onClick={openCreate} className="bg-gold text-teal-darker hover:bg-gold text-teal-darker-light text-white font-body" data-testid="add-review-btn">
           <Plus className="w-4 h-4 mr-2" />Добавить
         </Button>
       </div>
@@ -92,7 +92,7 @@ export default function ReviewsAdmin() {
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="bg-teal-dark/70 border-white/10 max-w-lg">
+        <DialogContent className="bg-teal-dark/70 border-teal-light/30 max-w-lg">
           <DialogHeader>
             <DialogTitle className="font-heading text-white text-xl">{editId ? 'Редактировать' : 'Добавить'} отзыв</DialogTitle>
           </DialogHeader>
@@ -100,21 +100,21 @@ export default function ReviewsAdmin() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-white/70 font-body text-sm">Имя автора</Label>
-                <Input value={form.author_name} onChange={(e) => setForm({ ...form, author_name: e.target.value })} className="bg-black/50 border-white/10 text-white h-10" />
+                <Input value={form.author_name} onChange={(e) => setForm({ ...form, author_name: e.target.value })} className="bg-teal-dark/80 border-teal-light/30 text-white h-10" />
               </div>
               <div className="space-y-2">
                 <Label className="text-white/70 font-body text-sm">Город</Label>
-                <Input value={form.author_city} onChange={(e) => setForm({ ...form, author_city: e.target.value })} className="bg-black/50 border-white/10 text-white h-10" />
+                <Input value={form.author_city} onChange={(e) => setForm({ ...form, author_city: e.target.value })} className="bg-teal-dark/80 border-teal-light/30 text-white h-10" />
               </div>
             </div>
             <div className="space-y-2">
               <Label className="text-white/70 font-body text-sm">Текст отзыва</Label>
-              <Textarea value={form.text} onChange={(e) => setForm({ ...form, text: e.target.value })} className="bg-black/50 border-white/10 text-white min-h-[100px]" />
+              <Textarea value={form.text} onChange={(e) => setForm({ ...form, text: e.target.value })} className="bg-teal-dark/80 border-teal-light/30 text-white min-h-[100px]" />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-white/70 font-body text-sm">Рейтинг (1-5)</Label>
-                <Input type="number" min={1} max={5} value={form.rating} onChange={(e) => setForm({ ...form, rating: parseInt(e.target.value) || 5 })} className="bg-black/50 border-white/10 text-white h-10" />
+                <Input type="number" min={1} max={5} value={form.rating} onChange={(e) => setForm({ ...form, rating: parseInt(e.target.value) || 5 })} className="bg-teal-dark/80 border-teal-light/30 text-white h-10" />
               </div>
               <div className="flex items-center gap-3 pt-6">
                 <Switch checked={form.is_published} onCheckedChange={(val) => setForm({ ...form, is_published: val })} />
@@ -124,7 +124,7 @@ export default function ReviewsAdmin() {
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setDialogOpen(false)} className="text-white/60 font-body">Отмена</Button>
-            <Button onClick={handleSave} className="bg-burgundy hover:bg-burgundy-light text-white font-body" data-testid="save-review-btn">Сохранить</Button>
+            <Button onClick={handleSave} className="bg-gold text-teal-darker hover:bg-gold text-teal-darker-light text-white font-body" data-testid="save-review-btn">Сохранить</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

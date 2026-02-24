@@ -58,7 +58,7 @@ export default function ContactsAdmin() {
       </div>
 
       <Dialog open={!!selected} onOpenChange={() => setSelected(null)}>
-        <DialogContent className="bg-teal-dark/70 border-white/10 max-w-lg">
+        <DialogContent className="bg-teal-dark/70 border-teal-light/30 max-w-lg">
           <DialogHeader>
             <DialogTitle className="font-heading text-white text-xl">Сообщение от {selected?.name}</DialogTitle>
           </DialogHeader>

@@ -89,10 +89,10 @@ export default function PagesAdmin() {
 
       <div className="mb-6">
         <Select value={selectedPage} onValueChange={setSelectedPage}>
-          <SelectTrigger className="w-64 bg-teal-dark/70 border-white/10 text-white h-10" data-testid="page-select">
+          <SelectTrigger className="w-64 bg-teal-dark/70 border-teal-light/30 text-white h-10" data-testid="page-select">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent className="bg-[#0f0f0f] border-white/10">
+          <SelectContent className="bg-teal-dark border-teal-light/30">
             {Object.entries(PAGE_NAMES).map(([slug, name]) => (
               <SelectItem key={slug} value={slug}>{name}</SelectItem>
             ))}
@@ -107,13 +107,13 @@ export default function PagesAdmin() {
             <Textarea
               value={blocks[field.key] || ''}
               onChange={(e) => setBlocks({ ...blocks, [field.key]: e.target.value })}
-              className="bg-black/50 border-white/10 text-white min-h-[80px] font-body text-sm"
+              className="bg-teal-dark/80 border-teal-light/30 text-white min-h-[80px] font-body text-sm"
               data-testid={`page-block-${field.key}`}
             />
           </div>
         ))}
 
-        <Button onClick={handleSave} disabled={saving} className="bg-burgundy hover:bg-burgundy-light text-white font-body" data-testid="save-page-btn">
+        <Button onClick={handleSave} disabled={saving} className="bg-gold text-teal-darker hover:bg-gold text-teal-darker-light text-white font-body" data-testid="save-page-btn">
           <Save className="w-4 h-4 mr-2" />
           {saving ? 'Сохранение...' : 'Сохранить'}
         </Button>

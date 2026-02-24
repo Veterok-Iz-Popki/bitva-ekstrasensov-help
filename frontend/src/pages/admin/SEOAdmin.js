@@ -53,10 +53,10 @@ export default function SEOAdmin() {
 
       <div className="mb-6">
         <Select value={selectedPage} onValueChange={setSelectedPage}>
-          <SelectTrigger className="w-64 bg-teal-dark/70 border-white/10 text-white h-10" data-testid="seo-page-select">
+          <SelectTrigger className="w-64 bg-teal-dark/70 border-teal-light/30 text-white h-10" data-testid="seo-page-select">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent className="bg-[#0f0f0f] border-white/10">
+          <SelectContent className="bg-teal-dark border-teal-light/30">
             {Object.entries(PAGE_NAMES).map(([slug, name]) => (
               <SelectItem key={slug} value={slug}>{name}</SelectItem>
             ))}
@@ -67,30 +67,30 @@ export default function SEOAdmin() {
       <div className="space-y-5 p-6 border border-teal-light/20 bg-teal-dark/70">
         <div className="space-y-2">
           <Label className="text-white/70 font-body text-sm">Title (заголовок страницы)</Label>
-          <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="bg-black/50 border-white/10 text-white h-10" data-testid="seo-title" />
+          <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="bg-teal-dark/80 border-teal-light/30 text-white h-10" data-testid="seo-title" />
         </div>
         <div className="space-y-2">
           <Label className="text-white/70 font-body text-sm">Description (описание)</Label>
-          <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="bg-black/50 border-white/10 text-white min-h-[80px]" data-testid="seo-description" />
+          <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="bg-teal-dark/80 border-teal-light/30 text-white min-h-[80px]" data-testid="seo-description" />
         </div>
         <div className="space-y-2">
           <Label className="text-white/70 font-body text-sm">Keywords (ключевые слова)</Label>
-          <Input value={form.keywords} onChange={(e) => setForm({ ...form, keywords: e.target.value })} className="bg-black/50 border-white/10 text-white h-10" data-testid="seo-keywords" />
+          <Input value={form.keywords} onChange={(e) => setForm({ ...form, keywords: e.target.value })} className="bg-teal-dark/80 border-teal-light/30 text-white h-10" data-testid="seo-keywords" />
         </div>
         <div className="space-y-2">
           <Label className="text-white/70 font-body text-sm">H1 (основной заголовок)</Label>
-          <Input value={form.h1} onChange={(e) => setForm({ ...form, h1: e.target.value })} className="bg-black/50 border-white/10 text-white h-10" />
+          <Input value={form.h1} onChange={(e) => setForm({ ...form, h1: e.target.value })} className="bg-teal-dark/80 border-teal-light/30 text-white h-10" />
         </div>
         <div className="space-y-2">
           <Label className="text-white/70 font-body text-sm">OG Title</Label>
-          <Input value={form.og_title} onChange={(e) => setForm({ ...form, og_title: e.target.value })} className="bg-black/50 border-white/10 text-white h-10" />
+          <Input value={form.og_title} onChange={(e) => setForm({ ...form, og_title: e.target.value })} className="bg-teal-dark/80 border-teal-light/30 text-white h-10" />
         </div>
         <div className="space-y-2">
           <Label className="text-white/70 font-body text-sm">OG Description</Label>
-          <Textarea value={form.og_description} onChange={(e) => setForm({ ...form, og_description: e.target.value })} className="bg-black/50 border-white/10 text-white min-h-[60px]" />
+          <Textarea value={form.og_description} onChange={(e) => setForm({ ...form, og_description: e.target.value })} className="bg-teal-dark/80 border-teal-light/30 text-white min-h-[60px]" />
         </div>
 
-        <Button onClick={handleSave} disabled={saving} className="bg-burgundy hover:bg-burgundy-light text-white font-body" data-testid="save-seo-btn">
+        <Button onClick={handleSave} disabled={saving} className="bg-gold text-teal-darker hover:bg-gold text-teal-darker-light text-white font-body" data-testid="save-seo-btn">
           <Save className="w-4 h-4 mr-2" />
           {saving ? 'Сохранение...' : 'Сохранить'}
         </Button>

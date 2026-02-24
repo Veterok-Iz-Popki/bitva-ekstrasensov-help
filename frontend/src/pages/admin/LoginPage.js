@@ -66,7 +66,7 @@ export default function LoginPage() {
             type="submit"
             data-testid="admin-login-btn"
             disabled={loading}
-            className="w-full bg-burgundy hover:bg-burgundy-light text-white h-12 uppercase tracking-widest font-body"
+            className="w-full bg-gold text-teal-darker hover:bg-gold text-teal-darker-light text-white h-12 uppercase tracking-widest font-body"
           >
             <Lock className="w-4 h-4 mr-2" />
             {loading ? 'Вход...' : 'Войти'}
