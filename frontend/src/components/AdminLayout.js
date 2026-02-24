@@ -97,7 +97,7 @@ export default function AdminLayout() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+      <div className="min-h-screen bg-teal-darker flex items-center justify-center">
         <div className="text-white/50 font-body">Загрузка...</div>
       </div>
     );
