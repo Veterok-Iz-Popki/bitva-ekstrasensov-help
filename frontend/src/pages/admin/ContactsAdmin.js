@@ -26,10 +26,10 @@ export default function ContactsAdmin() {
         <Badge variant="outline" className="border-gold/30 text-gold font-body">{items.length} шт.</Badge>
       </div>
 
-      <div className="border border-white/5 bg-teal-dark/70 overflow-x-auto">
+      <div className="border border-teal-light/20 bg-teal-dark/70 overflow-x-auto">
         <Table>
           <TableHeader>
-            <TableRow className="border-white/5 hover:bg-transparent">
+            <TableRow className="border-teal-light/20 hover:bg-transparent">
               <TableHead className="text-white/40 font-body">Имя</TableHead>
               <TableHead className="text-white/40 font-body">Email</TableHead>
               <TableHead className="text-white/40 font-body">Дата</TableHead>
@@ -38,7 +38,7 @@ export default function ContactsAdmin() {
           </TableHeader>
           <TableBody>
             {items.map((item) => (
-              <TableRow key={item.id} className="border-white/5 hover:bg-white/[0.02]">
+              <TableRow key={item.id} className="border-teal-light/20 hover:bg-white/[0.02]">
                 <TableCell className="font-body text-white">{item.name}</TableCell>
                 <TableCell className="font-body text-white/70">{item.email}</TableCell>
                 <TableCell className="font-body text-white/50 text-sm">{new Date(item.created_at).toLocaleDateString('ru-RU')}</TableCell>
@@ -68,7 +68,7 @@ export default function ContactsAdmin() {
               <div><span className="text-white/40">Дата:</span> <span className="text-white">{new Date(selected.created_at).toLocaleString('ru-RU')}</span></div>
               <div>
                 <p className="text-white/40 mb-1">Сообщение:</p>
-                <p className="text-white/70 border border-white/5 p-3">{selected.message}</p>
+                <p className="text-white/70 border border-teal-light/20 p-3">{selected.message}</p>
               </div>
             </div>
           )}
