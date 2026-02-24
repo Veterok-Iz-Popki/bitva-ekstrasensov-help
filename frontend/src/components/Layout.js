@@ -36,10 +36,8 @@ function Header() {
     >
       <div className="max-w-6xl mx-auto px-4 md:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
-          <Link to="/" className="flex items-center gap-2" data-testid="logo-link">
-            <span className="font-heading text-lg md:text-xl font-bold text-gold tracking-wide">
-              Битва Экстрасенсов
-            </span>
+          <Link to="/" className="flex items-center" data-testid="logo-link">
+            <img src="https://customer-assets.emergentagent.com/job_ekstrasensov-sajt/artifacts/oj9nxlpi_IMG_6061.JPEG" alt="Битва Экстрасенсов" className="h-12 md:h-14 w-auto" />
           </Link>
 
           {/* Desktop Nav */}
