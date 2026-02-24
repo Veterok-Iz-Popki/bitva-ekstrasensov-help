@@ -1,57 +1,119 @@
-/* Gold border utility */
-.border-gold {
-    border-color: rgba(212, 175, 55, 0.2);
+/* Gold CTA button */
+.btn-gold {
+    background-color: #d4a637;
+    color: #0a2530;
+    font-weight: 600;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    border: 2px solid #d4a637;
 }
-.border-gold-strong {
-    border-color: rgba(212, 175, 55, 0.5);
-}
-
-/* Glassmorphism card */
-.glass-card {
-    background: rgba(10, 10, 10, 0.6);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-/* Gold text shadow */
-.text-shadow-gold {
-    text-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+.btn-gold:hover {
+    background-color: #e8c356;
+    border-color: #e8c356;
 }
 
-/* Hero text shadow */
-.text-shadow-hero {
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+/* Outline button */
+.btn-outline-gold {
+    background: transparent;
+    color: #d4a637;
+    border: 2px solid #d4a637;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+.btn-outline-gold:hover {
+    background-color: #d4a637;
+    color: #0a2530;
 }
 
-/* Staggered fade-up animations */
-.stagger-1 { animation-delay: 0.1s; opacity: 0; }
-.stagger-2 { animation-delay: 0.2s; opacity: 0; }
-.stagger-3 { animation-delay: 0.3s; opacity: 0; }
-.stagger-4 { animation-delay: 0.4s; opacity: 0; }
-.stagger-5 { animation-delay: 0.5s; opacity: 0; }
-
-/* Participant card hover */
-.participant-card {
-    transition: all 0.5s ease;
+/* Teal card */
+.teal-card {
+    background: rgba(13, 48, 64, 0.7);
+    border: 1px solid rgba(26, 80, 96, 0.5);
+    border-radius: 6px;
+    transition: all 0.4s ease;
 }
-.participant-card:hover {
-    border-color: rgba(212, 175, 55, 0.5);
-    box-shadow: 0 0 30px rgba(107, 21, 37, 0.2);
+.teal-card:hover {
+    border-color: rgba(212, 166, 55, 0.4);
+    background: rgba(13, 48, 64, 0.9);
 }
 
-/* Section separator */
+/* Teal glass */
+.teal-glass {
+    background: rgba(10, 37, 48, 0.85);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(26, 80, 96, 0.3);
+}
+
+/* Section divider */
 .section-divider {
     height: 1px;
-    background: linear-gradient(to right, transparent, rgba(212, 175, 55, 0.3), transparent);
+    background: linear-gradient(to right, transparent, rgba(212, 166, 55, 0.3), transparent);
 }
 
-/* Input focus styles */
-input:focus, textarea:focus, select:focus {
-    outline: none;
+/* Gold text */
+.text-gold-glow {
+    color: #d4a637;
+    text-shadow: 0 0 20px rgba(212, 166, 55, 0.2);
+}
+
+/* Participant card - horizontal layout matching reference */
+.participant-card-h {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 1.25rem;
+    padding: 1.25rem;
+    background: rgba(13, 48, 64, 0.5);
+    border: 1px solid rgba(26, 80, 96, 0.4);
+    border-radius: 6px;
+    transition: all 0.4s ease;
+}
+.participant-card-h:hover {
+    border-color: rgba(212, 166, 55, 0.4);
+    background: rgba(13, 48, 64, 0.7);
+}
+
+/* Service card */
+.service-card {
+    background: rgba(10, 37, 48, 0.6);
+    border: 1px solid rgba(26, 80, 96, 0.4);
+    border-radius: 6px;
+    text-align: center;
+    transition: all 0.4s ease;
+}
+.service-card:hover {
+    border-color: #d4a637;
+}
+
+/* Benefit icon circle */
+.benefit-icon-circle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 2px solid #d4a637;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #d4a637;
 }
 
 /* Admin sidebar active */
 .admin-nav-active {
-    background: rgba(107, 21, 37, 0.3);
-    border-left: 2px solid #d4af37;
+    background: rgba(13, 48, 64, 0.8);
+    border-left: 2px solid #d4a637;
 }
+
+/* Badge outline teal-gold */
+.badge-spec {
+    display: inline-block;
+    padding: 2px 10px;
+    font-size: 12px;
+    border: 1px solid rgba(212, 166, 55, 0.5);
+    border-radius: 20px;
+    color: #d4a637;
+}
+
+/* Stagger animations */
+.stagger-1 { animation-delay: 0.1s; opacity: 0; }
+.stagger-2 { animation-delay: 0.2s; opacity: 0; }
+.stagger-3 { animation-delay: 0.3s; opacity: 0; }
+.stagger-4 { animation-delay: 0.4s; opacity: 0; }
