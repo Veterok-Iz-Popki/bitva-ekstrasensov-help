@@ -37,7 +37,7 @@ export default function SettingsAdmin() {
     <div data-testid="admin-settings">
       <h1 className="font-heading text-3xl font-bold text-white mb-6">Настройки сайта</h1>
 
-      <div className="space-y-5 p-6 border border-white/5 bg-teal-dark/70 max-w-2xl">
+      <div className="space-y-5 p-6 border border-teal-light/20 bg-teal-dark/70 max-w-2xl">
         <div className="space-y-2">
           <Label className="text-white/70 font-body text-sm">Email (отображается на сайте)</Label>
           <Input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="bg-black/50 border-white/10 text-white h-10" data-testid="settings-email" />
