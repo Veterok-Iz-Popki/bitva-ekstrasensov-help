@@ -123,7 +123,7 @@ export default function AdminLayout() {
                 <Menu className="w-5 h-5 text-white" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="p-0 w-60 bg-[#0a0a0a] border-white/5">
+            <SheetContent side="left" className="p-0 w-60 bg-teal-darker border-teal-light/20">
               <Sidebar />
             </SheetContent>
           </Sheet>
