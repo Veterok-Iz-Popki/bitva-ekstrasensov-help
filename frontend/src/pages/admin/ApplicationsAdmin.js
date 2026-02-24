@@ -60,10 +60,10 @@ export default function ApplicationsAdmin() {
         </Badge>
       </div>
 
-      <div className="border border-white/5 bg-teal-dark/70 overflow-x-auto">
+      <div className="border border-teal-light/20 bg-teal-dark/70 overflow-x-auto">
         <Table>
           <TableHeader>
-            <TableRow className="border-white/5 hover:bg-transparent">
+            <TableRow className="border-teal-light/20 hover:bg-transparent">
               <TableHead className="text-white/40 font-body">Имя</TableHead>
               <TableHead className="text-white/40 font-body">Телефон</TableHead>
               <TableHead className="text-white/40 font-body">Мессенджер</TableHead>
@@ -74,7 +74,7 @@ export default function ApplicationsAdmin() {
           </TableHeader>
           <TableBody>
             {items.map((item) => (
-              <TableRow key={item.id} className="border-white/5 hover:bg-white/[0.02]">
+              <TableRow key={item.id} className="border-teal-light/20 hover:bg-white/[0.02]">
                 <TableCell className="font-body text-white">{item.name}</TableCell>
                 <TableCell className="font-body text-white/70">{item.phone}</TableCell>
                 <TableCell className="font-body text-white/70">{item.messenger || '—'}</TableCell>
@@ -129,7 +129,7 @@ export default function ApplicationsAdmin() {
               {selected.description && (
                 <div>
                   <p className="text-sm text-white/40 font-body mb-1">Описание ситуации:</p>
-                  <p className="text-white/70 font-body text-sm border border-white/5 p-3">{selected.description}</p>
+                  <p className="text-white/70 font-body text-sm border border-teal-light/20 p-3">{selected.description}</p>
                 </div>
               )}
               <div>
