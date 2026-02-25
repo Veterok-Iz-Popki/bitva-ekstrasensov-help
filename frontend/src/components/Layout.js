@@ -103,7 +103,7 @@ function Footer() {
           <div>
             <Link to="/" className="inline-block mb-3">
               <img 
-                src="https://customer-assets.emergentagent.com/job_ekstrasensov-sajt/artifacts/oj9nxlpi_IMG_6061.JPEG" 
+                src="https://customer-assets.emergentagent.com/job_f7eeb759-9e5b-4f73-9fda-0f824d4e9d83/artifacts/usmcyqqy_bitva%20%281%29.png" 
                 alt="Битва Экстрасенсов" 
                 className="h-12 w-auto rounded-lg"
               />
