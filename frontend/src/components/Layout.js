@@ -121,6 +121,10 @@ function Footer() {
   const [settings, setSettings] = useState({});
   useEffect(() => { api.get('/settings').then((res) => setSettings(res.data)).catch(() => {}); }, []);
 
+  // Логотип из настроек
+  const logoUrl = settings?.logo_url || DEFAULT_LOGO.url;
+  const logoAlt = settings?.logo_alt || DEFAULT_LOGO.alt;
+
   return (
     <footer data-testid="main-footer" className="border-t border-teal-light/20 bg-teal-darker/95 mt-12">
       <div className="max-w-6xl mx-auto px-4 md:px-8 py-12">
@@ -129,9 +133,10 @@ function Footer() {
           <div>
             <Link to="/" className="inline-block mb-3">
               <img 
-                src="https://customer-assets.emergentagent.com/job_f7eeb759-9e5b-4f73-9fda-0f824d4e9d83/artifacts/usmcyqqy_bitva%20%281%29.png" 
-                alt="Битва Экстрасенсов" 
+                src={logoUrl} 
+                alt={logoAlt} 
                 className="h-12 w-auto rounded-lg"
+                data-testid="footer-logo"
               />
             </Link>
             <p className="text-xs text-white/40 leading-relaxed font-body">
