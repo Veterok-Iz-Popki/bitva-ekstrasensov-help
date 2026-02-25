@@ -57,6 +57,8 @@ class ApplicationCreate(BaseModel):
     name: str
     phone: str
     messenger: str = ""
+    age: str = ""
+    city: str = ""
     description: str = ""
     honeypot: str = ""
 
