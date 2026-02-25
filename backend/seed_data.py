@@ -235,6 +235,11 @@ def get_seed_data():
         "working_hours": "Ежедневно с 10:00 до 20:00 (МСК)",
         "copyright_text": "Битва экстрасенсов — официальный сайт помощи",
         "email_notifications_enabled": True,
+        # Логотип сайта
+        "logo_url": "https://customer-assets.emergentagent.com/job_f7eeb759-9e5b-4f73-9fda-0f824d4e9d83/artifacts/usmcyqqy_bitva%20%281%29.png",
+        "logo_alt": "Битва Экстрасенсов",
+        "logo_height_desktop": 56,
+        "logo_height_mobile": 48,
     }
 
     return {
