@@ -21,6 +21,10 @@ const PAGE_NAMES = {
   'topic-venets-bezbrachiya': 'Венец безбрачия',
   'topic-privorot': 'Приворот',
   'topic-zaklyatie': 'Заклятие',
+  'service-finansovaya-magiya': 'Финансовая магия',
+  'service-lyubovnaya-magiya': 'Любовная магия',
+  'service-magiya-zhizni': 'Магия жизни',
+  'service-magicheskaya-zashchita': 'Магическая защита',
 };
 
 export default function SEOAdmin() {

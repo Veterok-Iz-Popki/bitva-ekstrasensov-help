@@ -101,6 +101,36 @@ Object.keys(TOPIC_SLUGS).forEach(slug => {
   PAGE_SCHEMAS[slug] = TOPIC_SCHEMA;
 });
 
+// Общая схема для страниц услуг
+const SERVICE_SCHEMA = [
+  { key: 'title', label: 'Заголовок (H1)', type: 'text' },
+  { key: 'description', label: 'Описание услуги', type: 'textarea' },
+  { key: 'directions_title', label: 'Заголовок «Направления»', type: 'text' },
+  { key: 'directions', label: 'Направления (каждое с новой строки)', type: 'textarea' },
+  { key: 'situations_title', label: 'Заголовок «Когда обращаются»', type: 'text' },
+  { key: 'situations', label: 'Ситуации (каждая с новой строки)', type: 'textarea' },
+  { key: 'how_it_works_title', label: 'Заголовок «Как проходит»', type: 'text' },
+  { key: 'how_it_works', label: 'Шаги консультации (каждый с новой строки)', type: 'textarea' },
+  { key: 'results_title', label: 'Заголовок «Результаты»', type: 'text' },
+  { key: 'results', label: 'Результаты (каждый с новой строки)', type: 'textarea' },
+  { key: 'additional_title', label: 'Доп. заголовок (необязательно)', type: 'text' },
+  { key: 'additional_text', label: 'Доп. текст (необязательно)', type: 'textarea' },
+  { key: 'cta_title', label: 'Заголовок CTA', type: 'text' },
+  { key: 'cta_text', label: 'Текст CTA', type: 'textarea' },
+  { key: 'cta_button', label: 'Текст кнопки CTA', type: 'text' },
+];
+
+const SERVICE_SLUGS = {
+  'service-finansovaya-magiya': 'Финансовая магия',
+  'service-lyubovnaya-magiya': 'Любовная магия',
+  'service-magiya-zhizni': 'Магия жизни',
+  'service-magicheskaya-zashchita': 'Магическая защита',
+};
+
+Object.keys(SERVICE_SLUGS).forEach(slug => {
+  PAGE_SCHEMAS[slug] = SERVICE_SCHEMA;
+});
+
 const PAGE_NAMES = {
   home: 'Главная',
   participants: 'Участники',
@@ -109,6 +139,7 @@ const PAGE_NAMES = {
   faq: 'Вопросы (FAQ)',
   contacts: 'Контакты',
   ...TOPIC_SLUGS,
+  ...SERVICE_SLUGS,
 };
 
 // Компонент для загрузки изображения
