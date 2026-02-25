@@ -159,13 +159,14 @@ export default function HomePage() {
           {/* Problem categories */}
           <div className="flex flex-wrap justify-center gap-3 md:gap-5" data-testid="categories-row">
             {PROBLEM_CATEGORIES.map((cat, i) => (
-              <span
+              <Link
                 key={i}
-                className="text-gold/80 hover:text-gold font-body text-base transition-colors cursor-pointer border-b border-gold/30 hover:border-gold pb-0.5"
+                to={cat.path}
+                className="text-gold/80 hover:text-gold font-body text-base transition-colors border-b border-gold/30 hover:border-gold pb-0.5"
                 data-testid={`category-${i}`}
               >
                 {cat.label}
-              </span>
+              </Link>
             ))}
           </div>
         </div>
