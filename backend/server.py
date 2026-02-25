@@ -291,14 +291,32 @@ async def create_application(data: ApplicationCreate, request: Request):
     client_ip = request.client.host if request.client else "unknown"
     if not check_rate_limit(client_ip):
         raise HTTPException(status_code=429, detail="Слишком много запросов. Попробуйте позже.")
+    
+    # Валидация обязательных полей
+    if not data.lastName.strip():
+        raise HTTPException(status_code=400, detail="Укажите фамилию")
+    if not data.firstName.strip():
+        raise HTTPException(status_code=400, detail="Укажите имя")
+    if not data.patronymic.strip():
+        raise HTTPException(status_code=400, detail="Укажите отчество")
+    if not data.phone.strip():
+        raise HTTPException(status_code=400, detail="Укажите телефон")
+    if not data.problem.strip():
+        raise HTTPException(status_code=400, detail="Опишите вашу проблему")
+    
+    # Составляем полное имя для совместимости
+    full_name = f"{data.lastName} {data.firstName} {data.patronymic}".strip()
+    
     doc = {
         "id": str(uuid.uuid4()),
-        "name": data.name,
+        "lastName": data.lastName,
+        "firstName": data.firstName,
+        "patronymic": data.patronymic,
+        "name": full_name,  # для обратной совместимости
         "phone": data.phone,
-        "messenger": data.messenger,
         "age": data.age,
         "city": data.city,
-        "description": data.description,
+        "problem": data.problem,
         "status": "new",
         "notes": "",
         "created_at": datetime.now(timezone.utc).isoformat(),
