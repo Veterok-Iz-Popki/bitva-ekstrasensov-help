@@ -59,7 +59,6 @@ function App() {
               <Route path="/zapis-na-priem" element={<BookingPage />} />
               <Route path="/otzyvy" element={<ReviewsPage />} />
               <Route path="/voprosy-i-otvety" element={<FAQPage />} />
-              <Route path="/kontakty" element={<ContactsPage />} />
             </Routes>
           </Layout>
         } />
