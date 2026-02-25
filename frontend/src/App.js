@@ -8,7 +8,7 @@ import ParticipantDetailPage from "@/pages/ParticipantDetailPage";
 import BookingPage from "@/pages/BookingPage";
 import ReviewsPage from "@/pages/ReviewsPage";
 import FAQPage from "@/pages/FAQPage";
-import ContactsPage from "@/pages/ContactsPage";
+import TopicPage from "@/pages/TopicPage";
 import LoginPage from "@/pages/admin/LoginPage";
 import AdminLayout from "@/components/AdminLayout";
 import DashboardPage from "@/pages/admin/DashboardPage";
@@ -59,6 +59,13 @@ function App() {
               <Route path="/zapis-na-priem" element={<BookingPage />} />
               <Route path="/otzyvy" element={<ReviewsPage />} />
               <Route path="/voprosy-i-otvety" element={<FAQPage />} />
+              {/* Topic pages */}
+              <Route path="/porcha" element={<TopicPage />} />
+              <Route path="/proklyatie" element={<TopicPage />} />
+              <Route path="/sglaz" element={<TopicPage />} />
+              <Route path="/venets-bezbrachiya" element={<TopicPage />} />
+              <Route path="/privorot" element={<TopicPage />} />
+              <Route path="/zaklyatie" element={<TopicPage />} />
             </Routes>
           </Layout>
         } />
