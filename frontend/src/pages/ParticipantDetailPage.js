@@ -1,35 +1,40 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Star, ChevronDown } from 'lucide-react';
 import api, { setSEO, setJsonLd } from '../lib/api';
 import ApplicationForm from '../components/ApplicationForm';
 
 export default function ParticipantDetailPage() {
   const { slug } = useParams();
   const [participant, setParticipant] = useState(null);
+  const [reviews, setReviews] = useState([]);
+  const [showAllReviews, setShowAllReviews] = useState(false);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
+  const INITIAL_REVIEWS = 5;
+
   useEffect(() => {
-    api.get(`/participants/${slug}`)
-      .then((res) => {
-        setParticipant(res.data);
-        setSEO({
-          title: `${res.data.name} — участник Битвы экстрасенсов | Запись на консультацию`,
-          description: res.data.description,
-          keywords: `${res.data.name}, экстрасенс, консультация, битва экстрасенсов`,
-        });
-        setJsonLd({
-          "@context": "https://schema.org",
-          "@type": "Person",
-          "name": res.data.name,
-          "description": res.data.description,
-          "image": res.data.photo_url,
-          "jobTitle": res.data.title
-        });
-      })
-      .catch(() => setNotFound(true))
-      .finally(() => setLoading(false));
+    Promise.all([
+      api.get(`/participants/${slug}`),
+      api.get(`/participants/${slug}/reviews`),
+    ]).then(([partRes, revRes]) => {
+      setParticipant(partRes.data);
+      setReviews(revRes.data || []);
+      setSEO({
+        title: `${partRes.data.name} — участник Битвы экстрасенсов | Запись на консультацию`,
+        description: partRes.data.description,
+        keywords: `${partRes.data.name}, экстрасенс, консультация, битва экстрасенсов`,
+      });
+      setJsonLd({
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": partRes.data.name,
+        "description": partRes.data.description,
+        "image": partRes.data.photo_url,
+        "jobTitle": partRes.data.title
+      });
+    }).catch(() => setNotFound(true)).finally(() => setLoading(false));
   }, [slug]);
 
   if (loading) {
@@ -50,6 +55,9 @@ export default function ParticipantDetailPage() {
       </div>
     );
   }
+
+  const visibleReviews = showAllReviews ? reviews : reviews.slice(0, INITIAL_REVIEWS);
+  const hasMore = reviews.length > INITIAL_REVIEWS;
 
   return (
     <div className="pt-24 md:pt-32 pb-16" data-testid="participant-detail-page">
@@ -124,8 +132,64 @@ export default function ParticipantDetailPage() {
           </div>
         </div>
 
+        {/* Reviews section */}
+        {reviews.length > 0 && (
+          <>
+            <div className="section-divider mb-12" />
+            <section data-testid="participant-reviews-section">
+              <h2 className="font-heading text-2xl md:text-3xl font-bold text-white mb-8 text-center">
+                Отзывы о работе {participant.name.split(' ')[0]}
+              </h2>
+              <div className="space-y-4">
+                {visibleReviews.map((review, idx) => (
+                  <article
+                    key={review.id || idx}
+                    className="teal-card p-5 md:p-6"
+                    data-testid={`review-card-${idx}`}
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <p className="font-body font-semibold text-white" data-testid={`review-author-${idx}`}>
+                          {review.author_name}
+                        </p>
+                        {review.author_city && (
+                          <p className="font-body text-sm text-white/40" data-testid={`review-city-${idx}`}>
+                            {review.author_city}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex gap-0.5 shrink-0" data-testid={`review-rating-${idx}`}>
+                        {Array.from({ length: review.rating || 5 }).map((_, i) => (
+                          <Star key={i} className="w-4 h-4 text-gold fill-gold" />
+                        ))}
+                      </div>
+                    </div>
+                    <p className="font-body text-white/60 leading-relaxed" data-testid={`review-text-${idx}`}>
+                      {review.text}
+                    </p>
+                  </article>
+                ))}
+              </div>
+
+              {/* Show more button */}
+              {hasMore && !showAllReviews && (
+                <div className="text-center mt-6">
+                  <button
+                    onClick={() => setShowAllReviews(true)}
+                    className="btn-outline-gold px-8 py-3 font-body inline-flex items-center gap-2"
+                    data-testid="show-more-reviews-btn"
+                  >
+                    Показать ещё ({reviews.length - INITIAL_REVIEWS})
+                    <ChevronDown className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+            </section>
+          </>
+        )}
+
         {/* Application form section */}
-        <div className="section-divider mb-12" />
+        <div className="section-divider my-12" />
         
         <div className="max-w-md mx-auto">
           <div className="teal-card p-6 md:p-8">
