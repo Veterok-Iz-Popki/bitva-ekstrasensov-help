@@ -8,93 +8,59 @@ SEO-оптимизированный русскоязычный сайт для 
 - **Backend:** FastAPI + MongoDB (Motor async driver)
 - **Auth:** JWT (admin panel)
 - **Spam protection:** Honeypot + Rate limiting
-- **Email:** Resend API (настроен и работает)
-- **Image processing:** Pillow (оптимизация фото)
+- **Email:** Resend API
+- **Image processing:** Pillow
 
 ## Реализовано
 
-### Форма заявки
-- Фамилия, Имя, Отчество (обязательные)
-- Телефон с маской +7 (999) 999-99-99
-- Возраст, Город (необязательные)
-- Описание проблемы (обязательное)
-- Honeypot + Rate limiting
-
 ### Публичные страницы
-- **Главная (/)** — Hero, карточки участников, преимущества, услуги, SEO-текст, ссылки на темы
+- **Главная (/)** — Hero, участники, преимущества, услуги с ссылками, SEO-текст, ссылки на темы
 - **Участники (/uchastniki)** — Карточки с фото
-- **Профиль участника (/uchastniki/:slug)** — Фото, биография, форма записи
-- **Запись (/zapis-na-priem)** — Форма + шаги консультации
+- **Профиль участника (/uchastniki/:slug)** — Фото, биография, форма
+- **Запись (/zapis-na-priem)** — Форма + шаги
 - **Отзывы (/otzyvy)** — Карточки со звёздами
 - **FAQ (/voprosy-i-otvety)** — Аккордеон
 
-### 6 тематических страниц (25.02.2026)
-- **Порча (/porcha)** — Признаки, диагностика, CTA
-- **Проклятие (/proklyatie)** — Родовые проклятия, признаки, CTA
-- **Сглаз (/sglaz)** — Симптомы, снятие, CTA
-- **Венец безбрачия (/venets-bezbrachiya)** — Признаки, снятие блокировки, CTA
-- **Приворот (/privorot)** — Диагностика, снятие, CTA
-- **Заклятие (/zaklyatie)** — Признаки, снятие, CTA
+### 6 тематических страниц
+- /porcha, /proklyatie, /sglaz, /venets-bezbrachiya, /privorot, /zaklyatie
+- Уникальный контент, SEO, CMS-управление
 
-Каждая страница:
-- Уникальный контент из БД
-- Уникальные SEO мета-теги (title, description, keywords, h1, og)
-- Редактируется через CMS (админ-панель -> Страницы / SEO)
-- Breadcrumb навигация
-- Schema.org JSON-LD
+### 4 страницы услуг (25.02.2026)
+- **/finansovaya-magiya** — Финансовая магия
+- **/lyubovnaya-magiya** — Любовная магия
+- **/magiya-zhizni** — Магия жизни
+- **/magicheskaya-zashchita** — Магическая защита
+
+Каждая страница услуг содержит:
+- H1 (название), описание, направления, типичные ситуации, процесс консультации, результаты, CTA
+- Уникальные SEO мета-теги
+- Полное CMS-управление через админ-панель
+- Кнопки «Подробнее» на главной ведут на соответствующие страницы
 
 ### CMS Админ-панель (/admin)
 - JWT авторизация
-- Dashboard со статистикой
-- CRUD: Участники (с загрузкой фото), Отзывы, FAQ
-- Редактирование контента всех страниц (включая 6 тем)
-- Управление SEO мета-тегами всех страниц (включая 6 тем)
-- Заявки: просмотр, фильтрация, экспорт CSV
-- Настройки email-уведомлений
-
-### Интеграции
-- Email-уведомления через Resend API
-- Загрузка и оптимизация фото через Pillow
-
-## API Endpoints
-- `/api/pages/{slug}` — GET (public) / PUT (admin)
-- `/api/seo/{slug}` — GET (public) / PUT (admin)
-- `/api/participants` — GET/POST/PUT/DELETE
-- `/api/reviews` — GET/POST/PUT/DELETE
-- `/api/faq` — GET/POST/PUT/DELETE
-- `/api/applications` — POST (public), GET/PUT/DELETE (admin)
-- `/api/admin/applications/export/csv` — GET
-- `/api/admin/upload` — POST
-- `/api/settings` — GET/PUT
-- `/api/admin/login` — POST
-- `/api/admin/stats` — GET
+- CRUD: Участники, Отзывы, FAQ
+- Редактирование контента всех страниц (6 тем + 4 услуги)
+- SEO мета-теги для всех страниц
+- Заявки: просмотр, экспорт CSV
+- Email-уведомления через Resend
 
 ## Учётные данные
 - **Admin:** nikoa2020@gmail.com / aspire5542gl1952tq
 
 ## Тестирование
-- iteration_6: 37 backend + frontend E2E тестов — 100% passed (тематические страницы)
+- iteration_7: 83 backend + frontend тестов — 100% passed (услуги + регрессия тем)
+- iteration_6: 37 тестов — 100% passed (темы)
 
-## Структура файлов
+## Структура ключевых файлов
 ```
-/app/
-├── backend/
-│   ├── server.py
-│   ├── seed_data.py
-│   ├── uploads/
-│   ├── tests/
-│   │   └── test_topic_pages.py
-│   └── .env
-├── frontend/src/
-│   ├── components/
-│   ├── pages/
-│   │   ├── TopicPage.js
-│   │   ├── HomePage.js
-│   │   └── admin/
-│   │       ├── PagesAdmin.js
-│   │       └── SEOAdmin.js
-│   └── lib/api.js
-├── memory/PRD.md
-└── test_reports/
-    └── iteration_6.json
+backend/seed_data.py    - Данные для всех страниц и SEO
+backend/server.py       - API endpoints
+frontend/src/pages/
+  ServicePage.js        - Компонент страниц услуг
+  TopicPage.js          - Компонент тематических страниц
+  HomePage.js           - Главная с ссылками на услуги и темы
+  admin/PagesAdmin.js   - CMS для всех страниц
+  admin/SEOAdmin.js     - SEO управление
+frontend/src/App.js     - Все роуты
 ```
