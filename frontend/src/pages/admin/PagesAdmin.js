@@ -70,6 +70,37 @@ const PAGE_SCHEMAS = {
   ],
 };
 
+// Общая схема для страниц тем
+const TOPIC_SCHEMA = [
+  { key: 'title', label: 'Заголовок (H1)', type: 'text' },
+  { key: 'description', label: 'Описание проблемы', type: 'textarea' },
+  { key: 'symptoms_title', label: 'Заголовок блока «Признаки»', type: 'text' },
+  { key: 'symptoms', label: 'Признаки (каждый с новой строки)', type: 'textarea' },
+  { key: 'when_title', label: 'Заголовок «Когда обращаться»', type: 'text' },
+  { key: 'when_to_contact', label: 'Когда обращаться (каждый с новой строки)', type: 'textarea' },
+  { key: 'consultation_title', label: 'Заголовок «Процесс»', type: 'text' },
+  { key: 'consultation_process', label: 'Процесс консультации (каждый с новой строки)', type: 'textarea' },
+  { key: 'additional_title', label: 'Доп. заголовок (необязательно)', type: 'text' },
+  { key: 'additional_text', label: 'Доп. текст (необязательно)', type: 'textarea' },
+  { key: 'cta_title', label: 'Заголовок CTA', type: 'text' },
+  { key: 'cta_text', label: 'Текст CTA', type: 'textarea' },
+  { key: 'cta_button', label: 'Текст кнопки CTA', type: 'text' },
+];
+
+// Добавляем схемы для каждой страницы темы
+const TOPIC_SLUGS = {
+  'topic-porcha': 'Порча',
+  'topic-proklyatie': 'Проклятие',
+  'topic-sglaz': 'Сглаз',
+  'topic-venets-bezbrachiya': 'Венец безбрачия',
+  'topic-privorot': 'Приворот',
+  'topic-zaklyatie': 'Заклятие',
+};
+
+Object.keys(TOPIC_SLUGS).forEach(slug => {
+  PAGE_SCHEMAS[slug] = TOPIC_SCHEMA;
+});
+
 const PAGE_NAMES = {
   home: 'Главная',
   participants: 'Участники',
@@ -77,6 +108,7 @@ const PAGE_NAMES = {
   reviews: 'Отзывы',
   faq: 'Вопросы (FAQ)',
   contacts: 'Контакты',
+  ...TOPIC_SLUGS,
 };
 
 // Компонент для загрузки изображения

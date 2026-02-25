@@ -15,6 +15,12 @@ const PAGE_NAMES = {
   reviews: 'Отзывы',
   faq: 'Вопросы (FAQ)',
   contacts: 'Контакты',
+  'topic-porcha': 'Порча',
+  'topic-proklyatie': 'Проклятие',
+  'topic-sglaz': 'Сглаз',
+  'topic-venets-bezbrachiya': 'Венец безбрачия',
+  'topic-privorot': 'Приворот',
+  'topic-zaklyatie': 'Заклятие',
 };
 
 export default function SEOAdmin() {
