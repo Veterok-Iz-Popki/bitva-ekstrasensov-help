@@ -43,9 +43,45 @@
         font-family: 'Fira Sans', sans-serif;
         background: url('https://customer-assets.emergentagent.com/job_ekstrasensov-sajt/artifacts/o1q1ruoc_IMG_6574.JPEG') center center / cover no-repeat fixed;
         min-height: 100vh;
+        font-size: 17px;
+        line-height: 1.6;
     }
     h1, h2, h3, h4, h5, h6 {
         font-family: 'Playfair Display', serif;
+    }
+    h1 {
+        font-size: 2.75rem;
+        line-height: 1.2;
+    }
+    h2 {
+        font-size: 2rem;
+        line-height: 1.3;
+    }
+    h3 {
+        font-size: 1.5rem;
+        line-height: 1.4;
+    }
+    @media (min-width: 768px) {
+        body {
+            font-size: 18px;
+        }
+        h1 {
+            font-size: 3.5rem;
+        }
+        h2 {
+            font-size: 2.5rem;
+        }
+        h3 {
+            font-size: 1.75rem;
+        }
+    }
+    @media (min-width: 1024px) {
+        h1 {
+            font-size: 4rem;
+        }
+        h2 {
+            font-size: 3rem;
+        }
     }
 }
 
