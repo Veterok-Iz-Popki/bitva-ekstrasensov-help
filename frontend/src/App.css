@@ -117,3 +117,55 @@
 .stagger-2 { animation-delay: 0.2s; opacity: 0; }
 .stagger-3 { animation-delay: 0.3s; opacity: 0; }
 .stagger-4 { animation-delay: 0.4s; opacity: 0; }
+
+/* Participant card - vertical layout (reference style) */
+.participant-card-v {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    background: rgba(13, 48, 64, 0.4);
+    border: 1px solid rgba(26, 80, 96, 0.3);
+    border-radius: 8px;
+    transition: all 0.4s ease;
+}
+.participant-card-v:hover {
+    border-color: rgba(212, 166, 55, 0.5);
+    background: rgba(13, 48, 64, 0.7);
+    transform: translateY(-4px);
+}
+
+/* Circular photo container */
+.participant-photo-circle {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid rgba(212, 166, 55, 0.4);
+    margin-bottom: 0.75rem;
+    flex-shrink: 0;
+}
+@media (min-width: 768px) {
+    .participant-photo-circle {
+        width: 120px;
+        height: 120px;
+    }
+}
+
+/* Small outline button */
+.btn-outline-gold-sm {
+    display: inline-block;
+    padding: 6px 16px;
+    font-size: 11px;
+    background: transparent;
+    color: #d4a637;
+    border: 1px solid rgba(212, 166, 55, 0.5);
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    font-family: 'Fira Sans', sans-serif;
+    text-align: center;
+}
+.btn-outline-gold-sm:hover {
+    background: rgba(212, 166, 55, 0.1);
+    border-color: #d4a637;
+}
