@@ -741,9 +741,12 @@ async def _run_seed(data):
         if not existing:
             await db.participants.insert_one(p)
 
-    # Reviews
-    existing_reviews = await db.reviews.count_documents({})
-    if existing_reviews == 0:
+    # Reviews - seed participant-linked reviews if missing
+    has_participant_reviews = await db.reviews.count_documents({"participant_slug": {"$exists": True, "$ne": ""}})
+    if has_participant_reviews == 0:
+        # Remove old reviews without participant links
+        await db.reviews.delete_many({"participant_slug": {"$exists": False}})
+        await db.reviews.delete_many({"participant_slug": ""})
         for r in data["reviews"]:
             await db.reviews.insert_one(r)
 
