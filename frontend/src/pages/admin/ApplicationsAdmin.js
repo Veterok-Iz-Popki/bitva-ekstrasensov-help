@@ -185,7 +185,8 @@ export default function ApplicationsAdmin() {
                   </div>
                 </TableCell>
               </TableRow>
-            ))}
+              );
+            })}
             {filtered.length === 0 && (
               <TableRow>
                 <TableCell colSpan={7} className="text-center text-white/30 font-body py-8">
