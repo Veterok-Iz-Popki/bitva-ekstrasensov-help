@@ -72,7 +72,7 @@ function Header() {
                   key={item.path}
                   to={item.path}
                   data-testid={`nav-${item.path.replace('/', '') || 'home'}`}
-                  className={`px-4 py-2 text-sm font-body transition-colors duration-300 ${
+                  className={`px-5 py-2 text-base font-body transition-colors duration-300 ${
                     location.pathname === item.path ? 'text-gold' : 'text-white/80 hover:text-gold'
                   }`}
                 >
