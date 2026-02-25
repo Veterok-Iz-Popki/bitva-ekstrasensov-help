@@ -619,6 +619,72 @@ async def admin_get_stats(admin=Depends(get_current_admin)):
     }
 
 
+# ===== FILE UPLOAD =====
+
+@api_router.post("/admin/upload")
+async def upload_file(file: UploadFile = File(...), admin=Depends(get_current_admin)):
+    """Upload image file for participants, pages, etc."""
+    # Validate file type
+    allowed_types = ["image/jpeg", "image/png", "image/webp", "image/gif"]
+    if file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="Разрешены только изображения (JPEG, PNG, WebP, GIF)")
+    
+    # Validate file size (max 5MB)
+    contents = await file.read()
+    if len(contents) > 5 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="Максимальный размер файла: 5MB")
+    
+    # Generate unique filename
+    ext = file.filename.split(".")[-1] if "." in file.filename else "jpg"
+    filename = f"{uuid.uuid4()}.{ext}"
+    filepath = UPLOADS_DIR / filename
+    
+    # Optimize image if pillow available
+    try:
+        from PIL import Image
+        import io
+        
+        img = Image.open(io.BytesIO(contents))
+        
+        # Convert to RGB if necessary (for JPEG)
+        if img.mode in ("RGBA", "P") and ext.lower() in ("jpg", "jpeg"):
+            img = img.convert("RGB")
+        
+        # Resize if too large (max 1200px)
+        max_size = 1200
+        if img.width > max_size or img.height > max_size:
+            img.thumbnail((max_size, max_size), Image.Resampling.LANCZOS)
+        
+        # Save with compression
+        output = io.BytesIO()
+        if ext.lower() in ("jpg", "jpeg"):
+            img.save(output, format="JPEG", quality=85, optimize=True)
+        elif ext.lower() == "png":
+            img.save(output, format="PNG", optimize=True)
+        elif ext.lower() == "webp":
+            img.save(output, format="WebP", quality=85)
+        else:
+            img.save(output, format=img.format or "JPEG")
+        
+        contents = output.getvalue()
+        logger.info(f"Image optimized: {file.filename} -> {len(contents)} bytes")
+    except ImportError:
+        logger.warning("Pillow not installed, saving without optimization")
+    except Exception as e:
+        logger.warning(f"Image optimization failed: {e}, saving original")
+    
+    # Save file
+    with open(filepath, "wb") as f:
+        f.write(contents)
+    
+    # Return URL
+    return {
+        "status": "success",
+        "filename": filename,
+        "url": f"/api/uploads/{filename}"
+    }
+
+
 # ===== SEED =====
 
 @api_router.post("/admin/seed")
