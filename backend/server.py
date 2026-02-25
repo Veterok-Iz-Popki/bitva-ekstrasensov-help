@@ -764,6 +764,17 @@ async def shutdown_db_client():
 
 app.include_router(api_router)
 
+# Mount uploads directory for static file serving
+from fastapi.responses import FileResponse
+
+@app.get("/api/uploads/{filename}")
+async def get_uploaded_file(filename: str):
+    """Serve uploaded files"""
+    filepath = UPLOADS_DIR / filename
+    if not filepath.exists():
+        raise HTTPException(status_code=404, detail="Файл не найден")
+    return FileResponse(filepath)
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
