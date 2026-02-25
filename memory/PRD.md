@@ -110,7 +110,7 @@ SEO-оптимизированный русскоязычный сайт для 
 
 ## Учётные данные
 - **Admin:** nikoa2020@gmail.com / aspire5542gl1952tq
-- **Preview URL:** https://ekstrasensov-help.preview.emergentagent.com
+- **Preview URL:** https://spiritual-guide-60.preview.emergentagent.com
 - **Email для уведомлений:** nikoa2020@gmail.com (тестовый режим Resend)
 
 ## Бэклог
