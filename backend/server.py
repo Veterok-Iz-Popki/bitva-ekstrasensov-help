@@ -184,6 +184,9 @@ async def send_notification_email(application: dict):
             logger.info("Email notifications disabled in settings")
             return
         
+        # Полное имя
+        full_name = application.get('name') or f"{application.get('lastName', '')} {application.get('firstName', '')} {application.get('patronymic', '')}".strip()
+        
         html = f"""
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <div style="background: #0d3040; padding: 20px; text-align: center;">
@@ -193,8 +196,16 @@ async def send_notification_email(application: dict):
             <div style="background: #f5f5f5; padding: 20px;">
                 <table style="width: 100%; border-collapse: collapse;">
                     <tr>
-                        <td style="padding: 10px; border-bottom: 1px solid #ddd; font-weight: bold; width: 120px;">Имя:</td>
-                        <td style="padding: 10px; border-bottom: 1px solid #ddd;">{application.get('name', '-')}</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #ddd; font-weight: bold; width: 130px;">Фамилия:</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #ddd;">{application.get('lastName', '-')}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border-bottom: 1px solid #ddd; font-weight: bold;">Имя:</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #ddd;">{application.get('firstName', '-')}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border-bottom: 1px solid #ddd; font-weight: bold;">Отчество:</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #ddd;">{application.get('patronymic', '-')}</td>
                     </tr>
                     <tr>
                         <td style="padding: 10px; border-bottom: 1px solid #ddd; font-weight: bold;">Телефон:</td>
@@ -209,12 +220,8 @@ async def send_notification_email(application: dict):
                         <td style="padding: 10px; border-bottom: 1px solid #ddd;">{application.get('city', '-') or '-'}</td>
                     </tr>
                     <tr>
-                        <td style="padding: 10px; border-bottom: 1px solid #ddd; font-weight: bold;">Мессенджер:</td>
-                        <td style="padding: 10px; border-bottom: 1px solid #ddd;">{application.get('messenger', '-') or '-'}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 10px; font-weight: bold; vertical-align: top;">Описание:</td>
-                        <td style="padding: 10px;">{application.get('description', '-') or '-'}</td>
+                        <td style="padding: 10px; font-weight: bold; vertical-align: top;">Проблема:</td>
+                        <td style="padding: 10px;">{application.get('problem', '-') or '-'}</td>
                     </tr>
                 </table>
                 <p style="color: #666; font-size: 12px; margin-top: 20px;">
@@ -226,7 +233,7 @@ async def send_notification_email(application: dict):
         params = {
             "from": SENDER_EMAIL,
             "to": [to_email],
-            "subject": f"Новая заявка от {application.get('name', 'посетителя')} — Битва экстрасенсов",
+            "subject": f"Новая заявка от {full_name} — Битва экстрасенсов",
             "html": html,
         }
         await asyncio.to_thread(resend.Emails.send, params)
