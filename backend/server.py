@@ -116,6 +116,11 @@ class SiteSettingsUpdate(BaseModel):
     working_hours: str = ""
     copyright_text: str = ""
     email_notifications_enabled: bool = True
+    # Логотип сайта (шапка и футер)
+    logo_url: str = ""
+    logo_alt: str = "Битва Экстрасенсов"
+    logo_height_desktop: int = 56  # px
+    logo_height_mobile: int = 48  # px
 
 class ContactFormCreate(BaseModel):
     name: str
