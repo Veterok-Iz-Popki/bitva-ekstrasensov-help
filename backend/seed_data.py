@@ -231,9 +231,10 @@ def get_seed_data():
         "email": "info@bitva-ekstrasensov.ru",
         "phone": "",
         "address": "",
-        "notification_email": "admin@bitva-ekstrasensov.ru",
+        "notification_email": "romanrrrrrum2314@gmail.com",
         "working_hours": "Ежедневно с 10:00 до 20:00 (МСК)",
         "copyright_text": "Битва экстрасенсов — официальный сайт помощи",
+        "email_notifications_enabled": True,
     }
 
     return {
