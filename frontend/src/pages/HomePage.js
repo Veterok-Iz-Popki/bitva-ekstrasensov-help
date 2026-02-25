@@ -94,9 +94,25 @@ export default function HomePage() {
           </h1>
 
           {/* Subtitle with decoration */}
-          <h2 className="font-heading text-lg md:text-xl text-gold font-medium mb-8 animate-fade-up" style={{ animationDelay: '0.1s' }}>
+          <h2 className="font-heading text-lg md:text-xl text-gold font-medium mb-6 animate-fade-up" style={{ animationDelay: '0.1s' }}>
             {b.hero_subtitle || 'Сайт помощи экстрасенсов'}
           </h2>
+
+          {/* Логотипы Битва + ТНТ */}
+          <div className="flex items-center justify-center gap-4 md:gap-6 mb-6 animate-fade-up" style={{ animationDelay: '0.15s' }} data-testid="hero-logos">
+            <img
+              src={b.hero_logo_bitva || 'https://customer-assets.emergentagent.com/job_f7eeb759-9e5b-4f73-9fda-0f824d4e9d83/artifacts/k5jjrl8w_bitva.png'}
+              alt={b.hero_logo_bitva_alt || 'Битва экстрасенсов'}
+              className="h-10 md:h-14 lg:h-16 w-auto object-contain"
+              data-testid="logo-bitva"
+            />
+            <img
+              src={b.hero_logo_tnt || 'https://customer-assets.emergentagent.com/job_f7eeb759-9e5b-4f73-9fda-0f824d4e9d83/artifacts/152eb8kk_tnt.png'}
+              alt={b.hero_logo_tnt_alt || 'ТНТ'}
+              className="h-10 md:h-14 lg:h-16 w-auto object-contain"
+              data-testid="logo-tnt"
+            />
+          </div>
 
           {/* TNT logo placeholder + Unique opportunity text */}
           <div className="max-w-3xl mx-auto mb-8 animate-fade-up" style={{ animationDelay: '0.2s' }}>
