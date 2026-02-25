@@ -12,10 +12,19 @@ const NAV_ITEMS = [
   { path: '/kontakty', label: 'Контакты' },
 ];
 
+// Дефолтные значения на случай если настройки не загрузились
+const DEFAULT_LOGO = {
+  url: 'https://customer-assets.emergentagent.com/job_f7eeb759-9e5b-4f73-9fda-0f824d4e9d83/artifacts/usmcyqqy_bitva%20%281%29.png',
+  alt: 'Битва Экстрасенсов',
+  heightDesktop: 56,
+  heightMobile: 48,
+};
+
 function Header() {
   const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [settings, setSettings] = useState(null);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -24,6 +33,16 @@ function Header() {
   }, []);
 
   useEffect(() => { setMobileOpen(false); }, [location.pathname]);
+  
+  useEffect(() => {
+    api.get('/settings').then(res => setSettings(res.data)).catch(() => {});
+  }, []);
+
+  // Получаем данные логотипа из настроек или используем дефолт
+  const logoUrl = settings?.logo_url || DEFAULT_LOGO.url;
+  const logoAlt = settings?.logo_alt || DEFAULT_LOGO.alt;
+  const logoHeightDesktop = settings?.logo_height_desktop || DEFAULT_LOGO.heightDesktop;
+  const logoHeightMobile = settings?.logo_height_mobile || DEFAULT_LOGO.heightMobile;
 
   return (
     <header
@@ -34,9 +53,16 @@ function Header() {
     >
       <div className="max-w-6xl mx-auto px-4 md:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
-          {/* Логотип слева */}
+          {/* Логотип слева - из CMS */}
           <Link to="/" className="flex items-center shrink-0" data-testid="logo-link">
-            <img src="https://customer-assets.emergentagent.com/job_f7eeb759-9e5b-4f73-9fda-0f824d4e9d83/artifacts/usmcyqqy_bitva%20%281%29.png" alt="Битва Экстрасенсов" className="h-12 md:h-14 w-auto rounded-xl" />
+            <img 
+              src={logoUrl} 
+              alt={logoAlt} 
+              className="w-auto rounded-xl"
+              style={{ height: `${logoHeightMobile}px` }}
+              data-testid="header-logo"
+            />
+            <style>{`@media (min-width: 768px) { [data-testid="header-logo"] { height: ${logoHeightDesktop}px !important; } }`}</style>
           </Link>
 
           {/* Навигация по центру - desktop */}
