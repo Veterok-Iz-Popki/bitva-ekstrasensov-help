@@ -365,6 +365,46 @@ async def admin_delete_application(app_id: str, admin=Depends(get_current_admin)
         raise HTTPException(status_code=404, detail="Заявка не найдена")
     return {"status": "success"}
 
+@api_router.get("/admin/applications/export/csv")
+async def admin_export_applications_csv(admin=Depends(get_current_admin)):
+    """Export all applications as CSV file (UTF-8 with BOM for Excel compatibility)"""
+    from fastapi.responses import StreamingResponse
+    import csv
+    import io
+    
+    items = await db.applications.find({}, {"_id": 0}).sort("created_at", -1).to_list(10000)
+    
+    # Create CSV in memory with UTF-8 BOM for Excel
+    output = io.StringIO()
+    output.write('\ufeff')  # UTF-8 BOM for Excel
+    
+    fieldnames = ['Дата', 'Имя', 'Телефон', 'Город', 'Возраст', 'Мессенджер', 'Описание', 'Статус', 'Заметки']
+    writer = csv.DictWriter(output, fieldnames=fieldnames, delimiter=';')
+    writer.writeheader()
+    
+    for item in items:
+        writer.writerow({
+            'Дата': item.get('created_at', '')[:19].replace('T', ' ') if item.get('created_at') else '',
+            'Имя': item.get('name', ''),
+            'Телефон': item.get('phone', ''),
+            'Город': item.get('city', ''),
+            'Возраст': item.get('age', ''),
+            'Мессенджер': item.get('messenger', ''),
+            'Описание': item.get('description', ''),
+            'Статус': item.get('status', ''),
+            'Заметки': item.get('notes', ''),
+        })
+    
+    output.seek(0)
+    
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv; charset=utf-8",
+        headers={
+            "Content-Disposition": "attachment; filename=applications_export.csv"
+        }
+    )
+
 
 # ===== ADMIN PARTICIPANTS =====
 
