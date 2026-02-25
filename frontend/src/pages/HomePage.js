@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Shield, Users, HelpCircle, Globe, MessageCircle, UserCheck, ChevronLeft, ChevronRight } from 'lucide-react';
-import ApplicationForm from '../components/ApplicationForm';
+import { Shield, Users, HelpCircle, Globe, MessageCircle, UserCheck } from 'lucide-react';
 import api, { setSEO, setJsonLd } from '../lib/api';
 
 const PROBLEM_CATEGORIES = [
@@ -25,8 +24,6 @@ const BENEFITS = [
 export default function HomePage() {
   const [page, setPage] = useState(null);
   const [participants, setParticipants] = useState([]);
-  const [reviews, setReviews] = useState([]);
-  const [currentReview, setCurrentReview] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -34,11 +31,9 @@ export default function HomePage() {
       api.get('/pages/home'),
       api.get('/seo/home'),
       api.get('/participants'),
-      api.get('/reviews'),
-    ]).then(([pageRes, seoRes, partRes, revRes]) => {
+    ]).then(([pageRes, seoRes, partRes]) => {
       setPage(pageRes.data);
       setParticipants(partRes.data || []);
-      setReviews(revRes.data || []);
       const seo = seoRes.data;
       if (seo) setSEO({ title: seo.title, description: seo.description, keywords: seo.keywords });
       setJsonLd({
@@ -72,9 +67,6 @@ export default function HomePage() {
     parseServiceCat(b.service_cat_4)
   ].filter(c => c.title);
 
-  const prevReview = () => setCurrentReview((p) => (p === 0 ? reviews.length - 1 : p - 1));
-  const nextReview = () => setCurrentReview((p) => (p === reviews.length - 1 ? 0 : p + 1));
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -89,12 +81,12 @@ export default function HomePage() {
       <section className="pt-24 md:pt-32 pb-10 px-4" data-testid="hero-section">
         <div className="max-w-4xl mx-auto text-center">
           {/* Main H1 */}
-          <h1 className="font-heading text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight animate-fade-up">
+          <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight animate-fade-up">
             {b.hero_h1 || 'Помощь сильнейших экстрасенсов, ясновидящих, целителей, магов и ведьм России'}
           </h1>
 
           {/* Subtitle with decoration */}
-          <h2 className="font-heading text-lg md:text-xl text-gold font-medium mb-6 animate-fade-up" style={{ animationDelay: '0.1s' }}>
+          <h2 className="font-heading text-xl md:text-2xl text-gold font-medium mb-6 animate-fade-up" style={{ animationDelay: '0.1s' }}>
             {b.hero_subtitle || 'Сайт помощи экстрасенсов'}
           </h2>
 
@@ -128,38 +120,38 @@ export default function HomePage() {
 
           {/* TNT logo placeholder + Unique opportunity text */}
           <div className="max-w-3xl mx-auto mb-8 animate-fade-up" style={{ animationDelay: '0.2s' }}>
-            <p className="text-gold font-heading text-base md:text-lg font-semibold italic mb-4">
+            <p className="text-gold font-heading text-lg md:text-xl font-semibold italic mb-4">
               {b.hero_unique || 'Уникальная возможность!'}
             </p>
-            <p className="text-white/80 font-body leading-relaxed mb-2">
+            <p className="text-white/80 font-body leading-relaxed mb-2 text-base md:text-lg">
               {b.hero_text1 || 'Лично обратиться к любому участнику «Битва экстрасенсов».'}
             </p>
-            <p className="text-white/60 font-body leading-relaxed text-sm mb-6">
+            <p className="text-white/60 font-body leading-relaxed text-base mb-6">
               {b.hero_text2 || 'И получить диагностику и консультацию экстрасенсов, ясновидящих, магов, целителей и ведьм'}
             </p>
           </div>
 
           {/* Subheading */}
-          <h3 className="font-heading text-lg md:text-xl text-gold mb-4 animate-fade-up" style={{ animationDelay: '0.3s' }}>
+          <h3 className="font-heading text-xl md:text-2xl text-gold mb-4 animate-fade-up" style={{ animationDelay: '0.3s' }}>
             {b.hero_subheading || 'помощь и консультация экстрасенса'}
           </h3>
 
           {/* Description text */}
-          <p className="text-white/50 font-body text-sm leading-relaxed max-w-2xl mx-auto mb-8 animate-fade-up" style={{ animationDelay: '0.4s' }}>
+          <p className="text-white/50 font-body text-base leading-relaxed max-w-2xl mx-auto mb-8 animate-fade-up" style={{ animationDelay: '0.4s' }}>
             {b.about_text || 'Вам лично помогут сильнейшие и самые лучшие экстрасенсы России решить ваши проблемы и получить ответы на ваши вопросы.'}
           </p>
 
           {/* CTA Block */}
           <div className="max-w-sm mx-auto teal-card p-6 mb-10 animate-fade-up" style={{ animationDelay: '0.5s' }} data-testid="cta-block">
-            <p className="text-white font-body font-medium mb-4 text-sm">
+            <p className="text-white font-body font-medium mb-4 text-base">
               {b.cta_text || 'Количество заявок на помощь ограничено!'}
             </p>
             <Link to="/zapis-na-priem">
-              <button className="btn-gold px-8 py-3 text-sm font-body font-semibold mb-3 w-full md:w-auto" data-testid="hero-cta-btn">
+              <button className="btn-gold px-8 py-3 text-base font-body font-semibold mb-3 w-full md:w-auto" data-testid="hero-cta-btn">
                 {b.cta_button || 'Получить помощь экстрасенса!'}
               </button>
             </Link>
-            <p className="text-white/40 font-body text-xs">
+            <p className="text-white/40 font-body text-sm">
               {b.cta_subtext || 'Не упустите свой шанс!'}
             </p>
           </div>
@@ -169,7 +161,7 @@ export default function HomePage() {
             {PROBLEM_CATEGORIES.map((cat, i) => (
               <span
                 key={i}
-                className="text-gold/80 hover:text-gold font-body text-sm transition-colors cursor-pointer border-b border-gold/30 hover:border-gold pb-0.5"
+                className="text-gold/80 hover:text-gold font-body text-base transition-colors cursor-pointer border-b border-gold/30 hover:border-gold pb-0.5"
                 data-testid={`category-${i}`}
               >
                 {cat.label}
@@ -183,7 +175,7 @@ export default function HomePage() {
       {participants.length > 0 && (
         <section className="py-12 px-4" data-testid="participants-section">
           <div className="max-w-6xl mx-auto">
-            <h2 className="font-heading text-2xl md:text-4xl font-bold text-white text-center mb-10">
+            <h2 className="font-heading text-3xl md:text-5xl font-bold text-white text-center mb-10">
               {b.participants_title || 'Лучшие экстрасенсы России'}
             </h2>
 
@@ -207,19 +199,19 @@ export default function HomePage() {
                   </div>
 
                   {/* Name */}
-                  <h3 className="font-heading text-sm md:text-base font-semibold text-gold text-center leading-tight mb-1">
+                  <h3 className="font-heading text-base md:text-lg font-semibold text-gold text-center leading-tight mb-1">
                     {p.name}
                   </h3>
 
                   {/* Role/Specializations */}
                   <div className="flex flex-wrap justify-center gap-1 mb-3">
                     {(p.specializations || []).slice(0, 2).map((s, j) => (
-                      <span key={j} className="text-gold/60 font-body text-xs">{s}</span>
+                      <span key={j} className="text-gold/60 font-body text-sm">{s}</span>
                     ))}
                   </div>
 
                   {/* Short description */}
-                  <p className="text-white/50 font-body text-xs leading-relaxed text-center line-clamp-2 mb-3">
+                  <p className="text-white/50 font-body text-sm leading-relaxed text-center line-clamp-2 mb-3">
                     {p.title || p.description?.slice(0, 60)}
                   </p>
 
@@ -243,7 +235,7 @@ export default function HomePage() {
                   <div className="benefit-icon-circle mb-3">
                     <Icon className="w-7 h-7" />
                   </div>
-                  <p className="text-white/60 font-body text-xs leading-snug max-w-[120px]">{item.label}</p>
+                  <p className="text-white/60 font-body text-sm leading-snug max-w-[120px]">{item.label}</p>
                 </div>
               );
             })}
@@ -251,80 +243,25 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ===== REVIEWS CAROUSEL ===== */}
-      {reviews.length > 0 && (
-        <section className="py-12 px-4" data-testid="reviews-section">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="font-heading text-2xl md:text-4xl font-bold text-white text-center mb-8">
-              {b.reviews_title || 'Отзывы'}
-            </h2>
-
-            <div className="relative teal-card p-6 md:p-8">
-              <div className="min-h-[140px]">
-                <p className="text-white/70 font-body leading-relaxed mb-5 text-sm md:text-base">
-                  {reviews[currentReview]?.text}
-                </p>
-                <p className="text-gold font-body text-sm font-semibold italic">
-                  — {reviews[currentReview]?.author_name}
-                  {reviews[currentReview]?.author_city ? `, ${reviews[currentReview].author_city}` : ''}
-                </p>
-              </div>
-
-              {/* Navigation */}
-              <div className="flex items-center justify-between mt-6">
-                <button
-                  onClick={prevReview}
-                  className="w-10 h-10 rounded-full border border-gold/30 flex items-center justify-center text-gold hover:bg-gold/10 transition-colors"
-                  data-testid="review-prev"
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
-
-                <div className="flex gap-2">
-                  {reviews.map((_, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setCurrentReview(i)}
-                      className={`w-2.5 h-2.5 rounded-full transition-colors ${
-                        i === currentReview ? 'bg-gold' : 'bg-teal-light/40 hover:bg-teal-light/60'
-                      }`}
-                      data-testid={`review-dot-${i}`}
-                    />
-                  ))}
-                </div>
-
-                <button
-                  onClick={nextReview}
-                  className="w-10 h-10 rounded-full border border-gold/30 flex items-center justify-center text-gold hover:bg-gold/10 transition-colors"
-                  data-testid="review-next"
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
       {/* ===== SERVICES SECTION ===== */}
       {serviceCats.length > 0 && (
         <section className="py-12 px-4" data-testid="services-section">
           <div className="max-w-5xl mx-auto">
-            <h2 className="font-heading text-2xl md:text-4xl font-bold text-white text-center mb-10">
+            <h2 className="font-heading text-3xl md:text-5xl font-bold text-white text-center mb-10">
               {b.services_title || 'Услуги экстрасенсов'}
             </h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {serviceCats.map((cat, i) => (
                 <div key={i} className="service-card p-5" data-testid={`service-card-${i}`}>
-                  <h3 className="font-heading text-base font-bold text-gold">{cat.title}</h3>
+                  <h3 className="font-heading text-lg font-bold text-gold">{cat.title}</h3>
                   {cat.subtitle && (
-                    <p className="font-heading text-sm text-gold/70 mb-3">{cat.subtitle}</p>
+                    <p className="font-heading text-base text-gold/70 mb-3">{cat.subtitle}</p>
                   )}
                   <div className="section-divider mb-3" />
                   <ul className="space-y-2">
                     {cat.items.map((item, j) => (
-                      <li key={j} className="text-white/50 font-body text-xs leading-relaxed flex items-start gap-2">
+                      <li key={j} className="text-white/50 font-body text-sm leading-relaxed flex items-start gap-2">
                         <span className="text-gold/50 mt-0.5">•</span>
                         <span>{item}</span>
                       </li>
@@ -344,17 +281,17 @@ export default function HomePage() {
       {b.seo_text && (
         <section className="py-12 px-4" data-testid="seo-section">
           <div className="max-w-3xl mx-auto">
-            <h2 className="font-heading text-xl md:text-3xl font-semibold text-gold mb-6 text-center">
+            <h2 className="font-heading text-2xl md:text-4xl font-semibold text-gold mb-6 text-center">
               {b.seo_text_title || 'Экстрасенс онлайн — возможность изменить вашу жизнь!'}
             </h2>
-            <div className="text-white/45 font-body text-sm leading-relaxed space-y-4 text-center">
+            <div className="text-white/45 font-body text-base leading-relaxed space-y-4 text-center">
               {b.seo_text.split('\n').filter(Boolean).map((p, i) => (
                 <p key={i}>{p}</p>
               ))}
             </div>
             <div className="text-center mt-8">
               <Link to="/zapis-na-priem">
-                <button className="btn-gold px-8 py-3 font-body text-sm font-semibold" data-testid="seo-cta-btn">
+                <button className="btn-gold px-8 py-3 font-body font-semibold" data-testid="seo-cta-btn">
                   Записаться
                 </button>
               </Link>
@@ -362,16 +299,6 @@ export default function HomePage() {
           </div>
         </section>
       )}
-
-      {/* ===== APPLICATION FORM ===== */}
-      <section className="py-12 px-4" data-testid="form-section">
-        <div className="max-w-md mx-auto teal-card p-6 md:p-8">
-          <ApplicationForm
-            title={b.form_title || 'Запишитесь на консультацию'}
-            subtitle={b.form_subtitle}
-          />
-        </div>
-      </section>
     </div>
   );
 }
