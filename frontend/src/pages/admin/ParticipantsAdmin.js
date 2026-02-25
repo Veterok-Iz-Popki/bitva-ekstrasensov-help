@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/table';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
@@ -7,7 +7,7 @@ import { Label } from '../../components/ui/label';
 import { Switch } from '../../components/ui/switch';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../components/ui/dialog';
 import { Badge } from '../../components/ui/badge';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, Upload, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '../../lib/api';
 
@@ -20,6 +20,8 @@ export default function ParticipantsAdmin() {
   const [form, setForm] = useState({ ...emptyForm });
   const [specText, setSpecText] = useState('');
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
 
   const load = () => {
     api.get('/admin/participants').then((res) => setItems(res.data || [])).catch(() => {}).finally(() => setLoading(false));
@@ -29,7 +31,17 @@ export default function ParticipantsAdmin() {
   const openCreate = () => { setEditId(null); setForm({ ...emptyForm }); setSpecText(''); setDialogOpen(true); };
   const openEdit = (item) => {
     setEditId(item.id);
-    setForm({ slug: item.slug, name: item.name, title: item.title || '', description: item.description || '', full_description: item.full_description || '', photo_url: item.photo_url || '', specializations: item.specializations || [], is_active: item.is_active !== false, order: item.order || 0 });
+    setForm({
+      slug: item.slug,
+      name: item.name,
+      title: item.title || '',
+      description: item.description || '',
+      full_description: item.full_description || '',
+      photo_url: item.photo_url || '',
+      specializations: item.specializations || [],
+      is_active: item.is_active !== false,
+      order: item.order || 0
+    });
     setSpecText((item.specializations || []).join(', '));
     setDialogOpen(true);
   };
@@ -56,16 +68,54 @@ export default function ParticipantsAdmin() {
     try { await api.delete(`/admin/participants/${id}`); toast.success('Удалено'); load(); } catch { toast.error('Ошибка'); }
   };
 
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Выберите изображение');
+      return;
+    }
+
+    // Validate file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Максимальный размер файла: 5MB');
+      return;
+    }
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const res = await api.post('/admin/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      
+      // Build full URL
+      const baseUrl = process.env.REACT_APP_BACKEND_URL;
+      const photoUrl = `${baseUrl}${res.data.url}`;
+      setForm({ ...form, photo_url: photoUrl });
+      toast.success('Фото загружено');
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Ошибка загрузки');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
   return (
     <div data-testid="admin-participants">
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-heading text-3xl font-bold text-white">Участники</h1>
-        <Button onClick={openCreate} className="bg-gold text-teal-darker hover:bg-gold text-teal-darker-light text-white font-body" data-testid="add-participant-btn">
+        <Button onClick={openCreate} className="bg-gold hover:bg-gold-light text-teal-darker font-body font-semibold" data-testid="add-participant-btn">
           <Plus className="w-4 h-4 mr-2" />Добавить
         </Button>
       </div>
 
-      <div className="border border-teal-light/20 bg-teal-dark/70 overflow-x-auto">
+      <div className="border border-teal-light/20 bg-teal-dark/70 overflow-x-auto rounded-lg">
         <Table>
           <TableHeader>
             <TableRow className="border-teal-light/20 hover:bg-transparent">
@@ -82,14 +132,18 @@ export default function ParticipantsAdmin() {
               <TableRow key={item.id} className="border-teal-light/20 hover:bg-teal/30">
                 <TableCell>
                   {item.photo_url ? (
-                    <img src={item.photo_url} alt={item.name} className="w-10 h-10 object-cover" />
-                  ) : <div className="w-10 h-10 bg-white/5" />}
+                    <img src={item.photo_url} alt={item.name} className="w-12 h-12 object-cover rounded-full border border-gold/30" />
+                  ) : (
+                    <div className="w-12 h-12 bg-teal-light/10 rounded-full flex items-center justify-center">
+                      <ImageIcon className="w-5 h-5 text-white/30" />
+                    </div>
+                  )}
                 </TableCell>
-                <TableCell className="font-body text-white">{item.name}</TableCell>
+                <TableCell className="font-body text-white font-medium">{item.name}</TableCell>
                 <TableCell className="font-body text-white/70 text-sm">{item.title}</TableCell>
                 <TableCell className="font-body text-white/50">{item.order}</TableCell>
                 <TableCell>
-                  <Badge variant={item.is_active ? 'default' : 'secondary'} className="font-body text-xs">
+                  <Badge variant={item.is_active ? 'default' : 'secondary'} className={`font-body text-xs ${item.is_active ? 'bg-green-500/20 text-green-400' : ''}`}>
                     {item.is_active ? 'Активен' : 'Скрыт'}
                   </Badge>
                 </TableCell>
@@ -110,7 +164,7 @@ export default function ParticipantsAdmin() {
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="bg-teal-dark/70 border-teal-light/30 max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-teal-dark border-teal-light/30 max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-heading text-white text-xl">{editId ? 'Редактировать' : 'Добавить'} участника</DialogTitle>
           </DialogHeader>
@@ -118,47 +172,146 @@ export default function ParticipantsAdmin() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-white/70 font-body text-sm">Slug (URL)</Label>
-                <Input data-testid="participant-slug" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} className="bg-teal-dark/80 border-teal-light/30 text-white h-10" placeholder="ivan-ivanov" />
+                <Input
+                  data-testid="participant-slug"
+                  value={form.slug}
+                  onChange={(e) => setForm({ ...form, slug: e.target.value })}
+                  className="bg-teal-dark/80 border-teal-light/30 text-white h-10"
+                  placeholder="ivan-ivanov"
+                />
               </div>
               <div className="space-y-2">
                 <Label className="text-white/70 font-body text-sm">Имя</Label>
-                <Input data-testid="participant-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="bg-teal-dark/80 border-teal-light/30 text-white h-10" placeholder="Иван Иванов" />
+                <Input
+                  data-testid="participant-name"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  className="bg-teal-dark/80 border-teal-light/30 text-white h-10"
+                  placeholder="Иван Иванов"
+                />
               </div>
             </div>
+
             <div className="space-y-2">
               <Label className="text-white/70 font-body text-sm">Звание / Титул</Label>
-              <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="bg-teal-dark/80 border-teal-light/30 text-white h-10" placeholder="Ясновидящая, участник 20 сезона" />
+              <Input
+                value={form.title}
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
+                className="bg-teal-dark/80 border-teal-light/30 text-white h-10"
+                placeholder="Финалист 20 сезона"
+              />
             </div>
+
+            {/* Photo upload section */}
             <div className="space-y-2">
-              <Label className="text-white/70 font-body text-sm">URL фото</Label>
-              <Input value={form.photo_url} onChange={(e) => setForm({ ...form, photo_url: e.target.value })} className="bg-teal-dark/80 border-teal-light/30 text-white h-10" placeholder="https://..." />
+              <Label className="text-white/70 font-body text-sm">Фото участника</Label>
+              <div className="flex gap-4 items-start">
+                {/* Preview */}
+                <div className="w-24 h-24 rounded-lg border border-teal-light/30 overflow-hidden flex-shrink-0 bg-teal-darker/50">
+                  {form.photo_url ? (
+                    <img src={form.photo_url} alt="Preview" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <ImageIcon className="w-8 h-8 text-white/20" />
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex-1 space-y-2">
+                  {/* Upload button */}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    className="border-gold/50 text-gold hover:bg-gold/10 font-body w-full"
+                    data-testid="upload-photo-btn"
+                  >
+                    {uploading ? (
+                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Загрузка...</>
+                    ) : (
+                      <><Upload className="w-4 h-4 mr-2" />Загрузить фото</>
+                    )}
+                  </Button>
+
+                  {/* Or URL input */}
+                  <Input
+                    value={form.photo_url}
+                    onChange={(e) => setForm({ ...form, photo_url: e.target.value })}
+                    className="bg-teal-dark/80 border-teal-light/30 text-white h-10 text-sm"
+                    placeholder="или введите URL изображения"
+                  />
+                  <p className="text-white/40 text-xs font-body">
+                    Рекомендуемый размер: 400×400px. Макс. 5MB.
+                  </p>
+                </div>
+              </div>
             </div>
+
             <div className="space-y-2">
               <Label className="text-white/70 font-body text-sm">Краткое описание</Label>
-              <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="bg-teal-dark/80 border-teal-light/30 text-white min-h-[80px]" />
+              <Textarea
+                value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                className="bg-teal-dark/80 border-teal-light/30 text-white min-h-[80px]"
+                placeholder="Краткое описание для карточки"
+              />
             </div>
+
             <div className="space-y-2">
               <Label className="text-white/70 font-body text-sm">Полное описание</Label>
-              <Textarea value={form.full_description} onChange={(e) => setForm({ ...form, full_description: e.target.value })} className="bg-teal-dark/80 border-teal-light/30 text-white min-h-[120px]" />
+              <Textarea
+                value={form.full_description}
+                onChange={(e) => setForm({ ...form, full_description: e.target.value })}
+                className="bg-teal-dark/80 border-teal-light/30 text-white min-h-[120px]"
+                placeholder="Полная биография для детальной страницы"
+              />
             </div>
+
             <div className="space-y-2">
               <Label className="text-white/70 font-body text-sm">Специализации (через запятую)</Label>
-              <Input value={specText} onChange={(e) => setSpecText(e.target.value)} className="bg-teal-dark/80 border-teal-light/30 text-white h-10" placeholder="Ясновидение, Таро, Целительство" />
+              <Input
+                value={specText}
+                onChange={(e) => setSpecText(e.target.value)}
+                className="bg-teal-dark/80 border-teal-light/30 text-white h-10"
+                placeholder="Ясновидящая, Экстрасенс, Маг"
+              />
             </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-white/70 font-body text-sm">Порядок</Label>
-                <Input type="number" value={form.order} onChange={(e) => setForm({ ...form, order: parseInt(e.target.value) || 0 })} className="bg-teal-dark/80 border-teal-light/30 text-white h-10" />
+                <Label className="text-white/70 font-body text-sm">Порядок сортировки</Label>
+                <Input
+                  type="number"
+                  value={form.order}
+                  onChange={(e) => setForm({ ...form, order: parseInt(e.target.value) || 0 })}
+                  className="bg-teal-dark/80 border-teal-light/30 text-white h-10"
+                />
               </div>
               <div className="flex items-center gap-3 pt-6">
-                <Switch checked={form.is_active} onCheckedChange={(val) => setForm({ ...form, is_active: val })} data-testid="participant-active-switch" />
-                <Label className="text-white/70 font-body text-sm">Активен</Label>
+                <Switch
+                  checked={form.is_active}
+                  onCheckedChange={(val) => setForm({ ...form, is_active: val })}
+                  data-testid="participant-active-switch"
+                />
+                <Label className="text-white/70 font-body text-sm">Показывать на сайте</Label>
               </div>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setDialogOpen(false)} className="text-white/60 font-body">Отмена</Button>
-            <Button onClick={handleSave} className="bg-gold text-teal-darker hover:bg-gold text-teal-darker-light text-white font-body" data-testid="save-participant-btn">Сохранить</Button>
+            <Button variant="ghost" onClick={() => setDialogOpen(false)} className="text-white/60 font-body">
+              Отмена
+            </Button>
+            <Button onClick={handleSave} className="bg-gold hover:bg-gold-light text-teal-darker font-body font-semibold" data-testid="save-participant-btn">
+              Сохранить
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
