@@ -86,7 +86,7 @@ SEO-оптимизированный русскоязычный сайт для 
 - `/api/admin/stats` — GET
 
 ## Учётные данные
-- **Admin:** admin / admin123
+- **Admin:** nikoa2020@gmail.com / aspire5542gl1952tq
 - **Preview URL:** https://ekstrasensov-help.preview.emergentagent.com
 - **Email для уведомлений:** nikoa2020@gmail.com (тестовый режим Resend)
 
