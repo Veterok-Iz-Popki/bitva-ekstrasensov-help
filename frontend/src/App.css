@@ -58,18 +58,34 @@
 
 /* Participant card - horizontal layout matching reference */
 .participant-card-h {
-    display: grid;
-    grid-template-columns: 160px 1fr;
+    display: flex;
     gap: 1.25rem;
     padding: 1.25rem;
     background: rgba(13, 48, 64, 0.5);
     border: 1px solid rgba(26, 80, 96, 0.4);
-    border-radius: 6px;
+    border-radius: 8px;
     transition: all 0.4s ease;
 }
 .participant-card-h:hover {
-    border-color: rgba(212, 166, 55, 0.4);
+    border-color: rgba(212, 166, 55, 0.5);
     background: rgba(13, 48, 64, 0.7);
+    transform: translateY(-2px);
+}
+
+/* Horizontal card photo */
+.participant-photo-h {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid rgba(212, 166, 55, 0.4);
+    flex-shrink: 0;
+}
+@media (min-width: 768px) {
+    .participant-photo-h {
+        width: 150px;
+        height: 150px;
+    }
 }
 
 /* Service card */
