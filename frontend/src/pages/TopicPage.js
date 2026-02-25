@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle, AlertTriangle, HelpCircle, Phone } from 'lucide-react';
 import api, { setSEO, setJsonLd } from '../lib/api';
 
@@ -14,7 +14,8 @@ const TOPIC_NAMES = {
 };
 
 export default function TopicPage() {
-  const { slug } = useParams();
+  const location = useLocation();
+  const slug = location.pathname.replace(/^\//, '');
   const [page, setPage] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -41,7 +42,7 @@ export default function TopicPage() {
         "url": window.location.href
       });
     }).catch(() => setNotFound(true)).finally(() => setLoading(false));
-  }, [slug]);
+  }, [slug, location.pathname]);
 
   if (loading) {
     return (
