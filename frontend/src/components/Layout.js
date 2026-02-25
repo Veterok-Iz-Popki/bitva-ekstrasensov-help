@@ -9,7 +9,6 @@ const NAV_ITEMS = [
   { path: '/uchastniki', label: 'Экстрасенсы' },
   { path: '/otzyvy', label: 'Отзывы' },
   { path: '/voprosy-i-otvety', label: 'FAQ' },
-  { path: '/kontakty', label: 'Контакты' },
 ];
 
 // Дефолтные значения на случай если настройки не загрузились
