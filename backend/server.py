@@ -108,6 +108,7 @@ class SiteSettingsUpdate(BaseModel):
     notification_email: str = ""
     working_hours: str = ""
     copyright_text: str = ""
+    email_notifications_enabled: bool = True
 
 class ContactFormCreate(BaseModel):
     name: str
