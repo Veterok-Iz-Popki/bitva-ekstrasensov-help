@@ -169,18 +169,56 @@ async def send_notification_email(application: dict):
         if not to_email:
             logger.info("No notification email configured")
             return
+        
+        # Check if email notifications are enabled
+        email_enabled = (settings or {}).get("email_notifications_enabled", True)
+        if not email_enabled:
+            logger.info("Email notifications disabled in settings")
+            return
+        
         html = f"""
-        <h2>Новая заявка на консультацию</h2>
-        <p><strong>Имя:</strong> {application.get('name', '')}</p>
-        <p><strong>Телефон:</strong> {application.get('phone', '')}</p>
-        <p><strong>Мессенджер:</strong> {application.get('messenger', '')}</p>
-        <p><strong>Описание:</strong> {application.get('description', '')}</p>
-        <p><strong>Дата:</strong> {application.get('created_at', '')}</p>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <div style="background: #0d3040; padding: 20px; text-align: center;">
+                <h1 style="color: #d4a637; margin: 0;">Новая заявка</h1>
+                <p style="color: #ffffff; margin: 5px 0 0 0;">Битва экстрасенсов — сайт помощи</p>
+            </div>
+            <div style="background: #f5f5f5; padding: 20px;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <td style="padding: 10px; border-bottom: 1px solid #ddd; font-weight: bold; width: 120px;">Имя:</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #ddd;">{application.get('name', '-')}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border-bottom: 1px solid #ddd; font-weight: bold;">Телефон:</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #ddd;">{application.get('phone', '-')}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border-bottom: 1px solid #ddd; font-weight: bold;">Возраст:</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #ddd;">{application.get('age', '-') or '-'}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border-bottom: 1px solid #ddd; font-weight: bold;">Город:</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #ddd;">{application.get('city', '-') or '-'}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border-bottom: 1px solid #ddd; font-weight: bold;">Мессенджер:</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #ddd;">{application.get('messenger', '-') or '-'}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; font-weight: bold; vertical-align: top;">Описание:</td>
+                        <td style="padding: 10px;">{application.get('description', '-') or '-'}</td>
+                    </tr>
+                </table>
+                <p style="color: #666; font-size: 12px; margin-top: 20px;">
+                    Дата заявки: {application.get('created_at', '-')}
+                </p>
+            </div>
+        </div>
         """
         params = {
             "from": SENDER_EMAIL,
             "to": [to_email],
-            "subject": "Новая заявка — Битва экстрасенсов",
+            "subject": f"Новая заявка от {application.get('name', 'посетителя')} — Битва экстрасенсов",
             "html": html,
         }
         await asyncio.to_thread(resend.Emails.send, params)
