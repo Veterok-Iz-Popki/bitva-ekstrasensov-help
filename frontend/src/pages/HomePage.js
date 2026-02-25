@@ -21,6 +21,13 @@ const BENEFITS = [
   { label: 'Лично пообщаться с экстрасенсом', icon: Shield },
 ];
 
+const SERVICE_LINKS = [
+  '/finansovaya-magiya',
+  '/lyubovnaya-magiya',
+  '/magiya-zhizni',
+  '/magicheskaya-zashchita',
+];
+
 export default function HomePage() {
   const [page, setPage] = useState(null);
   const [participants, setParticipants] = useState([]);
@@ -268,8 +275,8 @@ export default function HomePage() {
                       </li>
                     ))}
                   </ul>
-                  <Link to="/zapis-na-priem" className="block mt-4">
-                    <button className="btn-outline-gold-sm w-full">Подробнее</button>
+                  <Link to={SERVICE_LINKS[i] || '/zapis-na-priem'} className="block mt-4">
+                    <button className="btn-outline-gold-sm w-full" data-testid={`service-link-${i}`}>Подробнее</button>
                   </Link>
                 </div>
               ))}
