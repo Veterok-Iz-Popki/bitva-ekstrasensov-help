@@ -138,7 +138,7 @@ export default function ApplicationsAdmin() {
         <Table>
           <TableHeader>
             <TableRow className="border-teal-light/20 hover:bg-transparent">
-              <TableHead className="text-white/40 font-body">Имя</TableHead>
+              <TableHead className="text-white/40 font-body">ФИО</TableHead>
               <TableHead className="text-white/40 font-body">Телефон</TableHead>
               <TableHead className="text-white/40 font-body hidden md:table-cell">Город</TableHead>
               <TableHead className="text-white/40 font-body hidden lg:table-cell">Возраст</TableHead>
@@ -148,9 +148,14 @@ export default function ApplicationsAdmin() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filtered.map((item) => (
+            {filtered.map((item) => {
+              // Собираем ФИО из новых полей или используем старое поле name
+              const fullName = item.lastName 
+                ? `${item.lastName} ${item.firstName || ''} ${item.patronymic || ''}`.trim()
+                : item.name;
+              return (
               <TableRow key={item.id} className="border-teal-light/20 hover:bg-teal/30">
-                <TableCell className="font-body text-white font-medium">{item.name}</TableCell>
+                <TableCell className="font-body text-white font-medium">{fullName}</TableCell>
                 <TableCell className="font-body text-white/70">{item.phone}</TableCell>
                 <TableCell className="font-body text-white/50 hidden md:table-cell">{item.city || '—'}</TableCell>
                 <TableCell className="font-body text-white/50 hidden lg:table-cell">{item.age || '—'}</TableCell>
