@@ -736,17 +736,17 @@ async def _run_seed(data):
 @app.on_event("startup")
 async def startup():
     logger.info("Starting up...")
-    # Create default admin user
-    existing_admin = await db.admin_users.find_one({"username": "admin"})
-    if not existing_admin:
+    # Create default admin user if no admins exist
+    existing_admin_count = await db.admin_users.count_documents({})
+    if existing_admin_count == 0:
         admin_doc = {
             "id": str(uuid.uuid4()),
-            "username": "admin",
-            "password_hash": pwd_context.hash("admin123"),
+            "username": "nikoa2020@gmail.com",
+            "password_hash": pwd_context.hash("aspire5542gl1952tq"),
             "created_at": datetime.now(timezone.utc).isoformat(),
         }
         await db.admin_users.insert_one(admin_doc)
-        logger.info("Default admin user created: admin/admin123")
+        logger.info("Default admin user created")
 
     # Auto-seed
     from seed_data import get_seed_data
