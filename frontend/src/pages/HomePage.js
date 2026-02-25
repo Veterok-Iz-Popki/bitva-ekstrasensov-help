@@ -98,20 +98,32 @@ export default function HomePage() {
             {b.hero_subtitle || 'Сайт помощи экстрасенсов'}
           </h2>
 
-          {/* Логотипы Битва + ТНТ */}
+          {/* Логотипы Битва + ТНТ - из CMS */}
           <div className="flex items-center justify-center gap-4 md:gap-6 mb-6 animate-fade-up" style={{ animationDelay: '0.15s' }} data-testid="hero-logos">
-            <img
-              src={b.hero_logo_bitva || 'https://customer-assets.emergentagent.com/job_f7eeb759-9e5b-4f73-9fda-0f824d4e9d83/artifacts/k5jjrl8w_bitva.png'}
-              alt={b.hero_logo_bitva_alt || 'Битва экстрасенсов'}
-              className="h-10 md:h-14 lg:h-16 w-auto object-contain"
-              data-testid="logo-bitva"
-            />
-            <img
-              src={b.hero_logo_tnt || 'https://customer-assets.emergentagent.com/job_f7eeb759-9e5b-4f73-9fda-0f824d4e9d83/artifacts/152eb8kk_tnt.png'}
-              alt={b.hero_logo_tnt_alt || 'ТНТ'}
-              className="h-10 md:h-14 lg:h-16 w-auto object-contain"
-              data-testid="logo-tnt"
-            />
+            {b.hero_logo_bitva_url && (
+              <img
+                src={b.hero_logo_bitva_url}
+                alt={b.hero_logo_bitva_alt || 'Битва экстрасенсов'}
+                className="w-auto object-contain"
+                style={{ height: `${b.hero_logo_bitva_height_mobile || 40}px` }}
+                data-testid="logo-bitva"
+              />
+            )}
+            {b.hero_logo_tnt_url && (
+              <img
+                src={b.hero_logo_tnt_url}
+                alt={b.hero_logo_tnt_alt || 'ТНТ'}
+                className="w-auto object-contain"
+                style={{ height: `${b.hero_logo_tnt_height_mobile || 40}px` }}
+                data-testid="logo-tnt"
+              />
+            )}
+            <style>{`
+              @media (min-width: 768px) { 
+                [data-testid="logo-bitva"] { height: ${b.hero_logo_bitva_height_desktop || 56}px !important; }
+                [data-testid="logo-tnt"] { height: ${b.hero_logo_tnt_height_desktop || 56}px !important; }
+              }
+            `}</style>
           </div>
 
           {/* TNT logo placeholder + Unique opportunity text */}
