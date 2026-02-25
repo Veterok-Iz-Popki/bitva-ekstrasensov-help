@@ -1,52 +1,72 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
 import { Textarea } from '../../components/ui/textarea';
 import { Label } from '../../components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
-import { Save } from 'lucide-react';
+import { Save, Upload, Image as ImageIcon, Loader2, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '../../lib/api';
 
 const PAGE_SCHEMAS = {
   home: [
-    { key: 'hero_subtitle', label: 'Подзаголовок (Hero)' },
-    { key: 'about_title', label: 'Заголовок «О проекте»' },
-    { key: 'about_text', label: 'Текст «О проекте»' },
-    { key: 'services_title', label: 'Заголовок «Услуги»' },
-    { key: 'services_list', label: 'Список услуг (каждая с новой строки)' },
-    { key: 'benefits_title', label: 'Заголовок «Преимущества»' },
-    { key: 'benefits_list', label: 'Список преимуществ (каждое с новой строки)' },
-    { key: 'form_title', label: 'Заголовок формы' },
-    { key: 'form_subtitle', label: 'Подзаголовок формы' },
-    { key: 'seo_text_title', label: 'Заголовок SEO-текста' },
-    { key: 'seo_text', label: 'SEO-текст' },
+    { key: 'hero_h1', label: 'Главный заголовок (H1)', type: 'text' },
+    { key: 'hero_subtitle', label: 'Подзаголовок (Hero)', type: 'text' },
+    // Изображения логотипов
+    { key: 'hero_logo_bitva_url', label: 'Логотип «Битва экстрасенсов» — URL', type: 'image' },
+    { key: 'hero_logo_bitva_alt', label: 'Логотип «Битва» — ALT-текст', type: 'text' },
+    { key: 'hero_logo_bitva_height_desktop', label: 'Логотип «Битва» — Высота Desktop (px)', type: 'number' },
+    { key: 'hero_logo_bitva_height_mobile', label: 'Логотип «Битва» — Высота Mobile (px)', type: 'number' },
+    { key: 'hero_logo_tnt_url', label: 'Логотип «ТНТ» — URL', type: 'image' },
+    { key: 'hero_logo_tnt_alt', label: 'Логотип «ТНТ» — ALT-текст', type: 'text' },
+    { key: 'hero_logo_tnt_height_desktop', label: 'Логотип «ТНТ» — Высота Desktop (px)', type: 'number' },
+    { key: 'hero_logo_tnt_height_mobile', label: 'Логотип «ТНТ» — Высота Mobile (px)', type: 'number' },
+    { key: 'hero_unique', label: 'Текст «Уникальная возможность»', type: 'text' },
+    { key: 'hero_text1', label: 'Hero текст 1', type: 'textarea' },
+    { key: 'hero_text2', label: 'Hero текст 2', type: 'textarea' },
+    { key: 'hero_subheading', label: 'Подзаголовок Hero', type: 'text' },
+    { key: 'about_text', label: 'Текст «О проекте»', type: 'textarea' },
+    { key: 'cta_text', label: 'CTA текст', type: 'text' },
+    { key: 'cta_button', label: 'Текст кнопки CTA', type: 'text' },
+    { key: 'cta_subtext', label: 'CTA подтекст', type: 'text' },
+    { key: 'participants_title', label: 'Заголовок «Участники»', type: 'text' },
+    { key: 'services_title', label: 'Заголовок «Услуги»', type: 'text' },
+    { key: 'service_cat_1', label: 'Услуги — категория 1', type: 'textarea' },
+    { key: 'service_cat_2', label: 'Услуги — категория 2', type: 'textarea' },
+    { key: 'service_cat_3', label: 'Услуги — категория 3', type: 'textarea' },
+    { key: 'service_cat_4', label: 'Услуги — категория 4', type: 'textarea' },
+    { key: 'reviews_title', label: 'Заголовок «Отзывы»', type: 'text' },
+    { key: 'form_title', label: 'Заголовок формы', type: 'text' },
+    { key: 'form_subtitle', label: 'Подзаголовок формы', type: 'text' },
+    { key: 'seo_text_title', label: 'Заголовок SEO-текста', type: 'text' },
+    { key: 'seo_text', label: 'SEO-текст', type: 'textarea' },
   ],
   participants: [
-    { key: 'page_title', label: 'Заголовок страницы' },
-    { key: 'page_subtitle', label: 'Подзаголовок' },
+    { key: 'page_title', label: 'Заголовок страницы', type: 'text' },
+    { key: 'page_subtitle', label: 'Подзаголовок', type: 'text' },
   ],
   booking: [
-    { key: 'page_title', label: 'Заголовок страницы' },
-    { key: 'page_subtitle', label: 'Подзаголовок' },
-    { key: 'process_title', label: 'Заголовок «Процесс»' },
-    { key: 'process_steps', label: 'Шаги процесса (каждый с новой строки)' },
-    { key: 'confidentiality_title', label: 'Заголовок «Конфиденциальность»' },
-    { key: 'confidentiality_text', label: 'Текст конфиденциальности' },
+    { key: 'page_title', label: 'Заголовок страницы', type: 'text' },
+    { key: 'page_subtitle', label: 'Подзаголовок', type: 'text' },
+    { key: 'process_title', label: 'Заголовок «Процесс»', type: 'text' },
+    { key: 'process_steps', label: 'Шаги процесса (каждый с новой строки)', type: 'textarea' },
+    { key: 'confidentiality_title', label: 'Заголовок «Конфиденциальность»', type: 'text' },
+    { key: 'confidentiality_text', label: 'Текст конфиденциальности', type: 'textarea' },
   ],
   reviews: [
-    { key: 'page_title', label: 'Заголовок страницы' },
-    { key: 'page_subtitle', label: 'Подзаголовок' },
-    { key: 'trust_title', label: 'Заголовок блока доверия' },
-    { key: 'trust_text', label: 'Текст блока доверия' },
+    { key: 'page_title', label: 'Заголовок страницы', type: 'text' },
+    { key: 'page_subtitle', label: 'Подзаголовок', type: 'text' },
+    { key: 'trust_title', label: 'Заголовок блока доверия', type: 'text' },
+    { key: 'trust_text', label: 'Текст блока доверия', type: 'textarea' },
   ],
   faq: [
-    { key: 'page_title', label: 'Заголовок страницы' },
-    { key: 'page_subtitle', label: 'Подзаголовок' },
+    { key: 'page_title', label: 'Заголовок страницы', type: 'text' },
+    { key: 'page_subtitle', label: 'Подзаголовок', type: 'text' },
   ],
   contacts: [
-    { key: 'page_title', label: 'Заголовок страницы' },
-    { key: 'page_subtitle', label: 'Подзаголовок' },
-    { key: 'appointment_text', label: 'Текст о записи' },
+    { key: 'page_title', label: 'Заголовок страницы', type: 'text' },
+    { key: 'page_subtitle', label: 'Подзаголовок', type: 'text' },
+    { key: 'appointment_text', label: 'Текст о записи', type: 'textarea' },
   ],
 };
 
@@ -58,6 +78,100 @@ const PAGE_NAMES = {
   faq: 'Вопросы (FAQ)',
   contacts: 'Контакты',
 };
+
+// Компонент для загрузки изображения
+function ImageField({ fieldKey, value, onChange, label }) {
+  const fileInputRef = useRef(null);
+  const [uploading, setUploading] = useState(false);
+
+  const handleUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Выберите изображение');
+      return;
+    }
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const res = await api.post('/admin/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      const baseUrl = process.env.REACT_APP_BACKEND_URL;
+      onChange(`${baseUrl}${res.data.url}`);
+      toast.success('Изображение загружено');
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Ошибка загрузки');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  return (
+    <div className="space-y-2 p-3 bg-teal-darker/30 rounded-lg border border-teal-light/10">
+      <Label className="text-white/70 font-body text-sm flex items-center gap-2">
+        <ImageIcon className="w-4 h-4 text-gold/60" />
+        {label}
+      </Label>
+      
+      <div className="flex gap-3 items-start">
+        {/* Preview */}
+        <div className="w-20 h-14 rounded border border-teal-light/20 overflow-hidden flex-shrink-0 bg-teal-darker/50 flex items-center justify-center">
+          {value ? (
+            <img src={value} alt="" className="max-w-full max-h-full object-contain" />
+          ) : (
+            <ImageIcon className="w-5 h-5 text-white/20" />
+          )}
+        </div>
+
+        <div className="flex-1 space-y-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleUpload}
+            className="hidden"
+          />
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="border-gold/50 text-gold hover:bg-gold/10 font-body h-8 text-xs"
+            >
+              {uploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Upload className="w-3 h-3 mr-1" />}
+              {uploading ? '' : 'Загрузить'}
+            </Button>
+            {value && (
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => onChange('')}
+                className="border-red-500/50 text-red-400 hover:bg-red-500/10 h-8"
+              >
+                <Trash2 className="w-3 h-3" />
+              </Button>
+            )}
+          </div>
+          <Input
+            value={value || ''}
+            onChange={(e) => onChange(e.target.value)}
+            className="bg-teal-dark/80 border-teal-light/30 text-white h-8 text-xs"
+            placeholder="или URL изображения"
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function PagesAdmin() {
   const [selectedPage, setSelectedPage] = useState('home');
@@ -81,6 +195,58 @@ export default function PagesAdmin() {
 
   const schema = PAGE_SCHEMAS[selectedPage] || [];
 
+  const renderField = (field) => {
+    const value = blocks[field.key] || '';
+    const onChange = (val) => setBlocks({ ...blocks, [field.key]: val });
+
+    switch (field.type) {
+      case 'image':
+        return (
+          <ImageField
+            key={field.key}
+            fieldKey={field.key}
+            value={value}
+            onChange={onChange}
+            label={field.label}
+          />
+        );
+      case 'number':
+        return (
+          <div key={field.key} className="space-y-2">
+            <Label className="text-white/70 font-body text-sm">{field.label}</Label>
+            <Input
+              type="number"
+              value={value}
+              onChange={(e) => onChange(parseInt(e.target.value) || 0)}
+              className="bg-teal-dark/80 border-teal-light/30 text-white h-9 w-32"
+            />
+          </div>
+        );
+      case 'textarea':
+        return (
+          <div key={field.key} className="space-y-2">
+            <Label className="text-white/70 font-body text-sm">{field.label}</Label>
+            <Textarea
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              className="bg-teal-dark/80 border-teal-light/30 text-white min-h-[80px] font-body text-sm"
+            />
+          </div>
+        );
+      default:
+        return (
+          <div key={field.key} className="space-y-2">
+            <Label className="text-white/70 font-body text-sm">{field.label}</Label>
+            <Input
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              className="bg-teal-dark/80 border-teal-light/30 text-white h-9"
+            />
+          </div>
+        );
+    }
+  };
+
   return (
     <div data-testid="admin-pages">
       <div className="flex items-center justify-between mb-6">
@@ -100,22 +266,12 @@ export default function PagesAdmin() {
         </Select>
       </div>
 
-      <div className="space-y-5 p-6 border border-teal-light/20 bg-teal-dark/70">
-        {schema.map((field) => (
-          <div key={field.key} className="space-y-2">
-            <Label className="text-white/70 font-body text-sm">{field.label}</Label>
-            <Textarea
-              value={blocks[field.key] || ''}
-              onChange={(e) => setBlocks({ ...blocks, [field.key]: e.target.value })}
-              className="bg-teal-dark/80 border-teal-light/30 text-white min-h-[80px] font-body text-sm"
-              data-testid={`page-block-${field.key}`}
-            />
-          </div>
-        ))}
+      <div className="space-y-4 p-6 border border-teal-light/20 bg-teal-dark/70 rounded-lg max-w-3xl">
+        {schema.map(renderField)}
 
-        <Button onClick={handleSave} disabled={saving} className="bg-gold text-teal-darker hover:bg-gold text-teal-darker-light text-white font-body" data-testid="save-page-btn">
+        <Button onClick={handleSave} disabled={saving} className="bg-gold hover:bg-gold-light text-teal-darker font-body font-semibold mt-4" data-testid="save-page-btn">
           <Save className="w-4 h-4 mr-2" />
-          {saving ? 'Сохранение...' : 'Сохранить'}
+          {saving ? 'Сохранение...' : 'Сохранить страницу'}
         </Button>
       </div>
     </div>
