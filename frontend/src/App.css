@@ -3,13 +3,21 @@
     background-color: #d4a637;
     color: #0a2530;
     font-weight: 600;
+    font-size: 16px;
     border-radius: 4px;
     transition: all 0.3s ease;
     border: 2px solid #d4a637;
+    padding: 12px 24px;
 }
 .btn-gold:hover {
     background-color: #e8c356;
     border-color: #e8c356;
+}
+@media (min-width: 768px) {
+    .btn-gold {
+        font-size: 17px;
+        padding: 14px 28px;
+    }
 }
 
 /* Outline button */
@@ -19,10 +27,18 @@
     border: 2px solid #d4a637;
     border-radius: 4px;
     transition: all 0.3s ease;
+    font-size: 15px;
+    padding: 10px 20px;
 }
 .btn-outline-gold:hover {
     background-color: #d4a637;
     color: #0a2530;
+}
+@media (min-width: 768px) {
+    .btn-outline-gold {
+        font-size: 16px;
+        padding: 12px 24px;
+    }
 }
 
 /* Teal card */
