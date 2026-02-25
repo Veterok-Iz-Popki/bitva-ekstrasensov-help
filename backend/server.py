@@ -60,12 +60,13 @@ class LoginRequest(BaseModel):
     password: str
 
 class ApplicationCreate(BaseModel):
-    name: str
-    phone: str
-    messenger: str = ""
-    age: str = ""
-    city: str = ""
-    description: str = ""
+    lastName: str  # Фамилия (обязательно)
+    firstName: str  # Имя (обязательно)
+    patronymic: str  # Отчество (обязательно)
+    phone: str  # Телефон (обязательно)
+    age: str = ""  # Возраст
+    city: str = ""  # Город
+    problem: str  # Описание проблемы (обязательно)
     honeypot: str = ""
 
 class ApplicationUpdate(BaseModel):
