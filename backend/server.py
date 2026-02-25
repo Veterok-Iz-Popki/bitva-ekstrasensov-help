@@ -250,6 +250,8 @@ async def create_application(data: ApplicationCreate, request: Request):
         "name": data.name,
         "phone": data.phone,
         "messenger": data.messenger,
+        "age": data.age,
+        "city": data.city,
         "description": data.description,
         "status": "new",
         "notes": "",
