@@ -175,6 +175,15 @@ def get_seed_data():
             "blocks": {
                 "hero_h1": "Помощь сильнейших экстрасенсов, ясновидящих, целителей, магов",
                 "hero_subtitle": "Сайт помощи экстрасенсов",
+                # Логотипы Битва + ТНТ (управляемые через CMS)
+                "hero_logo_bitva_url": "https://customer-assets.emergentagent.com/job_f7eeb759-9e5b-4f73-9fda-0f824d4e9d83/artifacts/k5jjrl8w_bitva.png",
+                "hero_logo_bitva_alt": "Битва экстрасенсов",
+                "hero_logo_bitva_height_desktop": 56,
+                "hero_logo_bitva_height_mobile": 40,
+                "hero_logo_tnt_url": "https://customer-assets.emergentagent.com/job_f7eeb759-9e5b-4f73-9fda-0f824d4e9d83/artifacts/152eb8kk_tnt.png",
+                "hero_logo_tnt_alt": "ТНТ",
+                "hero_logo_tnt_height_desktop": 56,
+                "hero_logo_tnt_height_mobile": 40,
                 "hero_unique": "Уникальная возможность!",
                 "hero_text1": "Лично обратиться к любому участнику проекта «Битва экстрасенсов».",
                 "hero_text2": "И получить диагностику и консультацию экстрасенсов, ясновидящих, магов, целителей",
