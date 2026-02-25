@@ -34,30 +34,39 @@ function Header() {
     >
       <div className="max-w-6xl mx-auto px-4 md:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
-          <Link to="/" className="flex items-center" data-testid="logo-link">
+          {/* Логотип слева */}
+          <Link to="/" className="flex items-center shrink-0" data-testid="logo-link">
             <img src="https://customer-assets.emergentagent.com/job_ekstrasensov-sajt/artifacts/oj9nxlpi_IMG_6061.JPEG" alt="Битва Экстрасенсов" className="h-12 md:h-14 w-auto rounded-xl" />
           </Link>
 
-          <nav className="hidden md:flex items-center gap-1" data-testid="desktop-nav">
-            {NAV_ITEMS.map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                data-testid={`nav-${item.path.replace('/', '') || 'home'}`}
-                className={`px-4 py-2 text-sm font-body transition-colors duration-300 ${
-                  location.pathname === item.path ? 'text-gold' : 'text-white/80 hover:text-gold'
-                }`}
-              >
-                {item.label}
-              </Link>
-            ))}
+          {/* Навигация по центру - desktop */}
+          <nav className="hidden md:flex items-center justify-center flex-1 mx-4" data-testid="desktop-nav">
+            <div className="flex items-center gap-1">
+              {NAV_ITEMS.map((item) => (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  data-testid={`nav-${item.path.replace('/', '') || 'home'}`}
+                  className={`px-4 py-2 text-sm font-body transition-colors duration-300 ${
+                    location.pathname === item.path ? 'text-gold' : 'text-white/80 hover:text-gold'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          </nav>
+
+          {/* Кнопка справа - desktop */}
+          <div className="hidden md:block shrink-0">
             <Link to="/zapis-na-priem">
-              <button className="btn-gold px-5 py-2 text-sm font-body ml-3" data-testid="header-cta">
+              <button className="btn-gold px-5 py-2 text-sm font-body" data-testid="header-cta">
                 Заказать звонок
               </button>
             </Link>
-          </nav>
+          </div>
 
+          {/* Мобильное меню */}
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger asChild className="md:hidden">
               <Button variant="ghost" size="icon" data-testid="mobile-menu-btn">
