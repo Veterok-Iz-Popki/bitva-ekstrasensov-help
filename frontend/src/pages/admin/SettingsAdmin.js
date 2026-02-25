@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { Switch } from '../../components/ui/switch';
-import { Save, Mail } from 'lucide-react';
+import { Save, Mail, Image as ImageIcon, Upload, Loader2, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '../../lib/api';
 
@@ -15,9 +15,16 @@ export default function SettingsAdmin() {
     notification_email: '',
     working_hours: '',
     copyright_text: '',
-    email_notifications_enabled: true
+    email_notifications_enabled: true,
+    // Логотип
+    logo_url: '',
+    logo_alt: 'Битва Экстрасенсов',
+    logo_height_desktop: 56,
+    logo_height_mobile: 48,
   });
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     api.get('/admin/settings').then((res) => {
@@ -30,6 +37,10 @@ export default function SettingsAdmin() {
         working_hours: d.working_hours || '',
         copyright_text: d.copyright_text || '',
         email_notifications_enabled: d.email_notifications_enabled !== false,
+        logo_url: d.logo_url || '',
+        logo_alt: d.logo_alt || 'Битва Экстрасенсов',
+        logo_height_desktop: d.logo_height_desktop || 56,
+        logo_height_mobile: d.logo_height_mobile || 48,
       });
     }).catch(() => {});
   }, []);
@@ -46,13 +57,138 @@ export default function SettingsAdmin() {
     }
   };
 
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Выберите изображение');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Максимальный размер: 5MB');
+      return;
+    }
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const res = await api.post('/admin/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      const baseUrl = process.env.REACT_APP_BACKEND_URL;
+      setForm({ ...form, logo_url: `${baseUrl}${res.data.url}` });
+      toast.success('Логотип загружен');
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Ошибка загрузки');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const removeLogo = () => {
+    setForm({ ...form, logo_url: '' });
+    toast.info('Логотип удалён. Сохраните настройки.');
+  };
+
   return (
     <div data-testid="admin-settings">
       <h1 className="font-heading text-3xl font-bold text-white mb-6">Настройки сайта</h1>
 
-      <div className="space-y-6 p-6 border border-teal-light/20 bg-teal-dark/70 max-w-2xl rounded-lg">
+      <div className="space-y-6 max-w-2xl">
+        {/* Логотип сайта */}
+        <div className="p-6 border border-teal-light/20 bg-teal-dark/70 rounded-lg">
+          <h2 className="font-heading text-lg font-semibold text-gold mb-4 flex items-center gap-2">
+            <ImageIcon className="w-5 h-5" />
+            Логотип сайта (шапка и подвал)
+          </h2>
+          
+          <div className="flex gap-4 items-start mb-4">
+            {/* Preview */}
+            <div className="w-32 h-20 rounded-lg border border-teal-light/30 overflow-hidden flex-shrink-0 bg-teal-darker/50 flex items-center justify-center">
+              {form.logo_url ? (
+                <img src={form.logo_url} alt="Логотип" className="max-w-full max-h-full object-contain" />
+              ) : (
+                <ImageIcon className="w-8 h-8 text-white/20" />
+              )}
+            </div>
+
+            <div className="flex-1 space-y-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleLogoUpload}
+                className="hidden"
+              />
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="border-gold/50 text-gold hover:bg-gold/10 font-body"
+                  data-testid="upload-logo-btn"
+                >
+                  {uploading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Загрузка...</> : <><Upload className="w-4 h-4 mr-2" />Загрузить</>}
+                </Button>
+                {form.logo_url && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={removeLogo}
+                    className="border-red-500/50 text-red-400 hover:bg-red-500/10 font-body"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                )}
+              </div>
+              <Input
+                value={form.logo_url}
+                onChange={(e) => setForm({ ...form, logo_url: e.target.value })}
+                className="bg-teal-dark/80 border-teal-light/30 text-white h-9 text-sm"
+                placeholder="или введите URL изображения"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            <div className="space-y-1">
+              <Label className="text-white/60 text-xs font-body">ALT-текст</Label>
+              <Input
+                value={form.logo_alt}
+                onChange={(e) => setForm({ ...form, logo_alt: e.target.value })}
+                className="bg-teal-dark/80 border-teal-light/30 text-white h-9 text-sm"
+                placeholder="Битва Экстрасенсов"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-white/60 text-xs font-body">Высота Desktop (px)</Label>
+              <Input
+                type="number"
+                value={form.logo_height_desktop}
+                onChange={(e) => setForm({ ...form, logo_height_desktop: parseInt(e.target.value) || 56 })}
+                className="bg-teal-dark/80 border-teal-light/30 text-white h-9 text-sm"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-white/60 text-xs font-body">Высота Mobile (px)</Label>
+              <Input
+                type="number"
+                value={form.logo_height_mobile}
+                onChange={(e) => setForm({ ...form, logo_height_mobile: parseInt(e.target.value) || 48 })}
+                className="bg-teal-dark/80 border-teal-light/30 text-white h-9 text-sm"
+              />
+            </div>
+          </div>
+        </div>
+
         {/* Contact info section */}
-        <div>
+        <div className="p-6 border border-teal-light/20 bg-teal-dark/70 rounded-lg">
           <h2 className="font-heading text-lg font-semibold text-gold mb-4">Контактная информация</h2>
           <div className="space-y-4">
             <div className="space-y-2">
@@ -96,7 +232,7 @@ export default function SettingsAdmin() {
         </div>
 
         {/* Email notifications section */}
-        <div className="border-t border-teal-light/20 pt-6">
+        <div className="p-6 border border-teal-light/20 bg-teal-dark/70 rounded-lg">
           <h2 className="font-heading text-lg font-semibold text-gold mb-4 flex items-center gap-2">
             <Mail className="w-5 h-5" />
             Email-уведомления
@@ -122,15 +258,12 @@ export default function SettingsAdmin() {
                 placeholder="admin@example.com"
                 data-testid="settings-notification-email"
               />
-              <p className="text-white/40 font-body text-xs">
-                На этот адрес будут приходить уведомления о новых заявках
-              </p>
             </div>
           </div>
         </div>
 
         {/* Footer section */}
-        <div className="border-t border-teal-light/20 pt-6">
+        <div className="p-6 border border-teal-light/20 bg-teal-dark/70 rounded-lg">
           <h2 className="font-heading text-lg font-semibold text-gold mb-4">Подвал сайта</h2>
           <div className="space-y-2">
             <Label className="text-white/70 font-body text-sm">Текст копирайта</Label>
@@ -150,7 +283,7 @@ export default function SettingsAdmin() {
           data-testid="save-settings-btn"
         >
           <Save className="w-4 h-4 mr-2" />
-          {saving ? 'Сохранение...' : 'Сохранить настройки'}
+          {saving ? 'Сохранение...' : 'Сохранить все настройки'}
         </Button>
       </div>
     </div>
