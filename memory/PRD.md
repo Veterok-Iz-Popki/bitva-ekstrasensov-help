@@ -7,60 +7,49 @@ SEO-оптимизированный русскоязычный сайт для 
 - **Frontend:** React + Tailwind CSS + Shadcn UI
 - **Backend:** FastAPI + MongoDB (Motor async driver)
 - **Auth:** JWT (admin panel)
-- **Spam protection:** Honeypot + Rate limiting
 - **Email:** Resend API
 - **Image processing:** Pillow
 
 ## Реализовано
 
 ### Публичные страницы
-- **Главная (/)** — Hero, участники, преимущества, услуги с ссылками, SEO-текст, ссылки на темы
-- **Участники (/uchastniki)** — Карточки с фото
-- **Профиль участника (/uchastniki/:slug)** — Фото, биография, форма
-- **Запись (/zapis-na-priem)** — Форма + шаги
-- **Отзывы (/otzyvy)** — Карточки со звёздами
-- **FAQ (/voprosy-i-otvety)** — Аккордеон
+- Главная (/), Участники (/uchastniki), Профиль участника (/uchastniki/:slug)
+- Запись (/zapis-na-priem), Отзывы (/otzyvy), FAQ (/voprosy-i-otvety)
 
 ### 6 тематических страниц
 - /porcha, /proklyatie, /sglaz, /venets-bezbrachiya, /privorot, /zaklyatie
-- Уникальный контент, SEO, CMS-управление
 
-### 4 страницы услуг (25.02.2026)
-- **/finansovaya-magiya** — Финансовая магия
-- **/lyubovnaya-magiya** — Любовная магия
-- **/magiya-zhizni** — Магия жизни
-- **/magicheskaya-zashchita** — Магическая защита
+### 4 страницы услуг
+- /finansovaya-magiya, /lyubovnaya-magiya, /magiya-zhizni, /magicheskaya-zashchita
 
-Каждая страница услуг содержит:
-- H1 (название), описание, направления, типичные ситуации, процесс консультации, результаты, CTA
-- Уникальные SEO мета-теги
-- Полное CMS-управление через админ-панель
-- Кнопки «Подробнее» на главной ведут на соответствующие страницы
+### Отзывы участников (25.02.2026)
+- **96 отзывов** в БД (12 на каждого из 8 участников)
+- Привязка к участнику через `participant_slug`
+- На странице участника: первые 5 видны, остальные через «Показать ещё»
+- Все отзывы в DOM (SEO-индексируемые)
+- CMS: добавление, редактирование, удаление, привязка к участнику, статус
+- Фильтрация по участнику в админ-панели
 
 ### CMS Админ-панель (/admin)
 - JWT авторизация
-- CRUD: Участники, Отзывы, FAQ
-- Редактирование контента всех страниц (6 тем + 4 услуги)
-- SEO мета-теги для всех страниц
-- Заявки: просмотр, экспорт CSV
-- Email-уведомления через Resend
+- CRUD всех сущностей + управление контентом/SEO всех страниц
+- Отзывы: привязка к участнику, фильтрация, статус публикации
+
+## API Endpoints
+- `/api/participants/{slug}/reviews` — GET (отзывы конкретного участника)
+- `/api/pages/{slug}`, `/api/seo/{slug}` — GET/PUT
+- `/api/participants`, `/api/reviews`, `/api/faq`
+- `/api/admin/reviews` — CRUD с participant_slug
+
+## DB Schema: reviews
+```
+{ id, participant_slug, author_name, author_city, text, rating, is_published, created_at }
+```
 
 ## Учётные данные
 - **Admin:** nikoa2020@gmail.com / aspire5542gl1952tq
 
 ## Тестирование
-- iteration_7: 83 backend + frontend тестов — 100% passed (услуги + регрессия тем)
-- iteration_6: 37 тестов — 100% passed (темы)
-
-## Структура ключевых файлов
-```
-backend/seed_data.py    - Данные для всех страниц и SEO
-backend/server.py       - API endpoints
-frontend/src/pages/
-  ServicePage.js        - Компонент страниц услуг
-  TopicPage.js          - Компонент тематических страниц
-  HomePage.js           - Главная с ссылками на услуги и темы
-  admin/PagesAdmin.js   - CMS для всех страниц
-  admin/SEOAdmin.js     - SEO управление
-frontend/src/App.js     - Все роуты
-```
+- iteration_8: 22 backend + full frontend — 100% (отзывы участников)
+- iteration_7: 83 теста — 100% (услуги + регрессия)
+- iteration_6: 37 тестов — 100% (темы)
