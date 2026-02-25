@@ -202,11 +202,25 @@ export default function ApplicationsAdmin() {
       <Dialog open={!!selected} onOpenChange={() => setSelected(null)}>
         <DialogContent className="bg-teal-dark border-teal-light/30 max-w-lg">
           <DialogHeader>
-            <DialogTitle className="font-heading text-white text-xl">Заявка: {selected?.name}</DialogTitle>
+            <DialogTitle className="font-heading text-white text-xl">
+              Заявка: {selected?.lastName ? `${selected.lastName} ${selected.firstName}` : selected?.name}
+            </DialogTitle>
           </DialogHeader>
           {selected && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4 text-sm font-body">
+                <div>
+                  <span className="text-white/40">Фамилия:</span>
+                  <p className="text-white">{selected.lastName || '—'}</p>
+                </div>
+                <div>
+                  <span className="text-white/40">Имя:</span>
+                  <p className="text-white">{selected.firstName || '—'}</p>
+                </div>
+                <div>
+                  <span className="text-white/40">Отчество:</span>
+                  <p className="text-white">{selected.patronymic || '—'}</p>
+                </div>
                 <div>
                   <span className="text-white/40">Телефон:</span>
                   <p className="text-white">{selected.phone}</p>
@@ -220,10 +234,6 @@ export default function ApplicationsAdmin() {
                   <p className="text-white">{selected.age || '—'}</p>
                 </div>
                 <div>
-                  <span className="text-white/40">Мессенджер:</span>
-                  <p className="text-white">{selected.messenger || '—'}</p>
-                </div>
-                <div>
                   <span className="text-white/40">Статус:</span>
                   <p className={STATUS_MAP[selected.status]?.color || 'text-white'}>
                     {STATUS_MAP[selected.status]?.label || selected.status}
@@ -234,11 +244,11 @@ export default function ApplicationsAdmin() {
                   <p className="text-white">{new Date(selected.created_at).toLocaleString('ru-RU')}</p>
                 </div>
               </div>
-              {selected.description && (
+              {(selected.problem || selected.description) && (
                 <div>
-                  <p className="text-sm text-white/40 font-body mb-1">Описание ситуации:</p>
+                  <p className="text-sm text-white/40 font-body mb-1">Описание проблемы:</p>
                   <p className="text-white/70 font-body text-sm border border-teal-light/20 p-3 rounded bg-teal-darker/50">
-                    {selected.description}
+                    {selected.problem || selected.description}
                   </p>
                 </div>
               )}
