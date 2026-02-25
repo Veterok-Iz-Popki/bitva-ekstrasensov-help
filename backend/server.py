@@ -410,19 +410,20 @@ async def admin_export_applications_csv(admin=Depends(get_current_admin)):
     output = io.StringIO()
     output.write('\ufeff')  # UTF-8 BOM for Excel
     
-    fieldnames = ['Дата', 'Имя', 'Телефон', 'Город', 'Возраст', 'Мессенджер', 'Описание', 'Статус', 'Заметки']
+    fieldnames = ['Дата', 'Фамилия', 'Имя', 'Отчество', 'Телефон', 'Город', 'Возраст', 'Проблема', 'Статус', 'Заметки']
     writer = csv.DictWriter(output, fieldnames=fieldnames, delimiter=';')
     writer.writeheader()
     
     for item in items:
         writer.writerow({
             'Дата': item.get('created_at', '')[:19].replace('T', ' ') if item.get('created_at') else '',
-            'Имя': item.get('name', ''),
+            'Фамилия': item.get('lastName', ''),
+            'Имя': item.get('firstName', ''),
+            'Отчество': item.get('patronymic', ''),
             'Телефон': item.get('phone', ''),
             'Город': item.get('city', ''),
             'Возраст': item.get('age', ''),
-            'Мессенджер': item.get('messenger', ''),
-            'Описание': item.get('description', ''),
+            'Проблема': item.get('problem', item.get('description', '')),
             'Статус': item.get('status', ''),
             'Заметки': item.get('notes', ''),
         })
