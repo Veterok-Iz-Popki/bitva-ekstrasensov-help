@@ -8,122 +8,121 @@ SEO-оптимизированный русскоязычный сайт для 
 - **Backend:** FastAPI + MongoDB (Motor async driver)
 - **Auth:** JWT (admin panel)
 - **Spam protection:** Honeypot + Rate limiting
-- **Email:** Resend (опционально, требует API key)
-
-## Пользователи
-- **Посетители** (25-65 лет, преимущественно женщины) — ищут помощь экстрасенсов
-- **Администратор** — управляет всем контентом через CMS
+- **Email:** Resend API (настроен и работает)
+- **Image processing:** Pillow (оптимизация фото)
 
 ## Реализовано (25.02.2026)
 
-### Дизайн (Референс: bitva-ekstrasensov-help.ru)
+### ✅ Дизайн (Референс: bitva-ekstrasensov-help.ru)
 - Тёмно-бирюзовый градиентный фон
 - Золотые акценты (#d4a637)
 - Шрифты: Playfair Display (заголовки) + Fira Sans (текст)
 - Glassmorphism карточки
 - Полная адаптивность (desktop/tablet/mobile)
 
-### Публичные страницы
-- **Главная (/)** — Hero секция, вертикальные карточки участников (круглые фото), преимущества (6 иконок), карусель отзывов, услуги (4 категории), SEO-текст, форма заявки
-- **Участники (/uchastniki)** — Горизонтальные карточки с круглыми фото (150px), специализации, кнопка "Обратиться"
-- **Профиль участника (/uchastniki/:slug)** — Фото, биография, специализации, форма записи
-- **Запись на приём (/zapis-na-priem)** — Форма (имя, телефон, возраст, город, описание) + шаги консультации
-- **Отзывы (/otzyvy)** — Карточки отзывов со звёздами + статистика доверия
-- **FAQ (/voprosy-i-otvety)** — Аккордеон вопросов-ответов
-- **Контакты (/kontakty)** — Форма обратной связи + контактная информация
+### ✅ Публичные страницы
+- **Главная (/)** — Hero, карточки участников, преимущества, отзывы, услуги, форма
+- **Участники (/uchastniki)** — Горизонтальные карточки с круглыми фото
+- **Профиль участника (/uchastniki/:slug)** — Фото, биография, форма записи
+- **Запись (/zapis-na-priem)** — Форма + шаги консультации
+- **Отзывы (/otzyvy)** — Карточки со звёздами
+- **FAQ (/voprosy-i-otvety)** — Аккордеон
+- **Контакты (/kontakty)** — Форма обратной связи
 
-### CMS Админ-панель (/admin)
+### ✅ CMS Админ-панель (/admin)
 - JWT авторизация (admin/admin123)
 - Dashboard со статистикой
-- CRUD: Участники, Отзывы, FAQ
+- CRUD: Участники (с загрузкой фото), Отзывы, FAQ
 - Редактирование контента страниц
 - Управление SEO мета-тегами
-- Просмотр/управление заявками
-- Просмотр сообщений обратной связи
-- Настройки сайта
+- Заявки: просмотр, фильтрация по статусу, **экспорт CSV**
+- **Настройки email-уведомлений** (вкл/выкл + адрес)
 
-### SEO
+### ✅ Email-уведомления (Resend)
+- Интеграция с Resend API работает
+- Настраиваемый email получателя через CMS
+- Переключатель вкл/выкл в админке
+- HTML-шаблон письма с данными заявки
+
+### ✅ Загрузка фото участников
+- Кнопка загрузки в админке
+- Автоматическая оптимизация (до 1200px, JPEG 85%)
+- Поддержка JPEG, PNG, WebP, GIF (макс. 5MB)
+- Хранение в /backend/uploads/
+
+### ✅ Экспорт заявок в CSV
+- Кнопка экспорта на странице заявок
+- UTF-8 с BOM для корректного отображения в Excel
+- Колонки: Дата, Имя, Телефон, Город, Возраст, Мессенджер, Описание, Статус, Заметки
+
+### ✅ Защита форм
+- Honeypot (скрытое поле)
+- Rate limiting (макс. 5 запросов/минуту)
+- Без reCAPTCHA
+
+### ✅ SEO
 - Уникальные Title/Description для каждой страницы
-- Ключевые слова для Яндекса
+- Один H1 на страницу
 - Schema.org JSON-LD микроразметка
 - ЧПУ URL с транслитерацией
-- Правильная структура H1-H3
 
-### API Endpoints
-- `/api/participants` — GET (публичный), CRUD (admin)
-- `/api/reviews` — GET (публичный), CRUD (admin)
-- `/api/faq` — GET (публичный), CRUD (admin)
-- `/api/pages/{slug}` — GET (публичный), PUT (admin)
-- `/api/seo/{slug}` — GET (публичный), PUT (admin)
+### Тестирование (iteration_4)
+- 39 backend API тестов — 100% passed
+- Frontend E2E — 100% passed
+- Email-уведомления подтверждены в логах
+
+## API Endpoints
+- `/api/participants` — GET/POST/PUT/DELETE
+- `/api/reviews` — GET/POST/PUT/DELETE
+- `/api/faq` — GET/POST/PUT/DELETE
+- `/api/pages/{slug}` — GET/PUT
+- `/api/seo/{slug}` — GET/PUT
 - `/api/applications` — POST (публичный), GET/PUT/DELETE (admin)
-- `/api/contact` — POST (публичный)
-- `/api/settings` — GET (публичный), PUT (admin)
+- `/api/admin/applications/export/csv` — GET (admin)
+- `/api/admin/upload` — POST (admin, multipart/form-data)
+- `/api/contact` — POST
+- `/api/settings` — GET/PUT
 - `/api/admin/login` — POST
-- `/api/admin/stats` — GET (admin)
+- `/api/admin/stats` — GET
 
-### Тестирование
-- 24 backend API тестов (100% passed)
-- Frontend E2E тестирование пройдено
-- Мобильная адаптивность проверена
+## Учётные данные
+- **Admin:** admin / admin123
+- **Preview URL:** https://ekstrasensov-help.preview.emergentagent.com
+- **Email для уведомлений:** nikoa2020@gmail.com (тестовый режим Resend)
 
 ## Бэклог
 
-### P0 (Высокий приоритет)
-- ✅ Полная переработка дизайна согласно референсу
+### P1 (Высокий приоритет)
+- ✅ Email-уведомления через Resend — ГОТОВО
+- ✅ Загрузка фото участников — ГОТОВО
+- ✅ Экспорт заявок в CSV — ГОТОВО
+- Верификация домена в Resend для отправки на любые email
 
-### P1 (Средний приоритет)
-- Настройка Resend API key для email-уведомлений
-- Загрузка собственных фото участников через админку (file upload)
+### P2 (Средний приоритет)
 - Смена пароля администратора из CMS
-
-### P2 (Низкий приоритет)
-- Экспорт заявок в CSV/Excel
-- Фильтрация заявок по статусу/дате
-- WYSIWYG редактор для текстового контента
+- Расширенная фильтрация заявок по дате
 
 ### P3 (Будущее)
-- Мультиязычность (если нужна)
 - Интеграция с CRM
+- Мультиязычность
 
 ## Структура файлов
 ```
 /app/
 ├── backend/
-│   ├── server.py           # FastAPI приложение
-│   ├── seed_data.py        # Seed данные
-│   ├── requirements.txt
+│   ├── server.py
+│   ├── seed_data.py
+│   ├── uploads/           # Загруженные фото
 │   ├── tests/
-│   │   └── test_api.py     # API тесты
-│   └── .env
-├── frontend/
-│   └── src/
-│       ├── components/
-│       │   ├── ui/         # Shadcn компоненты
-│       │   ├── ApplicationForm.js
-│       │   ├── Layout.js   # Header + Footer
-│       │   └── AdminLayout.js
-│       ├── pages/
-│       │   ├── HomePage.js
-│       │   ├── ParticipantsPage.js
-│       │   ├── ParticipantDetailPage.js
-│       │   ├── ReviewsPage.js
-│       │   ├── FAQPage.js
-│       │   ├── ContactsPage.js
-│       │   ├── BookingPage.js
-│       │   └── admin/      # Админ страницы
-│       ├── lib/
-│       │   └── api.js
-│       ├── App.js
-│       ├── App.css
-│       └── index.css
-├── memory/
-│   └── PRD.md
+│   │   ├── test_api.py
+│   │   └── test_new_features.py
+│   └── .env               # MONGO_URL, RESEND_API_KEY, JWT_SECRET
+├── frontend/src/
+│   ├── components/
+│   ├── pages/
+│   │   └── admin/
+│   └── lib/api.js
+├── memory/PRD.md
 └── test_reports/
-    ├── iteration_1.json
-    ├── iteration_2.json
-    └── iteration_3.json
+    └── iteration_4.json   # Последний отчёт тестирования
 ```
-
-## Учётные данные
-- **Admin:** admin / admin123
-- **API URL:** https://ekstrasensov-help.preview.emergentagent.com
