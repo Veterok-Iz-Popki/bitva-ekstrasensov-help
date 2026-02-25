@@ -90,6 +90,7 @@ class ReviewCreate(BaseModel):
     text: str
     rating: int = 5
     is_published: bool = True
+    participant_slug: str = ""
 
 class FAQCreate(BaseModel):
     question: str
@@ -275,6 +276,13 @@ async def get_participant(slug: str):
 @api_router.get("/reviews")
 async def get_reviews():
     items = await db.reviews.find({"is_published": True}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    return items
+
+@api_router.get("/participants/{slug}/reviews")
+async def get_participant_reviews(slug: str):
+    items = await db.reviews.find(
+        {"participant_slug": slug, "is_published": True}, {"_id": 0}
+    ).sort("created_at", -1).to_list(100)
     return items
 
 @api_router.get("/faq")
@@ -486,7 +494,7 @@ async def admin_delete_participant(participant_id: str, admin=Depends(get_curren
 
 @api_router.get("/admin/reviews")
 async def admin_get_reviews(admin=Depends(get_current_admin)):
-    items = await db.reviews.find({}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    items = await db.reviews.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
     return items
 
 @api_router.post("/admin/reviews")
