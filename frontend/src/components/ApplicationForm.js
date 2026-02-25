@@ -7,7 +7,22 @@ import api from '../lib/api';
 
 // Маска телефона +7 (999) 999-99-99
 const formatPhone = (value) => {
-  const digits = value.replace(/\D/g, '').slice(0, 11);
+  // Удаляем все нецифры
+  let digits = value.replace(/\D/g, '');
+  
+  // Если пользователь начал с 8, заменяем на 7
+  if (digits.startsWith('8')) {
+    digits = '7' + digits.slice(1);
+  }
+  
+  // Если первая цифра не 7, добавляем 7 в начало
+  if (digits.length > 0 && !digits.startsWith('7')) {
+    digits = '7' + digits;
+  }
+  
+  // Ограничиваем до 11 цифр
+  digits = digits.slice(0, 11);
+  
   if (!digits) return '';
   
   let formatted = '+7';
