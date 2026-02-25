@@ -36,7 +36,7 @@ function Header() {
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Логотип слева */}
           <Link to="/" className="flex items-center shrink-0" data-testid="logo-link">
-            <img src="https://customer-assets.emergentagent.com/job_ekstrasensov-sajt/artifacts/oj9nxlpi_IMG_6061.JPEG" alt="Битва Экстрасенсов" className="h-12 md:h-14 w-auto rounded-xl" />
+            <img src="https://customer-assets.emergentagent.com/job_f7eeb759-9e5b-4f73-9fda-0f824d4e9d83/artifacts/usmcyqqy_bitva%20%281%29.png" alt="Битва Экстрасенсов" className="h-12 md:h-14 w-auto rounded-xl" />
           </Link>
 
           {/* Навигация по центру - desktop */}
