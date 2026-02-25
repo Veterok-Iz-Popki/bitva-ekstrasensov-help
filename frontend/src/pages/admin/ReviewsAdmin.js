@@ -5,27 +5,40 @@ import { Input } from '../../components/ui/input';
 import { Textarea } from '../../components/ui/textarea';
 import { Label } from '../../components/ui/label';
 import { Switch } from '../../components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../components/ui/dialog';
 import { Badge } from '../../components/ui/badge';
 import { Star, Plus, Pencil, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '../../lib/api';
 
-const emptyForm = { author_name: '', author_city: '', text: '', rating: 5, is_published: true };
+const emptyForm = { author_name: '', author_city: '', text: '', rating: 5, is_published: true, participant_slug: '' };
 
 export default function ReviewsAdmin() {
   const [items, setItems] = useState([]);
+  const [participants, setParticipants] = useState([]);
+  const [filterSlug, setFilterSlug] = useState('all');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editId, setEditId] = useState(null);
   const [form, setForm] = useState({ ...emptyForm });
 
   const load = () => { api.get('/admin/reviews').then((res) => setItems(res.data || [])).catch(() => {}); };
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+    api.get('/admin/participants').then((res) => setParticipants(res.data || [])).catch(() => {});
+  }, []);
 
   const openCreate = () => { setEditId(null); setForm({ ...emptyForm }); setDialogOpen(true); };
   const openEdit = (item) => {
     setEditId(item.id);
-    setForm({ author_name: item.author_name, author_city: item.author_city || '', text: item.text, rating: item.rating || 5, is_published: item.is_published !== false });
+    setForm({
+      author_name: item.author_name,
+      author_city: item.author_city || '',
+      text: item.text,
+      rating: item.rating || 5,
+      is_published: item.is_published !== false,
+      participant_slug: item.participant_slug || '',
+    });
     setDialogOpen(true);
   };
 
@@ -42,6 +55,17 @@ export default function ReviewsAdmin() {
     try { await api.delete(`/admin/reviews/${id}`); toast.success('Удалено'); load(); } catch { toast.error('Ошибка'); }
   };
 
+  const filteredItems = filterSlug === 'all'
+    ? items
+    : filterSlug === 'none'
+      ? items.filter(r => !r.participant_slug)
+      : items.filter(r => r.participant_slug === filterSlug);
+
+  const getParticipantName = (slug) => {
+    const p = participants.find(x => x.slug === slug);
+    return p ? p.name : slug || '—';
+  };
+
   return (
     <div data-testid="admin-reviews">
       <div className="flex items-center justify-between mb-6">
@@ -51,22 +75,45 @@ export default function ReviewsAdmin() {
         </Button>
       </div>
 
+      {/* Filter by participant */}
+      <div className="mb-4">
+        <Select value={filterSlug} onValueChange={setFilterSlug}>
+          <SelectTrigger className="w-72 bg-teal-dark/70 border-teal-light/30 text-white h-10" data-testid="filter-participant-select">
+            <SelectValue placeholder="Фильтр по участнику" />
+          </SelectTrigger>
+          <SelectContent className="bg-teal-dark border-teal-light/30">
+            <SelectItem value="all">Все отзывы ({items.length})</SelectItem>
+            <SelectItem value="none">Без привязки</SelectItem>
+            {participants.map(p => (
+              <SelectItem key={p.slug} value={p.slug}>
+                {p.name} ({items.filter(r => r.participant_slug === p.slug).length})
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       <div className="border border-teal-light/20 bg-teal-dark/70 overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow className="border-teal-light/20 hover:bg-transparent">
               <TableHead className="text-white/40 font-body">Автор</TableHead>
-              <TableHead className="text-white/40 font-body">Город</TableHead>
+              <TableHead className="text-white/40 font-body">Участник</TableHead>
               <TableHead className="text-white/40 font-body">Рейтинг</TableHead>
               <TableHead className="text-white/40 font-body">Статус</TableHead>
               <TableHead className="text-white/40 font-body text-right">Действия</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {items.map((item) => (
+            {filteredItems.map((item) => (
               <TableRow key={item.id} className="border-teal-light/20 hover:bg-teal/30">
-                <TableCell className="font-body text-white">{item.author_name}</TableCell>
-                <TableCell className="font-body text-white/70">{item.author_city || '—'}</TableCell>
+                <TableCell className="font-body text-white">
+                  <div>{item.author_name}</div>
+                  <div className="text-white/40 text-xs">{item.author_city || ''}</div>
+                </TableCell>
+                <TableCell className="font-body text-white/70 text-sm">
+                  {item.participant_slug ? getParticipantName(item.participant_slug) : '—'}
+                </TableCell>
                 <TableCell>
                   <div className="flex gap-0.5">
                     {Array.from({ length: item.rating || 5 }).map((_, i) => (
@@ -97,6 +144,21 @@ export default function ReviewsAdmin() {
             <DialogTitle className="font-heading text-white text-xl">{editId ? 'Редактировать' : 'Добавить'} отзыв</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
+            {/* Participant select */}
+            <div className="space-y-2">
+              <Label className="text-white/70 font-body text-sm">Привязать к участнику</Label>
+              <Select value={form.participant_slug || '_none'} onValueChange={(val) => setForm({ ...form, participant_slug: val === '_none' ? '' : val })}>
+                <SelectTrigger className="bg-teal-dark/80 border-teal-light/30 text-white h-10" data-testid="review-participant-select">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-teal-dark border-teal-light/30">
+                  <SelectItem value="_none">Без привязки</SelectItem>
+                  {participants.map(p => (
+                    <SelectItem key={p.slug} value={p.slug}>{p.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-white/70 font-body text-sm">Имя автора</Label>
