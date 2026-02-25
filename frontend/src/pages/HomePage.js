@@ -4,12 +4,12 @@ import { Shield, Users, HelpCircle, Globe, MessageCircle, UserCheck } from 'luci
 import api, { setSEO, setJsonLd } from '../lib/api';
 
 const PROBLEM_CATEGORIES = [
-  { label: 'Порча', href: '#' },
-  { label: 'Проклятие', href: '#' },
-  { label: 'Сглаз', href: '#' },
-  { label: 'Венец безбрачия', href: '#' },
-  { label: 'Приворот', href: '#' },
-  { label: 'Заклятие', href: '#' },
+  { label: 'Порча', path: '/porcha' },
+  { label: 'Проклятие', path: '/proklyatie' },
+  { label: 'Сглаз', path: '/sglaz' },
+  { label: 'Венец безбрачия', path: '/venets-bezbrachiya' },
+  { label: 'Приворот', path: '/privorot' },
+  { label: 'Заклятие', path: '/zaklyatie' },
 ];
 
 const BENEFITS = [
