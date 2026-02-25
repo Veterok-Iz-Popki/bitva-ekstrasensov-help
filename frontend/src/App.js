@@ -9,6 +9,7 @@ import BookingPage from "@/pages/BookingPage";
 import ReviewsPage from "@/pages/ReviewsPage";
 import FAQPage from "@/pages/FAQPage";
 import TopicPage from "@/pages/TopicPage";
+import ServicePage from "@/pages/ServicePage";
 import LoginPage from "@/pages/admin/LoginPage";
 import AdminLayout from "@/components/AdminLayout";
 import DashboardPage from "@/pages/admin/DashboardPage";
@@ -66,6 +67,11 @@ function App() {
               <Route path="/venets-bezbrachiya" element={<TopicPage />} />
               <Route path="/privorot" element={<TopicPage />} />
               <Route path="/zaklyatie" element={<TopicPage />} />
+              {/* Service pages */}
+              <Route path="/finansovaya-magiya" element={<ServicePage />} />
+              <Route path="/lyubovnaya-magiya" element={<ServicePage />} />
+              <Route path="/magiya-zhizni" element={<ServicePage />} />
+              <Route path="/magicheskaya-zashchita" element={<ServicePage />} />
             </Routes>
           </Layout>
         } />
