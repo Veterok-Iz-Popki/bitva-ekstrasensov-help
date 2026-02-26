@@ -25,6 +25,8 @@ const PAGE_NAMES = {
   'service-lyubovnaya-magiya': 'Любовная магия',
   'service-magiya-zhizni': 'Магия жизни',
   'service-magicheskaya-zashchita': 'Магическая защита',
+  'foto-galereya': 'Фотогалерея',
+  'video': 'Видео',
 };
 
 export default function SEOAdmin() {
