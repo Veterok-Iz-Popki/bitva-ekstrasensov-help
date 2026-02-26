@@ -585,6 +585,76 @@ async def admin_delete_faq(faq_id: str, admin=Depends(get_current_admin)):
     return {"status": "success"}
 
 
+# ===== ADMIN GALLERY PHOTOS =====
+
+@api_router.get("/admin/gallery/photos")
+async def admin_get_gallery_photos(admin=Depends(get_current_admin)):
+    items = await db.gallery_photos.find({}, {"_id": 0}).sort("order", 1).to_list(200)
+    return items
+
+@api_router.post("/admin/gallery/photos")
+async def admin_create_gallery_photo(data: GalleryPhotoCreate, admin=Depends(get_current_admin)):
+    doc = {
+        "id": str(uuid.uuid4()),
+        **data.model_dump(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.gallery_photos.insert_one(doc)
+    doc.pop("_id", None)
+    return doc
+
+@api_router.put("/admin/gallery/photos/{photo_id}")
+async def admin_update_gallery_photo(photo_id: str, data: GalleryPhotoCreate, admin=Depends(get_current_admin)):
+    update = data.model_dump()
+    result = await db.gallery_photos.update_one({"id": photo_id}, {"$set": update})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Фото не найдено")
+    updated = await db.gallery_photos.find_one({"id": photo_id}, {"_id": 0})
+    return updated
+
+@api_router.delete("/admin/gallery/photos/{photo_id}")
+async def admin_delete_gallery_photo(photo_id: str, admin=Depends(get_current_admin)):
+    result = await db.gallery_photos.delete_one({"id": photo_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Фото не найдено")
+    return {"status": "success"}
+
+
+# ===== ADMIN GALLERY VIDEOS =====
+
+@api_router.get("/admin/gallery/videos")
+async def admin_get_gallery_videos(admin=Depends(get_current_admin)):
+    items = await db.gallery_videos.find({}, {"_id": 0}).sort("order", 1).to_list(200)
+    return items
+
+@api_router.post("/admin/gallery/videos")
+async def admin_create_gallery_video(data: GalleryVideoCreate, admin=Depends(get_current_admin)):
+    doc = {
+        "id": str(uuid.uuid4()),
+        **data.model_dump(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.gallery_videos.insert_one(doc)
+    doc.pop("_id", None)
+    return doc
+
+@api_router.put("/admin/gallery/videos/{video_id}")
+async def admin_update_gallery_video(video_id: str, data: GalleryVideoCreate, admin=Depends(get_current_admin)):
+    update = data.model_dump()
+    result = await db.gallery_videos.update_one({"id": video_id}, {"$set": update})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Видео не найдено")
+    updated = await db.gallery_videos.find_one({"id": video_id}, {"_id": 0})
+    return updated
+
+@api_router.delete("/admin/gallery/videos/{video_id}")
+async def admin_delete_gallery_video(video_id: str, admin=Depends(get_current_admin)):
+    result = await db.gallery_videos.delete_one({"id": video_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Видео не найдено")
+    return {"status": "success"}
+
+
 # ===== ADMIN SEO =====
 
 @api_router.get("/admin/seo")
