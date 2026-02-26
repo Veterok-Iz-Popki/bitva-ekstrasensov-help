@@ -10,6 +10,8 @@ import ReviewsPage from "@/pages/ReviewsPage";
 import FAQPage from "@/pages/FAQPage";
 import TopicPage from "@/pages/TopicPage";
 import ServicePage from "@/pages/ServicePage";
+import GalleryPage from "@/pages/GalleryPage";
+import VideoPage from "@/pages/VideoPage";
 import LoginPage from "@/pages/admin/LoginPage";
 import AdminLayout from "@/components/AdminLayout";
 import DashboardPage from "@/pages/admin/DashboardPage";
@@ -21,6 +23,8 @@ import PagesAdmin from "@/pages/admin/PagesAdmin";
 import SEOAdmin from "@/pages/admin/SEOAdmin";
 import ContactsAdmin from "@/pages/admin/ContactsAdmin";
 import SettingsAdmin from "@/pages/admin/SettingsAdmin";
+import GalleryAdmin from "@/pages/admin/GalleryAdmin";
+import VideoAdmin from "@/pages/admin/VideoAdmin";
 
 function App() {
   return (
@@ -48,6 +52,8 @@ function App() {
           <Route path="seo" element={<SEOAdmin />} />
           <Route path="contacts" element={<ContactsAdmin />} />
           <Route path="settings" element={<SettingsAdmin />} />
+          <Route path="gallery" element={<GalleryAdmin />} />
+          <Route path="video" element={<VideoAdmin />} />
         </Route>
 
         {/* Public Routes */}
@@ -72,6 +78,8 @@ function App() {
               <Route path="/lyubovnaya-magiya" element={<ServicePage />} />
               <Route path="/magiya-zhizni" element={<ServicePage />} />
               <Route path="/magicheskaya-zashchita" element={<ServicePage />} />
+              <Route path="/foto-galereya" element={<GalleryPage />} />
+              <Route path="/video" element={<VideoPage />} />
             </Routes>
           </Layout>
         } />
