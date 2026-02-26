@@ -1,5 +1,6 @@
 import "@/App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import ScrollToTop from "@/components/ScrollToTop";
 import { Toaster } from "@/components/ui/sonner";
 import Layout from "@/components/Layout";
 import HomePage from "@/pages/HomePage";

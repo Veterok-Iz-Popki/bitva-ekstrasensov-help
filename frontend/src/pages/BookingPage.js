@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Lock } from 'lucide-react';
 import ApplicationForm from '../components/ApplicationForm';
 import api, { setSEO } from '../lib/api';
 
@@ -18,7 +17,6 @@ export default function BookingPage() {
   }, []);
 
   const blocks = page?.blocks || {};
-  const steps = (blocks.process_steps || '').split('\n').filter(Boolean);
 
   if (loading) {
     return (
