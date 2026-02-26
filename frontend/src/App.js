@@ -30,6 +30,7 @@ import VideoAdmin from "@/pages/admin/VideoAdmin";
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Toaster
         position="top-right"
         toastOptions={{
