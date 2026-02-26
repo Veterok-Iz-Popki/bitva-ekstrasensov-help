@@ -98,6 +98,22 @@ class FAQCreate(BaseModel):
     order: int = 0
     is_active: bool = True
 
+class GalleryPhotoCreate(BaseModel):
+    image_url: str
+    title: str = ""
+    description: str = ""
+    alt_text: str = ""
+    order: int = 0
+    is_published: bool = True
+
+class GalleryVideoCreate(BaseModel):
+    video_url: str
+    title: str = ""
+    description: str = ""
+    thumbnail_url: str = ""
+    order: int = 0
+    is_published: bool = True
+
 class SEOUpdate(BaseModel):
     title: str = ""
     description: str = ""
