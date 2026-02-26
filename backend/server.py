@@ -306,6 +306,16 @@ async def get_faq():
     items = await db.faq.find({"is_active": True}, {"_id": 0}).sort("order", 1).to_list(100)
     return items
 
+@api_router.get("/gallery/photos")
+async def get_gallery_photos():
+    items = await db.gallery_photos.find({"is_published": True}, {"_id": 0}).sort("order", 1).to_list(200)
+    return items
+
+@api_router.get("/gallery/videos")
+async def get_gallery_videos():
+    items = await db.gallery_videos.find({"is_published": True}, {"_id": 0}).sort("order", 1).to_list(200)
+    return items
+
 @api_router.get("/seo/{page_slug}")
 async def get_seo(page_slug: str):
     seo = await db.seo_settings.find_one({"page_slug": page_slug}, {"_id": 0})
