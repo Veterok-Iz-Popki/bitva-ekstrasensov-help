@@ -32,8 +32,6 @@ function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  useEffect(() => { setMobileOpen(false); }, [location.pathname]);
-  
   useEffect(() => {
     api.get('/settings').then(res => setSettings(res.data)).catch(() => {});
   }, []);
