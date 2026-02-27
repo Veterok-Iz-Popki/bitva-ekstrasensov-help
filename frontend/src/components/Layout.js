@@ -7,7 +7,7 @@ import api from '../lib/api';
 
 const NAV_ITEMS = [
   { path: '/', label: 'Главная' },
-  { path: '/uchastniki', label: 'Экстрасенсы' },
+  { path: '/#ekstrasensy', label: 'Экстрасенсы' },
   { path: '/#uslugi', label: 'Услуги' },
   { path: '/otzyvy', label: 'Отзывы' },
   { path: '/foto-galereya', label: 'Фотогалерея' },
@@ -42,11 +42,12 @@ function Header() {
     api.get('/settings').then(res => setSettings(res.data)).catch(() => {});
   }, []);
 
-  // Handle hash scroll after navigation to /#uslugi
+  // Handle hash scroll after navigation
   useEffect(() => {
-    if (location.hash === '#uslugi') {
+    if (location.hash) {
+      const hash = location.hash.substring(1);
       const tryScroll = (attempts) => {
-        const el = document.getElementById('uslugi');
+        const el = document.getElementById(hash);
         if (el) {
           el.scrollIntoView({ behavior: 'smooth' });
         } else if (attempts > 0) {
@@ -58,13 +59,14 @@ function Header() {
   }, [location]);
 
   const handleNavClick = (e, item) => {
-    if (item.path === '/#uslugi') {
+    if (item.path.startsWith('/#')) {
       e.preventDefault();
+      const hash = item.path.substring(2);
       if (location.pathname === '/') {
-        const el = document.getElementById('uslugi');
+        const el = document.getElementById(hash);
         if (el) el.scrollIntoView({ behavior: 'smooth' });
       } else {
-        navigate('/#uslugi');
+        navigate(`/#${hash}`);
       }
     }
     setMobileOpen(false);
@@ -72,7 +74,7 @@ function Header() {
 
   const isActive = (itemPath) => {
     if (itemPath === '/') return location.pathname === '/' && !location.hash;
-    if (itemPath === '/#uslugi') return false;
+    if (itemPath.startsWith('/#')) return false;
     return location.pathname === itemPath;
   };
 
