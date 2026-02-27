@@ -103,9 +103,10 @@ function Header() {
                 <Link
                   key={item.path}
                   to={item.path}
-                  data-testid={`nav-${item.path.replace('/', '') || 'home'}`}
+                  onClick={(e) => handleNavClick(e, item)}
+                  data-testid={`nav-${item.path.replace(/[\/#]/g, '') || 'home'}`}
                   className={`px-5 py-2 text-base font-body transition-colors duration-300 ${
-                    location.pathname === item.path ? 'text-gold' : 'text-white/80 hover:text-gold'
+                    isActive(item.path) ? 'text-gold' : 'text-white/80 hover:text-gold'
                   }`}
                 >
                   {item.label}
