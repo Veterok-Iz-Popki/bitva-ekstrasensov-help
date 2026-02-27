@@ -65,7 +65,6 @@ function Header() {
         navigate(`/#${hash}`);
       }
     }
-    setMobileOpen(false);
   };
 
   const isActive = (itemPath) => {
