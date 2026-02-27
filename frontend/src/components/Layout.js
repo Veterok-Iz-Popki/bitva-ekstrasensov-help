@@ -45,8 +45,15 @@ function Header() {
   // Handle hash scroll after navigation to /#uslugi
   useEffect(() => {
     if (location.hash === '#uslugi') {
-      const el = document.getElementById('uslugi');
-      if (el) setTimeout(() => el.scrollIntoView({ behavior: 'smooth' }), 100);
+      const tryScroll = (attempts) => {
+        const el = document.getElementById('uslugi');
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' });
+        } else if (attempts > 0) {
+          setTimeout(() => tryScroll(attempts - 1), 200);
+        }
+      };
+      setTimeout(() => tryScroll(5), 300);
     }
   }, [location]);
 
