@@ -253,7 +253,7 @@ export default function HomePage() {
 
       {/* ===== SERVICES SECTION ===== */}
       {serviceCats.length > 0 && (
-        <section className="py-12 px-4" data-testid="services-section">
+        <section id="uslugi" className="py-12 px-4" data-testid="services-section">
           <div className="max-w-5xl mx-auto">
             <h2 className="font-heading text-3xl md:text-5xl font-bold text-white text-center mb-10">
               {b.services_title || 'Услуги экстрасенсов'}
