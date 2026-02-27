@@ -92,21 +92,19 @@ function Header() {
       }`}
     >
       <div className="max-w-6xl mx-auto px-4 md:px-8">
-        <div className="flex items-center justify-between h-16 md:h-20">
-          {/* Логотип слева - из CMS */}
+        {/* Desktop layout */}
+        <div className="hidden md:flex items-center justify-between h-20">
           <Link to="/" className="flex items-center shrink-0" data-testid="logo-link">
             <img 
               src={logoUrl} 
               alt={logoAlt} 
               className="w-auto rounded-xl"
-              style={{ height: `${logoHeightMobile}px` }}
+              style={{ height: `${logoHeightDesktop}px` }}
               data-testid="header-logo"
             />
-            <style>{`@media (min-width: 768px) { [data-testid="header-logo"] { height: ${logoHeightDesktop}px !important; } }`}</style>
           </Link>
 
-          {/* Навигация по центру - desktop */}
-          <nav className="hidden md:flex items-center justify-center flex-1 mx-4" data-testid="desktop-nav">
+          <nav className="flex items-center justify-center flex-1 mx-4" data-testid="desktop-nav">
             <div className="flex items-center gap-1">
               {NAV_ITEMS.map((item) => (
                 <Link
@@ -124,33 +122,67 @@ function Header() {
             </div>
           </nav>
 
-          {/* Кнопка справа - desktop */}
-          <div className="hidden md:block shrink-0">
+          <div className="shrink-0">
             <Link to="/zapis-na-priem">
               <button className="btn-gold px-5 py-2 text-sm font-body" data-testid="header-cta">
                 Заказать звонок
               </button>
             </Link>
           </div>
+        </div>
 
-          {/* Мобильное меню */}
-          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-            <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon" data-testid="mobile-menu-btn">
-                <Menu className="w-5 h-5 text-white" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="bg-teal-dark border-teal-light/20 w-64">
-              <nav className="flex flex-col gap-1 mt-8" data-testid="mobile-nav">
-                {NAV_ITEMS.map((item) => (
-                  <Link key={item.path} to={item.path} onClick={(e) => handleNavClick(e, item)} className={`px-4 py-3 text-sm font-body transition-colors ${
-                    isActive(item.path) ? 'text-gold bg-teal/50' : 'text-white/70 hover:text-gold hover:bg-teal/30'
-                  }`}>{item.label}</Link>
-                ))}
-                <Link to="/zapis-na-priem" onClick={() => setMobileOpen(false)} className="px-4 py-3 text-sm font-body text-gold">Записаться</Link>
-              </nav>
-            </SheetContent>
-          </Sheet>
+        {/* Mobile layout — no burger, all visible */}
+        <div className="md:hidden" data-testid="mobile-header">
+          {/* Row 1: Logo centered */}
+          <div className="flex items-center justify-center py-2">
+            <Link to="/" className="flex items-center" data-testid="mobile-logo-link">
+              <img 
+                src={logoUrl} 
+                alt={logoAlt} 
+                className="w-auto rounded-xl"
+                style={{ height: `${logoHeightMobile}px` }}
+              />
+            </Link>
+          </div>
+
+          {/* Row 2: Primary nav — Экстрасенсы, Услуги */}
+          <div className="flex items-center justify-center gap-6 py-1" data-testid="mobile-nav-primary">
+            {NAV_ITEMS.filter(i => i.path === '/#ekstrasensy' || i.path === '/#uslugi').map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                onClick={(e) => handleNavClick(e, item)}
+                className="text-white/80 hover:text-gold text-sm font-body transition-colors"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+
+          {/* Row 3: Secondary nav — rest of items */}
+          <div className="flex items-center justify-center flex-wrap gap-x-4 gap-y-0.5 py-1" data-testid="mobile-nav-secondary">
+            {NAV_ITEMS.filter(i => i.path !== '/#ekstrasensy' && i.path !== '/#uslugi').map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                onClick={(e) => handleNavClick(e, item)}
+                className={`text-xs font-body transition-colors ${
+                  isActive(item.path) ? 'text-gold' : 'text-white/50 hover:text-gold'
+                }`}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+
+          {/* Row 4: CTA */}
+          <div className="flex justify-center pb-2 pt-1">
+            <Link to="/zapis-na-priem">
+              <button className="btn-gold px-6 py-1.5 text-xs font-body" data-testid="mobile-cta">
+                Заказать звонок
+              </button>
+            </Link>
+          </div>
         </div>
       </div>
     </header>
