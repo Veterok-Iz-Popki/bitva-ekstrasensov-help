@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '../components/ui/sheet';
 import api from '../lib/api';
 
 const NAV_ITEMS = [
+  { path: '/', label: 'Главная' },
   { path: '/uchastniki', label: 'Экстрасенсы' },
+  { path: '/#uslugi', label: 'Услуги' },
   { path: '/otzyvy', label: 'Отзывы' },
   { path: '/foto-galereya', label: 'Фотогалерея' },
   { path: '/video', label: 'Видео' },
-  { path: '/voprosy-i-otvety', label: 'FAQ' },
+  { path: '/voprosy-i-otvety', label: 'Вопросы-Ответы' },
 ];
 
 // Дефолтные значения на случай если настройки не загрузились
