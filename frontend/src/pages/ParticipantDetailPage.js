@@ -49,7 +49,7 @@ export default function ParticipantDetailPage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center pt-20 gap-4">
         <p className="text-white/50 font-body text-lg">Участник не найден</p>
-        <Link to="/uchastniki" className="btn-outline-gold px-6 py-2 font-body text-sm">
+        <Link to="/#ekstrasensy" className="btn-outline-gold px-6 py-2 font-body text-sm">
           К списку участников
         </Link>
       </div>
@@ -64,7 +64,7 @@ export default function ParticipantDetailPage() {
       <div className="max-w-5xl mx-auto px-4 md:px-8">
         {/* Back link */}
         <Link
-          to="/uchastniki"
+          to="/#ekstrasensy"
           className="inline-flex items-center gap-2 text-sm text-white/50 hover:text-gold transition-colors font-body mb-8"
           data-testid="back-to-participants"
         >
