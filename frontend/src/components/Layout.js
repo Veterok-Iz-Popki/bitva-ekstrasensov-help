@@ -81,8 +81,8 @@ function Header() {
     <header
       data-testid="main-header"
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? 'teal-glass shadow-lg' : 'bg-transparent'
-      }`}
+        scrolled ? 'teal-glass shadow-lg' : 'md:bg-transparent'
+      } max-md:bg-teal-darker/95 max-md:backdrop-blur-md max-md:shadow-lg`}
     >
       <div className="max-w-6xl mx-auto px-4 md:px-8">
         {/* Desktop layout */}
@@ -125,10 +125,10 @@ function Header() {
         </div>
 
         {/* Mobile layout — no burger, all visible */}
-        <div className="md:hidden" data-testid="mobile-header">
+        <div className="md:hidden py-3 space-y-2" data-testid="mobile-header">
           {/* Row 1: Logo centered */}
-          <div className="flex items-center justify-center py-2">
-            <Link to="/" className="flex items-center" data-testid="mobile-logo-link">
+          <div className="flex items-center justify-center">
+            <Link to="/" data-testid="mobile-logo-link">
               <img 
                 src={logoUrl} 
                 alt={logoAlt} 
@@ -138,29 +138,29 @@ function Header() {
             </Link>
           </div>
 
-          {/* Row 2: Primary nav — Экстрасенсы, Услуги */}
-          <div className="flex items-center justify-center gap-6 py-1" data-testid="mobile-nav-primary">
+          {/* Row 2: Primary nav — Экстрасенсы + Услуги */}
+          <div className="flex items-center justify-center gap-8" data-testid="mobile-nav-primary">
             {NAV_ITEMS.filter(i => i.path === '/#ekstrasensy' || i.path === '/#uslugi').map((item) => (
               <Link
                 key={item.path}
                 to={item.path}
                 onClick={(e) => handleNavClick(e, item)}
-                className="text-white/80 hover:text-gold text-sm font-body transition-colors"
+                className="text-[15px] font-body text-white/90 hover:text-gold transition-colors"
               >
                 {item.label}
               </Link>
             ))}
           </div>
 
-          {/* Row 3: Secondary nav — rest of items */}
-          <div className="flex items-center justify-center flex-wrap gap-x-4 gap-y-0.5 py-1" data-testid="mobile-nav-secondary">
+          {/* Row 3: Secondary nav — wrap into 2 lines if needed */}
+          <div className="flex items-center justify-center flex-wrap gap-x-4 gap-y-1" data-testid="mobile-nav-secondary">
             {NAV_ITEMS.filter(i => i.path !== '/#ekstrasensy' && i.path !== '/#uslugi').map((item) => (
               <Link
                 key={item.path}
                 to={item.path}
                 onClick={(e) => handleNavClick(e, item)}
-                className={`text-xs font-body transition-colors ${
-                  isActive(item.path) ? 'text-gold' : 'text-white/50 hover:text-gold'
+                className={`text-[13px] font-body transition-colors whitespace-nowrap ${
+                  isActive(item.path) ? 'text-gold' : 'text-white/60 hover:text-gold'
                 }`}
               >
                 {item.label}
@@ -169,9 +169,9 @@ function Header() {
           </div>
 
           {/* Row 4: CTA */}
-          <div className="flex justify-center pb-2 pt-1">
+          <div className="flex justify-center pt-1">
             <Link to="/zapis-na-priem">
-              <button className="btn-gold px-6 py-1.5 text-xs font-body" data-testid="mobile-cta">
+              <button className="btn-gold px-8 py-2 text-[13px] font-body font-semibold" data-testid="mobile-cta">
                 Заказать звонок
               </button>
             </Link>
