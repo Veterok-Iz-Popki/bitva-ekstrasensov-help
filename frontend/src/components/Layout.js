@@ -25,6 +25,7 @@ const DEFAULT_LOGO = {
 
 function Header() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [settings, setSettings] = useState(null);
@@ -40,6 +41,33 @@ function Header() {
   useEffect(() => {
     api.get('/settings').then(res => setSettings(res.data)).catch(() => {});
   }, []);
+
+  // Handle hash scroll after navigation to /#uslugi
+  useEffect(() => {
+    if (location.hash === '#uslugi') {
+      const el = document.getElementById('uslugi');
+      if (el) setTimeout(() => el.scrollIntoView({ behavior: 'smooth' }), 100);
+    }
+  }, [location]);
+
+  const handleNavClick = (e, item) => {
+    if (item.path === '/#uslugi') {
+      e.preventDefault();
+      if (location.pathname === '/') {
+        const el = document.getElementById('uslugi');
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        navigate('/#uslugi');
+      }
+    }
+    setMobileOpen(false);
+  };
+
+  const isActive = (itemPath) => {
+    if (itemPath === '/') return location.pathname === '/' && !location.hash;
+    if (itemPath === '/#uslugi') return false;
+    return location.pathname === itemPath;
+  };
 
   // Получаем данные логотипа из настроек или используем дефолт
   const logoUrl = settings?.logo_url || DEFAULT_LOGO.url;
