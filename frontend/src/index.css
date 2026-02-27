@@ -4,6 +4,11 @@
 @tailwind components;
 @tailwind utilities;
 
+#ekstrasensy,
+#uslugi {
+  scroll-margin-top: 120px;
+}
+
 @layer base {
     :root {
         --background: 195 55% 10%;
