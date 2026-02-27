@@ -9,6 +9,13 @@
   scroll-margin-top: 120px;
 }
 
+@media (max-width: 767px) {
+  #ekstrasensy,
+  #uslugi {
+    scroll-margin-top: 180px;
+  }
+}
+
 @layer base {
     :root {
         --background: 195 55% 10%;
