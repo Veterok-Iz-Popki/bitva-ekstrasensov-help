@@ -63,7 +63,6 @@ function App() {
           <Layout>
             <Routes>
               <Route path="/" element={<HomePage />} />
-              <Route path="/uchastniki" element={<ParticipantsPage />} />
               <Route path="/uchastniki/:slug" element={<ParticipantDetailPage />} />
               <Route path="/zapis-na-priem" element={<BookingPage />} />
               <Route path="/otzyvy" element={<ReviewsPage />} />
