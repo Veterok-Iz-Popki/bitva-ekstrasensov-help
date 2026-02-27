@@ -133,13 +133,12 @@ function Header() {
             </SheetTrigger>
             <SheetContent side="right" className="bg-teal-dark border-teal-light/20 w-64">
               <nav className="flex flex-col gap-1 mt-8" data-testid="mobile-nav">
-                <Link to="/" className="px-4 py-3 text-sm font-body text-white/70 hover:text-gold hover:bg-teal/30 transition-colors">Главная</Link>
                 {NAV_ITEMS.map((item) => (
-                  <Link key={item.path} to={item.path} className={`px-4 py-3 text-sm font-body transition-colors ${
-                    location.pathname === item.path ? 'text-gold bg-teal/50' : 'text-white/70 hover:text-gold hover:bg-teal/30'
+                  <Link key={item.path} to={item.path} onClick={(e) => handleNavClick(e, item)} className={`px-4 py-3 text-sm font-body transition-colors ${
+                    isActive(item.path) ? 'text-gold bg-teal/50' : 'text-white/70 hover:text-gold hover:bg-teal/30'
                   }`}>{item.label}</Link>
                 ))}
-                <Link to="/zapis-na-priem" className="px-4 py-3 text-sm font-body text-gold">Записаться</Link>
+                <Link to="/zapis-na-priem" onClick={() => setMobileOpen(false)} className="px-4 py-3 text-sm font-body text-gold">Записаться</Link>
               </nav>
             </SheetContent>
           </Sheet>
