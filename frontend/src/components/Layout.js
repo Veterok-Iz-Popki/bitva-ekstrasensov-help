@@ -267,6 +267,7 @@ export default function Layout({ children }) {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
+      <div className="h-0 md:h-0 max-md:h-[160px]" aria-hidden="true" />
       <main className="flex-1">{children}</main>
       <Footer />
     </div>
