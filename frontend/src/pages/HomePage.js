@@ -181,7 +181,7 @@ export default function HomePage() {
 
       {/* ===== PARTICIPANTS GRID ===== */}
       {participants.length > 0 && (
-        <section className="py-12 px-4" data-testid="participants-section">
+        <section id="ekstrasensy" className="py-12 px-4" data-testid="participants-section">
           <div className="max-w-6xl mx-auto">
             <h2 className="font-heading text-3xl md:text-5xl font-bold text-white text-center mb-10">
               {b.participants_title || 'Лучшие экстрасенсы России'}
