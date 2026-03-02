@@ -12,7 +12,7 @@
 @media (max-width: 767px) {
   #ekstrasensy,
   #uslugi {
-    scroll-margin-top: 240px;
+    scroll-margin-top: calc(var(--mobile-header-height, 220px) + 20px);
   }
 }
 

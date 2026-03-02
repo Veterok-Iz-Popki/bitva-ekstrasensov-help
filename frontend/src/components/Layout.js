@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import api from '../lib/api';
 
@@ -25,6 +25,8 @@ function Header() {
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [settings, setSettings] = useState(null);
+  const [headerH, setHeaderH] = useState(0);
+  const headerRef = useRef(null);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -35,6 +37,20 @@ function Header() {
   useEffect(() => {
     api.get('/settings').then(res => setSettings(res.data)).catch(() => {});
   }, []);
+
+  // Measure header height for spacer
+  useEffect(() => {
+    const measure = () => {
+      if (headerRef.current) {
+        const h = headerRef.current.offsetHeight;
+        setHeaderH(h);
+        document.documentElement.style.setProperty('--mobile-header-height', `${h}px`);
+      }
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [settings]);
 
   // Handle hash scroll after navigation
   useEffect(() => {
@@ -79,10 +95,11 @@ function Header() {
 
   return (
     <header
+      ref={headerRef}
       data-testid="main-header"
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-[9999] transition-all duration-300 ${
         scrolled ? 'teal-glass shadow-lg' : 'md:bg-transparent'
-      } max-md:bg-teal-darker/95 max-md:backdrop-blur-md max-md:shadow-lg`}
+      } max-md:bg-teal-darker/95 max-md:backdrop-blur-md max-md:shadow-md max-md:border-b max-md:border-white/5`}
     >
       <div className="max-w-6xl mx-auto px-4 md:px-8">
         {/* Desktop layout */}
@@ -267,7 +284,7 @@ export default function Layout({ children }) {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <div className="h-0 max-md:h-[220px]" aria-hidden="true" />
+      <div className="md:hidden" style={{ height: 'var(--mobile-header-height, 220px)' }} aria-hidden="true" />
       <main className="flex-1">{children}</main>
       <Footer />
     </div>
