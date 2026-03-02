@@ -267,6 +267,23 @@ export default function HomePage() {
         </section>
       )}
 
+      {/* ===== CTA BETWEEN REVIEWS AND SERVICES ===== */}
+      <section className="py-20 md:py-28 px-4" data-testid="cta-mid-section">
+        <div className="max-w-sm mx-auto teal-card p-6 text-center">
+          <p className="text-white font-body font-medium mb-4 text-base">
+            {b.cta_text || 'Количество заявок на помощь ограничено!'}
+          </p>
+          <Link to="/zapis-na-priem">
+            <button className="btn-gold px-8 py-3 text-base font-body font-semibold mb-3 w-full md:w-auto" data-testid="cta-mid-btn">
+              {b.cta_button || 'Получить помощь экстрасенса!'}
+            </button>
+          </Link>
+          <p className="text-white/40 font-body text-sm">
+            {b.cta_subtext || 'Не упустите свой шанс!'}
+          </p>
+        </div>
+      </section>
+
       {/* ===== SERVICES SECTION ===== */}
       {serviceCats.length > 0 && (
         <section id="uslugi" className="py-12 px-4" data-testid="services-section">
@@ -314,11 +331,19 @@ export default function HomePage() {
               ))}
             </div>
             <div className="text-center mt-8">
-              <Link to="/zapis-na-priem">
-                <button className="btn-gold px-8 py-3 font-body font-semibold" data-testid="seo-cta-btn">
-                  Записаться
-                </button>
-              </Link>
+              <div className="max-w-sm mx-auto teal-card p-6">
+                <p className="text-white font-body font-medium mb-4 text-base">
+                  {b.cta_text || 'Количество заявок на помощь ограничено!'}
+                </p>
+                <Link to="/zapis-na-priem">
+                  <button className="btn-gold px-8 py-3 text-base font-body font-semibold mb-3 w-full md:w-auto" data-testid="seo-cta-btn">
+                    {b.cta_button || 'Получить помощь экстрасенса!'}
+                  </button>
+                </Link>
+                <p className="text-white/40 font-body text-sm">
+                  {b.cta_subtext || 'Не упустите свой шанс!'}
+                </p>
+              </div>
             </div>
           </div>
         </section>
