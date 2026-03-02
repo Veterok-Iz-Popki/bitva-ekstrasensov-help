@@ -4,10 +4,8 @@ import ScrollToTop from "@/components/ScrollToTop";
 import { Toaster } from "@/components/ui/sonner";
 import Layout from "@/components/Layout";
 import HomePage from "@/pages/HomePage";
-import ParticipantsPage from "@/pages/ParticipantsPage";
 import ParticipantDetailPage from "@/pages/ParticipantDetailPage";
 import BookingPage from "@/pages/BookingPage";
-import ReviewsPage from "@/pages/ReviewsPage";
 import FAQPage from "@/pages/FAQPage";
 import TopicPage from "@/pages/TopicPage";
 import ServicePage from "@/pages/ServicePage";
@@ -65,7 +63,6 @@ function App() {
               <Route path="/" element={<HomePage />} />
               <Route path="/uchastniki/:slug" element={<ParticipantDetailPage />} />
               <Route path="/zapis-na-priem" element={<BookingPage />} />
-              <Route path="/otzyvy" element={<ReviewsPage />} />
               <Route path="/voprosy-i-otvety" element={<FAQPage />} />
               {/* Topic pages */}
               <Route path="/porcha" element={<TopicPage />} />

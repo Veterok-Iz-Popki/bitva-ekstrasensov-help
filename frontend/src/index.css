@@ -5,13 +5,15 @@
 @tailwind utilities;
 
 #ekstrasensy,
-#uslugi {
+#uslugi,
+#otzyvy {
   scroll-margin-top: 20px;
 }
 
 @media (min-width: 768px) {
   #ekstrasensy,
-  #uslugi {
+  #uslugi,
+  #otzyvy {
     scroll-margin-top: 120px;
   }
 }

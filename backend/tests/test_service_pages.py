@@ -13,7 +13,7 @@ import pytest
 import requests
 import os
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://spiritual-guide-60.preview.emergentagent.com').rstrip('/')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://psychic-battle-1.preview.emergentagent.com').rstrip('/')
 
 # 4 Service page slugs
 SERVICE_SLUGS = [

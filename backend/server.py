@@ -290,8 +290,18 @@ async def get_participant(slug: str):
     return item
 
 @api_router.get("/reviews")
-async def get_reviews():
-    items = await db.reviews.find({"is_published": True}, {"_id": 0}).sort("created_at", -1).to_list(100)
+async def get_reviews(limit: int = 30):
+    import random
+    items = await db.reviews.find({"is_published": True}, {"_id": 0}).sort("created_at", -1).to_list(limit)
+    # Enrich with participant names
+    slugs = list(set(r.get("participant_slug", "") for r in items if r.get("participant_slug")))
+    name_map = {}
+    if slugs:
+        participants = await db.participants.find({"slug": {"$in": slugs}}, {"_id": 0, "slug": 1, "name": 1}).to_list(len(slugs))
+        name_map = {p["slug"]: p["name"] for p in participants}
+    for r in items:
+        r["participant_name"] = name_map.get(r.get("participant_slug", ""), "")
+    random.shuffle(items)
     return items
 
 @api_router.get("/participants/{slug}/reviews")

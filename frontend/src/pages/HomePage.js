@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Shield, Users, HelpCircle, Globe, MessageCircle, UserCheck } from 'lucide-react';
 import api, { setSEO, setJsonLd } from '../lib/api';
+import ReviewsCarousel from '../components/ReviewsCarousel';
 
 const PROBLEM_CATEGORIES = [
   { label: 'Порча', path: '/porcha' },
@@ -31,6 +32,7 @@ const SERVICE_LINKS = [
 export default function HomePage() {
   const [page, setPage] = useState(null);
   const [participants, setParticipants] = useState([]);
+  const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -38,9 +40,11 @@ export default function HomePage() {
       api.get('/pages/home'),
       api.get('/seo/home'),
       api.get('/participants'),
-    ]).then(([pageRes, seoRes, partRes]) => {
+      api.get('/reviews?limit=30'),
+    ]).then(([pageRes, seoRes, partRes, revRes]) => {
       setPage(pageRes.data);
       setParticipants(partRes.data || []);
+      setReviews(revRes.data || []);
       const seo = seoRes.data;
       if (seo) setSEO({ title: seo.title, description: seo.description, keywords: seo.keywords });
       setJsonLd({
@@ -250,6 +254,18 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ===== REVIEWS CAROUSEL ===== */}
+      {reviews.length > 0 && (
+        <section id="otzyvy" className="py-12 px-4" data-testid="reviews-section">
+          <div className="max-w-6xl mx-auto">
+            <h2 className="font-heading text-3xl md:text-5xl font-bold text-white text-center mb-10">
+              {b.reviews_title || 'Отзывы'}
+            </h2>
+            <ReviewsCarousel reviews={reviews} />
+          </div>
+        </section>
+      )}
 
       {/* ===== SERVICES SECTION ===== */}
       {serviceCats.length > 0 && (
