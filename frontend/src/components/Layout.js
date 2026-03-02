@@ -97,9 +97,9 @@ function Header() {
     <header
       ref={headerRef}
       data-testid="main-header"
-      className={`fixed top-0 left-0 right-0 z-[9999] transition-all duration-300 ${
+      className={`left-0 right-0 transition-all duration-300 md:fixed md:top-0 md:z-[9999] max-md:relative max-md:z-auto ${
         scrolled ? 'teal-glass shadow-lg' : 'md:bg-transparent'
-      } max-md:bg-teal-darker/95 max-md:backdrop-blur-md max-md:shadow-md max-md:border-b max-md:border-white/5`}
+      } max-md:bg-teal-darker/95`}
     >
       <div className="max-w-6xl mx-auto px-4 md:px-8">
         {/* Desktop layout */}
@@ -284,7 +284,6 @@ export default function Layout({ children }) {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <div className="md:hidden" style={{ height: 'var(--mobile-header-height, 220px)' }} aria-hidden="true" />
       <main className="flex-1">{children}</main>
       <Footer />
     </div>

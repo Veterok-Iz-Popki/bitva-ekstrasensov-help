@@ -6,13 +6,27 @@
 
 #ekstrasensy,
 #uslugi {
-  scroll-margin-top: 120px;
+  scroll-margin-top: 20px;
 }
 
-@media (max-width: 767px) {
+@media (min-width: 768px) {
   #ekstrasensy,
   #uslugi {
-    scroll-margin-top: calc(var(--mobile-header-height, 220px) + 20px);
+    scroll-margin-top: 120px;
+  }
+}
+
+/* On mobile, header is static (not fixed), so reduce page top padding */
+@media (max-width: 767px) {
+  [data-testid="hero-section"],
+  [data-testid="booking-page"],
+  [data-testid="reviews-page"],
+  [data-testid="video-page"],
+  [data-testid="gallery-page"],
+  [data-testid="participant-detail-page"],
+  [data-testid^="topic-page-"],
+  [data-testid^="service-page-"] {
+    padding-top: 1rem !important;
   }
 }
 
