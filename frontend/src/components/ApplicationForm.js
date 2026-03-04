@@ -1,24 +1,10 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
+import { IMaskInput } from 'react-imask';
 import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
 import { Label } from '../components/ui/label';
 import { toast } from 'sonner';
 import api from '../lib/api';
-
-const formatPhone = (value) => {
-  let digits = value.replace(/\D/g, '');
-  if (digits.startsWith('8')) digits = '7' + digits.slice(1);
-  if (digits.length > 0 && !digits.startsWith('7')) digits = '7' + digits;
-  digits = digits.slice(0, 11);
-  if (digits.length === 0) return '+7';
-  if (digits.length === 1) return '+7';
-  let f = '+7 (' + digits.slice(1, 4);
-  if (digits.length >= 4) f += ')';
-  if (digits.length > 4) f += ' ' + digits.slice(4, 7);
-  if (digits.length > 7) f += '-' + digits.slice(7, 9);
-  if (digits.length > 9) f += '-' + digits.slice(9, 11);
-  return f;
-};
 
 export default function ApplicationForm({ title, subtitle }) {
   const [form, setForm] = useState({
@@ -31,24 +17,8 @@ export default function ApplicationForm({ title, subtitle }) {
     problem: '',
     honeypot: ''
   });
+  const [phoneDisplay, setPhoneDisplay] = useState('');
   const [loading, setLoading] = useState(false);
-
-  const handlePhoneChange = useCallback((e) => {
-    const raw = e.target.value;
-    // If user cleared everything or is at just "+", reset to +7
-    if (raw.replace(/\D/g, '').length <= 1) {
-      setForm(prev => ({ ...prev, phone: '+7' }));
-      return;
-    }
-    setForm(prev => ({ ...prev, phone: formatPhone(raw) }));
-  }, []);
-
-  const handlePhoneFocus = useCallback(() => {
-    setForm(prev => {
-      if (!prev.phone) return { ...prev, phone: '+7' };
-      return prev;
-    });
-  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -66,7 +36,7 @@ export default function ApplicationForm({ title, subtitle }) {
       toast.error('Укажите отчество');
       return;
     }
-    if (!form.phone.trim() || form.phone.replace(/\D/g, '').length < 11) {
+    if (!form.phone || form.phone.replace(/\D/g, '').length < 11) {
       toast.error('Укажите корректный номер телефона');
       return;
     }
@@ -79,6 +49,7 @@ export default function ApplicationForm({ title, subtitle }) {
     try {
       await api.post('/applications', form);
       toast.success('Заявка успешно отправлена! Мы свяжемся с вами.');
+      setPhoneDisplay('');
       setForm({
         lastName: '',
         firstName: '',
@@ -160,14 +131,19 @@ export default function ApplicationForm({ title, subtitle }) {
           </div>
           <div className="space-y-1">
             <Label className="text-white/60 text-xs font-body">Телефон <span className="text-red-400">*</span></Label>
-            <Input
-              data-testid="form-phone"
-              type="tel"
+            <IMaskInput
+              mask="+7 (000) 000-00-00"
+              lazy={true}
+              value={phoneDisplay}
+              unmask={false}
+              onAccept={(value, mask) => {
+                setPhoneDisplay(value);
+                const unmasked = mask.unmaskedValue;
+                setForm(prev => ({ ...prev, phone: unmasked ? `+7${unmasked}` : '' }));
+              }}
               placeholder="+7 (999) 999-99-99"
-              value={form.phone}
-              onChange={handlePhoneChange}
-              onFocus={handlePhoneFocus}
-              className="bg-teal-dark/80 border-teal-light/30 focus:border-gold text-white placeholder:text-white/25 h-10 text-sm"
+              data-testid="form-phone"
+              className="flex h-10 w-full rounded-md border px-3 py-2 text-sm bg-teal-dark/80 border-teal-light/30 focus:border-gold text-white placeholder:text-white/25 focus:outline-none focus:ring-1 focus:ring-gold"
               required
             />
           </div>
