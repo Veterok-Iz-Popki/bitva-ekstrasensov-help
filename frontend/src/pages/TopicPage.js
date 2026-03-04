@@ -13,6 +13,15 @@ const TOPIC_NAMES = {
   'zaklyatie': 'Заклятие',
 };
 
+const TOPIC_CTA = {
+  'porcha': 'Снять порчу',
+  'proklyatie': 'Снять проклятие',
+  'sglaz': 'Снять сглаз',
+  'venets-bezbrachiya': 'Снять венец безбрачия',
+  'privorot': 'Снять приворот',
+  'zaklyatie': 'Снять заклятие',
+};
+
 export default function TopicPage() {
   const location = useLocation();
   const slug = location.pathname.replace(/^\//, '');
@@ -179,7 +188,7 @@ export default function TopicPage() {
           </p>
           <Link to="/zapis-na-priem">
             <button className="btn-gold px-10 py-4 text-lg font-body font-semibold" data-testid="topic-cta-btn">
-              {b.cta_button || 'Получить консультацию'}
+              {b.cta_button || TOPIC_CTA[slug] || 'Получить консультацию'}
             </button>
           </Link>
         </section>
