@@ -1,48 +1,9 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
 import { Label } from '../components/ui/label';
 import { toast } from 'sonner';
 import api from '../lib/api';
-
-// Маска телефона +7 (999) 999-99-99
-const formatPhone = (value) => {
-  // Удаляем все нецифры
-  let digits = value.replace(/\D/g, '');
-  
-  // Если пользователь начал с 8, заменяем на 7
-  if (digits.startsWith('8')) {
-    digits = '7' + digits.slice(1);
-  }
-  
-  // Если первая цифра не 7, добавляем 7 в начало
-  if (digits.length > 0 && !digits.startsWith('7')) {
-    digits = '7' + digits;
-  }
-  
-  // Ограничиваем до 11 цифр
-  digits = digits.slice(0, 11);
-  
-  if (!digits) return '';
-  
-  let formatted = '+7';
-  if (digits.length > 1) {
-    formatted += ' (' + digits.slice(1, 4);
-  }
-  if (digits.length >= 4) {
-    formatted += ')';
-  }
-  if (digits.length > 4) {
-    formatted += ' ' + digits.slice(4, 7);
-  }
-  if (digits.length > 7) {
-    formatted += '-' + digits.slice(7, 9);
-  }
-  if (digits.length > 9) {
-    formatted += '-' + digits.slice(9, 11);
-  }
-  return formatted;
-};
 
 export default function ApplicationForm({ title, subtitle }) {
   const [form, setForm] = useState({
@@ -56,11 +17,6 @@ export default function ApplicationForm({ title, subtitle }) {
     honeypot: ''
   });
   const [loading, setLoading] = useState(false);
-
-  const handlePhoneChange = useCallback((e) => {
-    const formatted = formatPhone(e.target.value);
-    setForm(prev => ({ ...prev, phone: formatted }));
-  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -78,7 +34,7 @@ export default function ApplicationForm({ title, subtitle }) {
       toast.error('Укажите отчество');
       return;
     }
-    if (!form.phone.trim() || form.phone.replace(/\D/g, '').length < 11) {
+    if (!form.phone.trim() || form.phone.replace(/\D/g, '').length < 10) {
       toast.error('Укажите корректный номер телефона');
       return;
     }
@@ -174,9 +130,10 @@ export default function ApplicationForm({ title, subtitle }) {
             <Label className="text-white/60 text-xs font-body">Телефон <span className="text-red-400">*</span></Label>
             <Input
               data-testid="form-phone"
+              type="tel"
               placeholder="+7 (999) 999-99-99"
               value={form.phone}
-              onChange={handlePhoneChange}
+              onChange={(e) => setForm({ ...form, phone: e.target.value })}
               className="bg-teal-dark/80 border-teal-light/30 focus:border-gold text-white placeholder:text-white/25 h-10 text-sm"
               required
             />
@@ -228,7 +185,7 @@ export default function ApplicationForm({ title, subtitle }) {
           disabled={loading}
           className="btn-gold w-full py-3 text-sm font-body uppercase tracking-wide"
         >
-          {loading ? 'Отправка...' : 'Записаться на консультацию'}
+          {loading ? 'Отправка...' : 'Отправить'}
         </button>
       </form>
     </div>

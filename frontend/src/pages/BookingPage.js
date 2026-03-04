@@ -31,12 +31,9 @@ export default function BookingPage() {
       <div className="max-w-md mx-auto px-4 md:px-8">
         {/* Header */}
         <div className="text-center mb-10">
-          <h1 className="font-heading text-2xl sm:text-3xl md:text-5xl font-bold text-white mb-4">
+          <h1 className="font-heading text-2xl sm:text-3xl md:text-5xl font-bold text-white">
             {blocks.page_title || 'Запись на приём к экстрасенсу'}
           </h1>
-          <p className="text-white/50 font-body text-sm md:text-base">
-            {blocks.page_subtitle || 'Заполните форму для записи на консультацию'}
-          </p>
         </div>
 
         {/* Application form */}
