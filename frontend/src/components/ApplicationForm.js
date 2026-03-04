@@ -1,24 +1,147 @@
-import { useState } from 'react';
-import { IMaskInput } from 'react-imask';
+import { useState, useRef, useCallback } from 'react';
 import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
 import { Label } from '../components/ui/label';
 import { toast } from 'sonner';
 import api from '../lib/api';
 
+const PREFIX = '+7';
+
+function formatDigits(digits) {
+  if (!digits) return PREFIX;
+  let f = PREFIX + ' (';
+  f += digits.slice(0, 3);
+  if (digits.length > 3) {
+    f += ') ' + digits.slice(3, 6);
+  }
+  if (digits.length > 6) f += '-' + digits.slice(6, 8);
+  if (digits.length > 8) f += '-' + digits.slice(8, 10);
+  return f;
+}
+
+function extractDigitsAfter7(value) {
+  const all = value.replace(/\D/g, '');
+  if (all.startsWith('7')) return all.slice(1).slice(0, 10);
+  if (all.startsWith('8')) return all.slice(1).slice(0, 10);
+  return all.slice(0, 10);
+}
+
 export default function ApplicationForm({ title, subtitle }) {
   const [form, setForm] = useState({
     lastName: '',
     firstName: '',
     patronymic: '',
-    phone: '',
+    phone: PREFIX,
     age: '',
     city: '',
     problem: '',
     honeypot: ''
   });
-  const [phoneDisplay, setPhoneDisplay] = useState('');
   const [loading, setLoading] = useState(false);
+  const phoneRef = useRef(null);
+  const prevDigitsRef = useRef('');
+
+  const handlePhoneChange = useCallback((e) => {
+    const raw = e.target.value;
+    let digits = extractDigitsAfter7(raw);
+    
+    // If the raw value got shorter than prefix, reset
+    if (raw.length <= 2) {
+      setForm(prev => ({ ...prev, phone: PREFIX }));
+      requestAnimationFrame(() => {
+        if (phoneRef.current) phoneRef.current.setSelectionRange(2, 2);
+      });
+      prevDigitsRef.current = '';
+      return;
+    }
+    
+    const formatted = formatDigits(digits);
+    prevDigitsRef.current = digits;
+    setForm(prev => ({ ...prev, phone: formatted }));
+
+    requestAnimationFrame(() => {
+      if (phoneRef.current) {
+        const len = formatted.length;
+        phoneRef.current.setSelectionRange(len, len);
+      }
+    });
+  }, []);
+
+  const handlePhoneKeyDown = useCallback((e) => {
+    const input = e.target;
+    const { selectionStart, selectionEnd, value } = input;
+    
+    if (e.key === 'Backspace') {
+      // Prevent deleting +7
+      if (selectionStart <= 2 && selectionEnd <= 2) {
+        e.preventDefault();
+        return;
+      }
+      
+      // If there's a selection that includes +7, handle specially
+      if (selectionStart < 2) {
+        e.preventDefault();
+        const digits = extractDigitsAfter7(value.slice(selectionEnd));
+        const formatted = formatDigits(digits);
+        prevDigitsRef.current = digits;
+        setForm(prev => ({ ...prev, phone: formatted || PREFIX }));
+        requestAnimationFrame(() => {
+          if (phoneRef.current) phoneRef.current.setSelectionRange(2, 2);
+        });
+        return;
+      }
+
+      // If cursor is right after a formatting char, skip over it
+      const charBefore = value[selectionStart - 1];
+      if (selectionStart === selectionEnd && (charBefore === ' ' || charBefore === '(' || charBefore === ')' || charBefore === '-')) {
+        e.preventDefault();
+        // Find the nearest digit before cursor and remove it
+        const currentDigits = extractDigitsAfter7(value);
+        if (currentDigits.length === 0) return;
+        const newDigits = currentDigits.slice(0, -1);
+        const formatted = formatDigits(newDigits) || PREFIX;
+        prevDigitsRef.current = newDigits;
+        setForm(prev => ({ ...prev, phone: formatted }));
+        requestAnimationFrame(() => {
+          if (phoneRef.current) {
+            const len = formatted.length;
+            phoneRef.current.setSelectionRange(len, len);
+          }
+        });
+        return;
+      }
+    }
+    
+    // Ctrl+A → Delete/Backspace: onChange will handle it, but we need to ensure +7 stays
+    if ((e.key === 'Delete' || e.key === 'Backspace') && selectionStart === 0 && selectionEnd === value.length) {
+      e.preventDefault();
+      prevDigitsRef.current = '';
+      setForm(prev => ({ ...prev, phone: PREFIX }));
+      requestAnimationFrame(() => {
+        if (phoneRef.current) phoneRef.current.setSelectionRange(2, 2);
+      });
+      return;
+    }
+    
+    if (e.key === 'Delete' && selectionStart < 2) {
+      e.preventDefault();
+    }
+  }, []);
+
+  const handlePhoneFocus = useCallback(() => {
+    setForm(prev => {
+      if (!prev.phone || prev.phone.length < 2) return { ...prev, phone: PREFIX };
+      return prev;
+    });
+  }, []);
+
+  const handlePhoneBlur = useCallback(() => {
+    setForm(prev => {
+      const digits = extractDigitsAfter7(prev.phone);
+      if (!digits) return { ...prev, phone: PREFIX };
+      return prev;
+    });
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -49,12 +172,11 @@ export default function ApplicationForm({ title, subtitle }) {
     try {
       await api.post('/applications', form);
       toast.success('Заявка успешно отправлена! Мы свяжемся с вами.');
-      setPhoneDisplay('');
       setForm({
         lastName: '',
         firstName: '',
         patronymic: '',
-        phone: '',
+        phone: PREFIX,
         age: '',
         city: '',
         problem: '',
@@ -131,18 +253,15 @@ export default function ApplicationForm({ title, subtitle }) {
           </div>
           <div className="space-y-1">
             <Label className="text-white/60 text-xs font-body">Телефон <span className="text-red-400">*</span></Label>
-            <IMaskInput
-              mask="+7 (000) 000-00-00"
-              lazy={true}
-              value={phoneDisplay}
-              unmask={false}
-              onAccept={(value, mask) => {
-                setPhoneDisplay(value);
-                const unmasked = mask.unmaskedValue;
-                setForm(prev => ({ ...prev, phone: unmasked ? `+7${unmasked}` : '' }));
-              }}
-              placeholder="+7 (999) 999-99-99"
+            <input
+              ref={phoneRef}
               data-testid="form-phone"
+              type="tel"
+              value={form.phone}
+              onChange={handlePhoneChange}
+              onKeyDown={handlePhoneKeyDown}
+              onFocus={handlePhoneFocus}
+              onBlur={handlePhoneBlur}
               className="flex h-10 w-full rounded-md border px-3 py-2 text-sm bg-teal-dark/80 border-teal-light/30 focus:border-gold text-white placeholder:text-white/25 focus:outline-none focus:ring-1 focus:ring-gold"
               required
             />
