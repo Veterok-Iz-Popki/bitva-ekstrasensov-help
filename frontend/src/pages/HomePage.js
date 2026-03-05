@@ -257,7 +257,7 @@ export default function HomePage() {
 
       {/* ===== REVIEWS CAROUSEL ===== */}
       {reviews.length > 0 && (
-        <section id="otzyvy" className="py-12 px-4" data-testid="reviews-section">
+        <section id="otzyvy" className="py-10 px-4" data-testid="reviews-section">
           <div className="max-w-6xl mx-auto">
             <h2 className="font-heading text-3xl md:text-5xl font-bold text-white text-center mb-10">
               {b.reviews_title || 'Отзывы'}
@@ -268,7 +268,7 @@ export default function HomePage() {
       )}
 
       {/* ===== CTA BETWEEN REVIEWS AND SERVICES ===== */}
-      <section className="py-20 md:py-28 px-4" data-testid="cta-mid-section">
+      <section className="py-6 md:py-8 px-4" data-testid="cta-mid-section">
         <div className="max-w-sm mx-auto teal-card p-6 text-center">
           <p className="text-white font-body font-medium mb-4 text-base">
             {b.cta_text || 'Количество заявок на помощь ограничено!'}
@@ -286,7 +286,7 @@ export default function HomePage() {
 
       {/* ===== SERVICES SECTION ===== */}
       {serviceCats.length > 0 && (
-        <section id="uslugi" className="py-12 px-4" data-testid="services-section">
+        <section id="uslugi" className="py-10 px-4" data-testid="services-section">
           <div className="max-w-5xl mx-auto">
             <h2 className="font-heading text-3xl md:text-5xl font-bold text-white text-center mb-10">
               {b.services_title || 'Услуги экстрасенсов'}
