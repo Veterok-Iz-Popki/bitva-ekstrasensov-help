@@ -6,7 +6,13 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js",
+    "db:init": "node scripts/db-init.js",
+    "db:dump": "node scripts/db-dump.js",
+    "db:restore": "node scripts/db-restore.js",
+    "db:seed": "node -e \"require('./db'); const {runSeed}=require('./seed'); runSeed(require('./db')).then(()=>process.exit(0))\"",
+    "setup": "npm run db:init && npm run db:seed",
+    "test": "echo \"No tests\" && exit 0"
   },
   "keywords": [],
   "author": "",
