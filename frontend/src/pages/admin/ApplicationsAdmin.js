@@ -40,11 +40,11 @@ export default function ApplicationsAdmin() {
     }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     applyFilter(items, statusFilter);
-  }, [statusFilter, items]);
+  }, [statusFilter, items]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const updateStatus = async (id, status) => {
     try {
