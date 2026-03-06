@@ -59,7 +59,7 @@
   },
   "scripts": {
     "start": "craco start",
-    "build": "craco build",
+    "build": "BUILD_PATH=../backend/build craco build",
     "test": "craco test"
   },
   "browserslist": {

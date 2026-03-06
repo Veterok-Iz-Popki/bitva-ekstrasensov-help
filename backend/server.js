@@ -618,6 +618,15 @@ api.get('/uploads/:filename', (req, res) => {
 // Mount API
 app.use('/api', api);
 
+// Serve frontend build
+const BUILD_DIR = path.join(__dirname, 'build');
+if (fs.existsSync(BUILD_DIR)) {
+  app.use(express.static(BUILD_DIR));
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(BUILD_DIR, 'index.html'));
+  });
+}
+
 // ===== STARTUP =====
 
 async function startup() {
