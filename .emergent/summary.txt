@@ -1,187 +1,343 @@
 <analysis>**original_problem_statement:**
-Пользователь запросил создание SEO-оптимизированного сайта «Битва экстрасенсов — официальный сайт помощи». В ходе работы требования были значительно расширены, и теперь приложение представляет собой полнофункциональный сайт с продвинутой CMS для управления всем контентом.
+Изначально пользователь запросил создание SEO-оптимизированного сайта «Битва экстрасенсов — официальный сайт помощи». В процессе разработки проект превратился в полнофункциональный сайт с продвинутой CMS для управления всем контентом (участники, страницы, отзывы, галереи, SEO).
 
-**PRODUCT REQUIREMENTS:**
--   **Цель:** Сбор заявок через детализированную форму.
--   **CMS:** Все текстовые блоки, изображения (логотипы, фото), страницы (тематические, услуги, галерея, видео), участники, отзывы и SEO-теги должны быть полностью управляемыми из административной панели на русском языке. Никакого хардкода.
--   **Структура и Навигация:**
-    -   Главная страница с блоками-якорями: «Экстрасенсы», «Услуги».
-    -   Личные страницы для каждого экстрасенса с привязанными к ним отзывами.
-    -   Тематические страницы («Порча», «Проклятие» и т.д.).
-    -   Страницы услуг («Финансовая магия» и т.д.).
-    -   Страницы «Фотогалерея» и «Видео» с загрузкой контента через CMS.
-    -   Страница с формой заявки.
--   **UI/UX:**
-    -   Шапка сайта на ПК и планшетах должна быть фиксированной.
-    -   Шапка на мобильных устройствах должна быть статичной (прокручиваться вместе с контентом) и отображать все пункты меню без бургера.
-    -   При любой навигации страница должна прокручиваться вверх (scroll-to-top).
--   **Технические требования:**
-    -   Авторизация в админ-панели: JWT.
-    -   Уведомления о заявках: Email через Resend.
-    -   Защита от спама: Honeypot.
-    -   SEO: Уникальные мета-теги для каждой страницы, ЧПУ, правильная структура заголовков.
+В ходе этой сессии были выполнены следующие крупные задачи:
+1.  По запросу пользователя была произведена полная миграция бэкенда с **Python/FastAPI/MongoDB** на **Node.js/Express/MariaDB**.
+2.  Была полностью обновлена база экстрасенсов (8 новых участников с уникальным контентом и фото).
+3.  Была значительно переработана главная страница: добавлен карусель отзывов, новые CTA-блоки, изменен лейаут карточек экстрасенсов.
+4.  Были внесены многочисленные правки в UI, включая исправление маски телефона в форме заявки.
+5.  Пользователь получил подробные инструкции по самостоятельному деплою проекта на VPS.
+6.  Последний запрос — унифицировать дизайн личных страниц всех экстрасенсов по предоставленному образцу.
 
 **User's preferred language**: Русский
 
 **what currently exists?**
-Создано полнофункциональное full-stack приложение (FastAPI + React + MongoDB) с многофункциональной админ-панелью. Все текстовые и графические элементы сайта управляются через CMS. Реализована JWT-аутентификация, CRUD-операции для основного контента (участники, страницы, отзывы, галереи), отправка email-уведомлений через Resend, экспорт заявок в CSV.
-
-Поведение шапки сайта полностью настроено согласно последним требованиям: она фиксированная на десктопе/планшете и статичная на мобильных устройствах. Навигация использует якорные ссылки для ключевых разделов главной страницы. Отдельные страницы-списки для Участников и Отзывов были удалены в пользу блоков на главной странице.
+Существует полнофункциональное full-stack приложение с фронтендом на React и бэкендом на Node.js/Express и MariaDB. Весь контент (тексты, фото, SEO) управляется через CMS-админку. Реализована JWT-аутентификация, CRUD-операции для всего контента, отправка email-уведомлений через Resend. Последними изменениями были полная замена бэкенд-стека, обновление списка экстрасенсов и переработка их карточек на главной странице.
 
 **Last working item**:
--   Last item agent was working: Реализация блока «Отзывы» на главной странице. Этот блок должен быть в виде карусели и агрегировать все опубликованные отзывы со страниц отдельных экстрасенсов. Также требовалось удалить отдельную страницу  и сделать пункт меню «Отзывы» якорной ссылкой на этот новый блок.
--   Status: NOT STARTED
--   Agent Testing Done: N
--   Which testing method agent to use? both
--   User Testing Done: N
+*   **Last item agent was working:** Унификация личных страниц всех экстрасенсов, чтобы они соответствовали структуре и дизайну страницы-референса (). Агент только начал работу, проанализировав страницу-референс.
+*   **Status:** NOT STARTED
+*   **Agent Testing Done:** N
+*   **Which testing method agent to use?** frontend testing agent (для проверки всех 8 страниц на соответствие новому шаблону и адаптивности) или последовательные скриншоты каждой страницы.
+*   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
--   **Issue 1:** (P0) Реализовать блок «Отзывы» на главной странице и обновить навигацию.
-    -   **Attempted fixes:** Нет, задача только что получена.
-    -   **Next debug checklist:**
-        1.  Удалить роут  из .
-        2.  Удалить страницу .
-        3.  Убедиться, что API-эндпоинт  возвращает все опубликованные отзывы.
-        4.  Создать компонент карусели отзывов, например, .
-        5.  На странице :
-            -   Получить данные с .
-            -   Добавить новый блок с заголовком H2 «Отзывы» и компонентом карусели строго над блоком услуг ().
-            -   Присвоить новому блоку .
-        6.  В компоненте навигации :
-            -   Найти пункт меню Отзывы.
-            -   Изменить его ссылку на якорную .
-        7.  Протестировать функционал: отображение карусели, работу якорной ссылки с главной и других страниц, адаптивность.
-    -   **Why fix this issue and what will be achieved with the fix?** Это последнее требование пользователя для завершения реструктуризации главной страницы и улучшения ее информативности.
-    -   **Status:** NOT STARTED
-    -   **Is recurring issue?** N
-    -   **Should Test frontend/backend/both after fix?** both
-    -   **Blocked on other issue:** None
+*   **Issue 1:** (P0) Унифицировать дизайн и структуру личных страниц всех 8 экстрасенсов.
+    *   **Attempted fixes:** Нет, задача только что получена.
+    *   **Next debug checklist:**
+        1.  Изучить текущую структуру .
+        2.  Проанализировать структуру страницы-референса (hero-блок, фото, имя, подзаголовок, основной текст, блок преимуществ, отзывы, CTA).
+        3.  Полностью переработать JSX и стили в , чтобы он соответствовал новому шаблону.
+        4.  Проверить, поддерживает ли модель данных  в  все необходимые для нового дизайна поля. При необходимости добавить новые колонки в таблицу  в  и обновить API.
+        5.  Убедиться, что все новые блоки контента можно редактировать через админ-панель (может потребовать обновления ).
+        6.  Проверить, что все 8 страниц экстрасенсов (,  и т.д.) корректно отображаются в новом дизайне со своим уникальным контентом.
+    *   **Why fix this issue and what will be achieved with the fix?** Для приведения всех ключевых страниц сайта к единому профессиональному виду согласно требованию пользователя.
+    *   **Status:** NOT STARTED
+    *   **Is recurring issue?** N
+    *   **Should Test frontend/backend/both after fix?** frontend
+    *   **Blocked on other issue:** None
 
 **In progress Task List**:
--   None.
+*   None.
 
 **Upcoming and Future Tasks**
--   **Upcoming Tasks:**
-    -   (P1) Добавить автоматическую генерацию . Агент предложил создать динамический эндпоинт , но ожидает ответа пользователя о том, как сконфигурировать доменное имя (через  или через CMS).
+*   **Upcoming Tasks:**
+    *   (P1) Добавить автоматическую генерацию .
+        *   **План:** Создать эндпоинт  в , который будет динамически собирать все публичные URL из базы данных (участники, страницы и т.д.) и генерировать валидный XML-файл. Доменное имя брать из переменной окружения.
 
 **Completed work in this session**
--   **CMS-управляемый контент:**
-    -   Реализованы 6 тематических страниц («Порча» и т.д.) с управлением через CMS.
-    -   Реализованы 4 страницы услуг («Финансовая магия» и т.д.) с управлением через CMS.
-    -   Созданы страницы «Фотогалерея» и «Видео» с загрузкой/удалением/управлением контентом через CMS.
--   **Отзывы:** Реализована система отзывов, привязанных к конкретному участнику, с отображением на их личных страницах и управлением через админ-панель.
--   **UI/UX и Навигация:**
-    -   Реализован глобальный  при переходах.
-    -   Очищена страница формы записи (), оставлена только форма.
-    -   **Полностью переработана шапка (Header):**
-        -   Добавлены/переименованы пункты меню.
-        -   Ссылки «Экстрасенсы» и «Услуги» преобразованы в якорные на главную страницу с корректной прокруткой и отступом ().
-        -   Удалена отдельная страница-список .
-        -   **Реализовано финальное поведение:** шапка фиксированная () на десктопе/планшете и статичная () на мобильных устройствах.
-        -   Мобильное меню отображается без бургера, все пункты видны сразу.
+*   **Основное:**
+    *   **Миграция бэкенда:** Полностью переписан бэкенд с Python/FastAPI/MongoDB на **Node.js/Express/MariaDB**.
+    *   **Замена контента:** Заменены все участники на 8 новых с уникальными текстами, фото и SEO-данными.
+    *   **Инструкции по деплою:** Предоставлены подробные пошаговые инструкции для развертывания проекта на собственном VPS.
+*   **Frontend (Главная страница):**
+    *   Реализована карусель отзывов.
+    *   Добавлены два новых CTA-блока.
+    *   Переработан дизайн блока экстрасенсов (горизонтальные карточки 2 в ряд).
+    *   Изменен стиль кнопок Обратиться.
+    *   Оптимизированы отступы между блоками.
+*   **Backend и DX:**
+    *   Созданы npm <command>
+
+Usage:
+
+npm install        install all the dependencies in your project
+npm install <foo>  add the <foo> dependency to your project
+npm test           run this project's tests
+npm run <foo>      run the script named <foo>
+npm <command> -h   quick help on <command>
+npm -l             display usage info for all commands
+npm help <term>    search for help on <term>
+npm help npm       more involved overview
+
+All commands:
+
+    access, adduser, audit, bugs, cache, ci, completion,
+    config, dedupe, deprecate, diff, dist-tag, docs, doctor,
+    edit, exec, explain, explore, find-dupes, fund, get, help,
+    help-search, hook, init, install, install-ci-test,
+    install-test, link, ll, login, logout, ls, org, outdated,
+    owner, pack, ping, pkg, prefix, profile, prune, publish,
+    query, rebuild, repo, restart, root, run-script, sbom,
+    search, set, shrinkwrap, star, stars, start, stop, team,
+    test, token, uninstall, unpublish, unstar, update, version,
+    view, whoami
+
+Specify configs in the ini-formatted file:
+    /root/.npmrc
+or on the command line via: npm <command> --key=value
+
+More configuration info: npm help config
+Configuration fields: npm help 7 config
+
+npm@10.8.2 /usr/lib/node_modules/npm скрипты для управления БД (, , , ).
+    *   Порт бэкенда сделан настраиваемым через .
+    *   Сборка фронтенда теперь помещается в  для раздачи единым Node.js сервером.
+    *   Удален весь старый Python-код.
+*   **Исправления багов:**
+    *   Многократно исправлена логика маски телефона в форме заявки.
+    *   Исправлены конфликты зависимостей npm <command>
+
+Usage:
+
+npm install        install all the dependencies in your project
+npm install <foo>  add the <foo> dependency to your project
+npm test           run this project's tests
+npm run <foo>      run the script named <foo>
+npm <command> -h   quick help on <command>
+npm -l             display usage info for all commands
+npm help <term>    search for help on <term>
+npm help npm       more involved overview
+
+All commands:
+
+    access, adduser, audit, bugs, cache, ci, completion,
+    config, dedupe, deprecate, diff, dist-tag, docs, doctor,
+    edit, exec, explain, explore, find-dupes, fund, get, help,
+    help-search, hook, init, install, install-ci-test,
+    install-test, link, ll, login, logout, ls, org, outdated,
+    owner, pack, ping, pkg, prefix, profile, prune, publish,
+    query, rebuild, repo, restart, root, run-script, sbom,
+    search, set, shrinkwrap, star, stars, start, stop, team,
+    test, token, uninstall, unpublish, unstar, update, version,
+    view, whoami
+
+Specify configs in the ini-formatted file:
+    /root/.npmrc
+or on the command line via: npm <command> --key=value
+
+More configuration info: npm help config
+Configuration fields: npm help 7 config
+
+npm@10.8.2 /usr/lib/node_modules/npm (, ).
+    *   Исправлена ошибка линтинга .
 
 **Earlier issues found/mentioned but not fixed**
--   **Issue 1:** Автоматическая генерация .
-    -   **Debug checklist:**
-        1.  Получить от пользователя предпочтительный способ указания домена (переменная окружения или поле в CMS).
-        2.  Создать эндпоинт  в .
-        3.  Внутри эндпоинта собрать все публичные URL из коллекций , , .
-        4.  Сформировать XML-ответ в стандартном формате sitemap.
-        5.  Проверить корректность генерации и доступность файла по URL.
-    -   **Why to solve this issue and what will be achieved with this?** Улучшит SEO-индексацию сайта поисковыми системами.
-    -   **Should Test frontend/backend/both after fix:** backend
-    -   **Is recurring issue?** N
+*   None not already listed in .
 
 **Known issue recurrence from previous fork**
--   None.
+*   **Проблема:** В среде разработки Emergent база данных MariaDB нестабильна и может терять данные при перезапуске контейнера.
+*   **Решение в Emergent:** Был добавлен supervisor-конфиг для MariaDB и многократно выполнялась переустановка и наполнение базы ().
+*   **Примечание для следующего агента:** Это проблема исключительно текущей среды. На реальном VPS с постоянным хранилищем этой проблемы не будет. Если данные пропали — выполните  в директории .
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Backend:** FastAPI, MongoDB (Motor), Pydantic, JWT.
--   **Frontend:** React, Tailwind CSS, shadcn/ui, react-router-dom.
--   **Image Processing:** Pillow.
--   **Email:** Resend.
--   **Environment:** Docker, Supervisor.
+*   **Backend:** Node.js, Express.js, MariaDB (с драйвером ), JWT (), Resend (для email), Multer (для загрузки файлов).
+*   **Frontend:** React, Tailwind CSS, shadcn/ui, react-router-dom.
+*   **Архитектура развертывания:** Единый Node.js процесс, который отдает и API (), и статику фронтенда.
 
 **key DB schema**
--   : 
--   : 
--   : 
--   : 
--   : 
--   : 
--   : 
--   : 
--   : 
--   : 
+*   : 
+*   : 
+*   : 
+*   : 
+*   : 
 
 **changes in tech stack**
--   None in this session.
+*   **Ключевое изменение:** Бэкенд полностью переписан с **Python/FastAPI/MongoDB** на **Node.js/Express/MariaDB**.
 
 **All files of reference**
--   : Добавлены эндпоинты для галереи, видео, отзывов по участникам. Обновлена логика seed.
--   : Добавлены модели , . Обновлена модель .
--   : Значительно расширен для наполнения новых разделов.
--   : Добавлены и удалены роуты, интегрирован .
--   : Полностью переработан для реализации сложной логики шапки (fixed/static) и навигации.
--   : Добавлены uid=0(root) gid=0(root) groups=0(root) для якорных ссылок.
--   : Добавлен блок отзывов с кнопкой Показать ещё.
--   : Добавлен выбор участника при создании/редактировании отзыва.
--   , , , : Новые файлы для функций галереи/видео.
--   : Добавлены стили  и медиа-запросы для отступов.
+*   : Новый монолитный файл бэкенда, содержащий все API.
+*   : Источник истины для структуры базы данных MariaDB.
+*   , : Файлы с начальными данными для всего сайта.
+*   : Скрипты для управления БД и зависимости.
+*   : **Ключевой файл для следующей задачи.**
+*   : Сильно изменен для нового дизайна.
 
 **Areas that need refactoring**:
--   None.
+*    является монолитным файлом, содержащим более 30 API-эндпоинтов. Для улучшения читаемости и поддержки его следует разбить на модули по функциональности (например, , , ).
 
 **key api endpoints**
--   : Получение отзывов для конкретного участника.
--   , : CRUD для фотогалереи.
--   , : CRUD для видеогалереи.
--   : Получение всех опубликованных отзывов (агрегированный).
--   : Получение контента для CMS-страниц.
+*    - Получить всех активных участников.
+*    - Получить детальную информацию об участнике.
+*    - Отправить заявку.
+*    - Авторизация администратора.
+*    - Получить все опубликованные отзывы.
+*   Все CRUD-эндпоинты для админки, начинающиеся с 
 
 **Critical Info for New Agent**
--   **Приоритет:** Главная задача — реализовать блок агрегированных отзывов на главной странице и обновить навигацию.
--   **Поведение шапки (Header):** Логика шапки является финальной и важной:  на desktop/tablet (>=768px),  на mobile (<768px). Все отступы и якоря настроены под это поведение.
--   **CMS — источник истины:** Пользователь постоянно подчеркивает, что весь контент должен управляться из админ-панели. Избегайте хардкода.
--   **Ожидание ответа:** Задача по созданию  заблокирована ожиданием ответа пользователя о способе конфигурации доменного имени.
+*   **Стек изменился!** Бэкенд теперь на Node.js и MariaDB. Весь Python-код удален. Не пытайтесь искать  или использовать 
+Usage:   
+  pip <command> [options]
+
+Commands:
+  install                     Install packages.
+  lock                        Generate a lock file.
+  download                    Download packages.
+  uninstall                   Uninstall packages.
+  freeze                      Output installed packages in requirements format.
+  inspect                     Inspect the python environment.
+  list                        List installed packages.
+  show                        Show information about installed packages.
+  check                       Verify installed packages have compatible 
+dependencies.
+  config                      Manage local and global configuration.
+  search                      Search PyPI for packages.
+  cache                       Inspect and manage pip's wheel cache.
+  index                       Inspect information available from package 
+indexes.
+  wheel                       Build wheels from your requirements.
+  hash                        Compute hashes of package archives.
+  completion                  A helper command used for command completion.
+  debug                       Show information useful for debugging.
+  help                        Show help for commands.
+
+General Options:
+  -h, --help                  Show help.
+  --debug                     Let unhandled exceptions propagate outside the
+                              main subroutine, instead of logging them to
+                              stderr.
+  --isolated                  Run pip in an isolated mode, ignoring
+                              environment variables and user configuration.
+  --require-virtualenv        Allow pip to only run in a virtual environment;
+                              exit with an error otherwise.
+  --python <python>           Run pip with the specified Python interpreter.
+  -v, --verbose               Give more output. Option is additive, and can be
+                              used up to 3 times.
+  -V, --version               Show version and exit.
+  -q, --quiet                 Give less output. Option is additive, and can be
+                              used up to 3 times (corresponding to WARNING,
+                              ERROR, and CRITICAL logging levels).
+  --log <path>                Path to a verbose appending log.
+  --no-input                  Disable prompting for input.
+  --keyring-provider <keyring_provider>
+                              Enable the credential lookup via the keyring
+                              library if user input is allowed. Specify which
+                              mechanism to use [auto, disabled, import,
+                              subprocess]. (default: auto)
+  --proxy <proxy>             Specify a proxy in the form
+                              scheme://[user:passwd@]proxy.server:port.
+  --retries <retries>         Maximum attempts to establish a new HTTP
+                              connection. (default: 5)
+  --timeout <sec>             Set the socket timeout (default 15 seconds).
+  --exists-action <action>    Default action when a path already exists:
+                              (s)witch, (i)gnore, (w)ipe, (b)ackup, (a)bort.
+  --trusted-host <hostname>   Mark this host or host:port pair as trusted,
+                              even though it does not have valid or any HTTPS.
+  --cert <path>               Path to PEM-encoded CA certificate bundle. If
+                              provided, overrides the default. See 'SSL
+                              Certificate Verification' in pip documentation
+                              for more information.
+  --client-cert <path>        Path to SSL client certificate, a single file
+                              containing the private key and the certificate
+                              in PEM format.
+  --cache-dir <dir>           Store the cache data in <dir>.
+  --no-cache-dir              Disable the cache.
+  --disable-pip-version-check
+                              Don't periodically check PyPI to determine
+                              whether a new version of pip is available for
+                              download. Implied with --no-
+                              index.
+  --no-color                  Suppress colored output.
+  --use-feature <feature>     Enable new functionality, that may be backward
+                              incompatible.
+  --use-deprecated <feature>  Enable deprecated functionality, that will be
+                              removed in the future.
+  --resume-retries <resume_retries>
+                              Maximum attempts to resume or restart an
+                              incomplete download. (default: 5). Все команды выполняются через npm <command>
+
+Usage:
+
+npm install        install all the dependencies in your project
+npm install <foo>  add the <foo> dependency to your project
+npm test           run this project's tests
+npm run <foo>      run the script named <foo>
+npm <command> -h   quick help on <command>
+npm -l             display usage info for all commands
+npm help <term>    search for help on <term>
+npm help npm       more involved overview
+
+All commands:
+
+    access, adduser, audit, bugs, cache, ci, completion,
+    config, dedupe, deprecate, diff, dist-tag, docs, doctor,
+    edit, exec, explain, explore, find-dupes, fund, get, help,
+    help-search, hook, init, install, install-ci-test,
+    install-test, link, ll, login, logout, ls, org, outdated,
+    owner, pack, ping, pkg, prefix, profile, prune, publish,
+    query, rebuild, repo, restart, root, run-script, sbom,
+    search, set, shrinkwrap, star, stars, start, stop, team,
+    test, token, uninstall, unpublish, unstar, update, version,
+    view, whoami
+
+Specify configs in the ini-formatted file:
+    /root/.npmrc
+or on the command line via: npm <command> --key=value
+
+More configuration info: npm help config
+Configuration fields: npm help 7 config
+
+npm@10.8.2 /usr/lib/node_modules/npm или yarn install v1.22.22
+[1/4] Resolving packages...
+[2/4] Fetching packages...
+[3/4] Linking dependencies...
+[4/4] Building fresh packages...
+success Saved lockfile.
+Done in 0.03s. в папке .
+*   **Нестабильность БД в Emergent:** Локальная MariaDB может падать. Если сайт пустой (нет экстрасенсов, отзывов) — перейдите в  и выполните . Это восстановит и создаст базу данных с нуля. На реальном сервере такой проблемы не будет.
+*   **Основная задача:** Сосредоточьтесь на унификации дизайна личных страниц экстрасенсов. Это крупная фронтенд-задача.
 
 **documents and test reports created in this job**
--   Многочисленные отчеты о тестировании в .
+*   
+*   
+*   
+*   
+*   
+*   Многочисленные отчеты в .
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **#356:** Запрос на добавление агрегированного блока отзывов на главную страницу и превращение пункта меню Отзывы в якорь.
-2.  **#353:** Запрос на полное удаление отдельной страницы Отзывы.
-3.  **#336:** Финальное требование по поведению шапки:  на десктопе,  на мобильном.
-4.  **#311:** Сообщение пользователя о том, что мобильная шапка не зафиксирована (было неверное восприятие, но привело к уточнению требований).
-5.  **#300:** Требование сделать мобильную шапку фиксированной (промежуточный этап).
-6.  **#276:** Просьба исправить верстку мобильной шапки, так как она перекрывала контент.
-7.  **#251:** Требование убрать бургер на мобильной версии и показать все пункты меню.
-8.  **#242:** Просьба скорректировать отступ для якорных ссылок ().
-9.  **#225:** Требование удалить отдельную страницу со списком участников и сделать пункт меню якорной ссылкой.
-10. **#190:** Запрос на изменение шапки: добавить Главная, переименовать FAQ, добавить якорную ссылку Услуги.
+1.  **#518:** Запрос на унификацию всех личных страниц экстрасенсов по образцу страницы Голуновой. (PENDING)
+2.  **#516:** Запрос на изменение стиля кнопок Обратиться в карточках экстрасенсов. (DONE)
+3.  **#504:** Запрос на изменение лейаута блока экстрасенсов на главной странице (2 колонки, горизонтальные карточки). (DONE)
+4.  **#469:** Запрос на полную замену списка экстрасенсов на 8 новых с уникальным контентом. (DONE)
+5.  **#461:** Сообщение о пропаже контента (решено восстановлением БД).
+6.  **#459:** Сообщение об ошибке в консоли (определено как ошибка браузерного расширения).
+7.  **#457:** Вопрос о том, где указывать email для уведомлений.
+8.  **#453:** Ошибка  при запуске Node.js 23 (исправлено).
+9.  **#449:** Просьба добавить команду для тестового запуска сервера ().
+10. **#439:** Просьба изменить путь сборки фронтенда в .
 
 **Project Health Check:**
--   **Broken:** None.
--   **Mocked:** None.
+*   **Broken:** None.
+*   **Mocked:** None.
 
 **3rd Party Integrations**
--   **Resend:** Для отправки email-уведомлений о новых заявках.
--   **Pillow:** Для обработки изображений на бэкенде.
+*   **Resend:** Для отправки email-уведомлений.
+*   **MariaDB:** Основная база данных.
 
 **Testing status**
--   Testing agent used after significant changes: YES. Агент тестирования успешно использовался для E2E-тестов после реализации каждой крупной функции.
--   Troubleshoot agent used after agent stuck in loop: NO.
--   Test files created: None.
--   Known regressions: None.
+*   **Testing agent used after significant changes:** YES. Агент тестирования был успешно запущен после миграции бэкенда и подтвердил работоспособность 100% тестов.
+*   **Troubleshoot agent used after agent stuck in loop:** NO.
+*   **Test files created:** None.
+*   **Known regressions:** None.
 
 **Credentials to test flow:**
--   **URL админ-панели:** 
--   **Логин:** 
--   **Пароль:** 
+*   **URL админ-панели:** 
+*   **Логин:** 
+*   **Пароль:** 
 
 **What agent forgot to execute**
--   Агент не приступил к реализации последнего запроса пользователя (агрегированный блок отзывов на главной), так как сессия завершилась сразу после его получения.
--   Задача по генерации  не была начата, так как ожидает уточнения от пользователя.</analysis>
+*   Агент не приступил к реализации последнего запроса пользователя (унификация страниц экстрасенсов), так как он был получен в самом конце сессии. Эта задача является основным .</analysis>

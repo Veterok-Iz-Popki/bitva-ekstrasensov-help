@@ -201,3 +201,168 @@
     background: rgba(212, 166, 55, 0.1);
     border-color: #d4a637;
 }
+
+
+/* ========== PARTICIPANT PROFILE PAGE ========== */
+
+/* Two-column layout */
+.profile-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+@media (min-width: 768px) {
+    .profile-layout {
+        flex-direction: row;
+        gap: 2.5rem;
+    }
+}
+
+/* Left column */
+.profile-left {
+    width: 100%;
+}
+@media (min-width: 768px) {
+    .profile-left {
+        width: 45%;
+        flex-shrink: 0;
+    }
+}
+
+/* Right column */
+.profile-right {
+    width: 100%;
+    flex: 1;
+}
+@media (min-width: 768px) {
+    .profile-right {
+        margin-top: -8px;
+    }
+}
+
+/* Photo wrapper */
+.profile-photo-wrapper {
+    border: 3px solid rgba(212, 166, 55, 0.35);
+    border-radius: 10px;
+    overflow: hidden;
+    background: rgba(13, 48, 64, 0.5);
+}
+.profile-photo-wrapper img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+/* Section label */
+.profile-section-label {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #d4a637;
+    margin-bottom: 0.5rem;
+}
+
+/* Horizontal rule */
+.profile-hr {
+    height: 1px;
+    background: linear-gradient(to right, rgba(212, 166, 55, 0.3), rgba(26, 80, 96, 0.3));
+    margin: 1rem 0;
+}
+
+/* Specialization pill */
+.profile-pill {
+    display: inline-block;
+    padding: 6px 18px;
+    font-size: 14px;
+    font-family: 'Fira Sans', sans-serif;
+    border: 1px solid rgba(212, 166, 55, 0.5);
+    border-radius: 25px;
+    color: #d4a637;
+    background: rgba(212, 166, 55, 0.08);
+    transition: all 0.3s ease;
+}
+.profile-pill:hover {
+    background: rgba(212, 166, 55, 0.15);
+}
+
+/* Service box */
+.profile-service-box {
+    background: linear-gradient(135deg, rgba(13, 48, 64, 0.8), rgba(10, 37, 48, 0.9));
+    border: 1px solid rgba(26, 80, 96, 0.5);
+    border-left: 3px solid #d4a637;
+    padding: 14px 18px;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.4;
+    border-radius: 0 6px 6px 0;
+    transition: all 0.3s ease;
+}
+.profile-service-box:hover {
+    border-left-color: #e8c356;
+    background: linear-gradient(135deg, rgba(13, 48, 64, 0.9), rgba(10, 37, 48, 1));
+}
+
+/* CTA block */
+.profile-cta-block {
+    background: linear-gradient(135deg, rgba(26, 80, 96, 0.6), rgba(13, 48, 64, 0.8));
+    border: 2px solid rgba(212, 166, 55, 0.4);
+    border-radius: 10px;
+    padding: 1.5rem;
+    text-align: center;
+    margin: 1.25rem 0;
+}
+
+/* Description text */
+.profile-description {
+    font-family: 'Fira Sans', sans-serif;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 16px;
+    line-height: 1.7;
+    margin-top: 1.25rem;
+}
+.profile-description p {
+    margin-bottom: 0.75rem;
+}
+.profile-description strong {
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 600;
+}
+
+/* Reviews header */
+.profile-reviews-header {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #d4a637;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(212, 166, 55, 0.2);
+}
+
+/* Review author */
+.profile-review-author {
+    font-family: 'Fira Sans', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.85);
+    margin-bottom: 4px;
+}
+
+/* Review text */
+.profile-review-text {
+    font-family: 'Fira Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.55);
+    font-style: italic;
+}
+
+/* Disclaimer */
+.profile-disclaimer {
+    font-family: 'Fira Sans', sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.35);
+}

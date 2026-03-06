@@ -52,7 +52,7 @@
   "seed_data_creation": "Pre-seeded with 8 participants, 6 reviews, 8 FAQ items, page content, site settings",
   "retest_needed": false,
   "should_main_agent_self_test": true,
-  "context_for_next_testing_agent": "All features implemented and working: Application forms with honeypot, Email notifications via Resend (working - see backend logs), CSV export with UTF-8 BOM, Photo upload with Pillow optimization, Admin panel with all CRUD operations. Public URL: https://psychic-battle-1.preview.emergentagent.com",
+  "context_for_next_testing_agent": "All features implemented and working: Application forms with honeypot, Email notifications via Resend (working - see backend logs), CSV export with UTF-8 BOM, Photo upload with Pillow optimization, Admin panel with all CRUD operations. Public URL: https://psychic-profiles.preview.emergentagent.com",
   "email_notification_evidence": {
     "status": "WORKING",
     "log_entries": [

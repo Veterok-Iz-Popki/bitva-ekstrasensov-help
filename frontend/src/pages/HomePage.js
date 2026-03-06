@@ -238,7 +238,7 @@ export default function HomePage() {
                     {/* CTA button */}
                     <div>
                       <Link to={`/uchastniki/${p.slug}`}>
-                        <span className="btn-outline-gold-sm" data-testid={`participant-cta-${p.slug}`}>Обратиться</span>
+                        <span className="inline-block bg-gold hover:bg-gold/85 text-teal-dark font-body font-semibold text-sm md:text-base px-6 py-2.5 rounded-lg transition-colors" data-testid={`participant-cta-${p.slug}`}>Обратиться</span>
                       </Link>
                     </div>
                   </div>
