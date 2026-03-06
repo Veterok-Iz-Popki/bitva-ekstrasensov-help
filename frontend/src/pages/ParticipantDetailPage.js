@@ -167,9 +167,16 @@ export default function ParticipantDetailPage() {
     <div className="pt-24 md:pt-32 pb-16" data-testid="participant-detail-page">
       {/* Application Form Modal */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" data-testid="application-modal">
-          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowForm(false)} />
-          <div className="relative z-10 w-full max-w-lg teal-card p-6 md:p-8 max-h-[90vh] overflow-y-auto">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          data-testid="application-modal"
+          onClick={() => setShowForm(false)}
+        >
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" />
+          <div
+            className="relative z-10 w-full max-w-lg teal-card p-6 md:p-8 max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
               onClick={() => setShowForm(false)}
               className="absolute top-3 right-3 text-white/40 hover:text-white transition-colors"
