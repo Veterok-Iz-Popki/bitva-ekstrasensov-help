@@ -191,45 +191,58 @@ export default function HomePage() {
               {b.participants_title || 'Лучшие экстрасенсы России'}
             </h2>
 
-            {/* Participant cards grid - reference style */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 gap-4 md:gap-6">
+            {/* Participant cards grid - horizontal 2-column layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
               {participants.map((p) => (
-                <Link
+                <div
                   key={p.id}
-                  to={`/uchastniki/${p.slug}`}
-                  className="participant-card-v group"
+                  className="teal-card flex flex-row items-start gap-4 md:gap-5 p-4"
                   data-testid={`participant-card-${p.slug}`}
                 >
-                  {/* Circular photo */}
-                  <div className="participant-photo-circle">
-                    <img
-                      src={p.photo_url}
-                      alt={p.name}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      loading="lazy"
-                    />
+                  {/* Square photo */}
+                  <Link to={`/uchastniki/${p.slug}`} className="shrink-0">
+                    <div className="w-28 h-32 md:w-36 md:h-40 rounded-md overflow-hidden border-2 border-white/20">
+                      <img
+                        src={p.photo_url}
+                        alt={p.name}
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                        loading="lazy"
+                      />
+                    </div>
+                  </Link>
+
+                  {/* Text content */}
+                  <div className="flex flex-col justify-between min-h-[130px] md:min-h-[160px]">
+                    <div>
+                      <Link to={`/uchastniki/${p.slug}`}>
+                        <h3 className="font-heading text-lg md:text-xl font-bold text-gold hover:text-gold/80 transition-colors mb-2">
+                          {p.name}
+                        </h3>
+                      </Link>
+
+                      {/* Specialization badges */}
+                      <div className="flex flex-wrap gap-1.5 mb-2">
+                        {(Array.isArray(p.specializations) ? p.specializations : []).slice(0, 2).map((s, j) => (
+                          <span key={j} className="px-2.5 py-0.5 rounded-full border border-gold/40 text-gold/80 font-body text-xs">
+                            {s}
+                          </span>
+                        ))}
+                      </div>
+
+                      {/* Short description */}
+                      <p className="text-white/50 font-body text-sm leading-relaxed line-clamp-2 mb-3">
+                        {p.title}
+                      </p>
+                    </div>
+
+                    {/* CTA button */}
+                    <div>
+                      <Link to={`/uchastniki/${p.slug}`}>
+                        <span className="btn-outline-gold-sm" data-testid={`participant-cta-${p.slug}`}>Обратиться</span>
+                      </Link>
+                    </div>
                   </div>
-
-                  {/* Name */}
-                  <h3 className="font-heading text-base md:text-lg font-semibold text-gold text-center leading-tight mb-1">
-                    {p.name}
-                  </h3>
-
-                  {/* Role/Specializations */}
-                  <div className="flex flex-wrap justify-center gap-1 mb-3">
-                    {(p.specializations || []).slice(0, 2).map((s, j) => (
-                      <span key={j} className="text-gold/60 font-body text-sm">{s}</span>
-                    ))}
-                  </div>
-
-                  {/* Short description */}
-                  <p className="text-white/50 font-body text-sm leading-relaxed text-center line-clamp-2 mb-3">
-                    {p.title || p.description?.slice(0, 60)}
-                  </p>
-
-                  {/* CTA button */}
-                  <span className="btn-outline-gold-sm">Обратиться</span>
-                </Link>
+                </div>
               ))}
             </div>
           </div>
