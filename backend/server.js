@@ -622,7 +622,7 @@ app.use('/api', api);
 const BUILD_DIR = path.join(__dirname, 'build');
 if (fs.existsSync(BUILD_DIR)) {
   app.use(express.static(BUILD_DIR));
-  app.get('*', (req, res) => {
+  app.get('/{*splat}', (req, res) => {
     res.sendFile(path.join(BUILD_DIR, 'index.html'));
   });
 }
