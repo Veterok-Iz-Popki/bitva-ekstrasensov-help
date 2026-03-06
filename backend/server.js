@@ -11,7 +11,7 @@ require('dotenv').config({ path: __dirname + '/.env' });
 const db = require('./db');
 
 const app = express();
-const PORT = 8001;
+const PORT = process.env.PORT || 8001;
 
 // Config
 const JWT_SECRET = process.env.JWT_SECRET || 'change-me-in-production';
