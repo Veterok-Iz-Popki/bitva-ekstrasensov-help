@@ -3,7 +3,7 @@ import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
 import { Label } from '../components/ui/label';
 import { toast } from 'sonner';
-import { X, Phone, Copy, Download } from 'lucide-react';
+import { X } from 'lucide-react';
 import api from '../lib/api';
 
 const PREFIX = '+7';
@@ -16,22 +16,11 @@ function isMobilePhone() {
   return mobileRegex.test(ua) && window.innerWidth < 768;
 }
 
-const CONTACT_PHONE = '+79284217358';
 const CONTACT_PHONE_DISPLAY = '+7 (928) 421-73-58';
 
 function openVCard() {
-  // Direct navigation — iOS Safari opens "Add Contact" natively
-  // Android may open contacts app or download the file
   const apiUrl = process.env.REACT_APP_BACKEND_URL || '';
   window.location.href = `${apiUrl}/api/contact.vcf`;
-}
-
-function copyPhone() {
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(CONTACT_PHONE).then(() => {
-      // Will be handled by caller via toast
-    }).catch(() => {});
-  }
 }
 
 function formatDigits(digits) {
@@ -389,31 +378,10 @@ export default function ApplicationForm({ title, subtitle, psychicSlug, psychicN
             {/* Primary: Save contact (opens .vcf) */}
             <button
               onClick={() => { openVCard(); }}
-              className="btn-gold w-full py-3 text-sm font-body font-semibold uppercase tracking-wide flex items-center justify-center gap-2 mb-3"
+              className="btn-gold w-full py-3 text-sm font-body font-semibold uppercase tracking-wide"
               data-testid="vcard-save-btn"
             >
-              <Download className="w-4 h-4" />
               Сохранить контакт
-            </button>
-
-            {/* Secondary: Call directly */}
-            <a
-              href={`tel:${CONTACT_PHONE}`}
-              className="btn-outline-gold w-full py-3 text-sm font-body font-semibold uppercase tracking-wide flex items-center justify-center gap-2 mb-3 no-underline"
-              data-testid="vcard-call-btn"
-            >
-              <Phone className="w-4 h-4" />
-              Позвонить
-            </a>
-
-            {/* Tertiary: Copy number */}
-            <button
-              onClick={() => { copyPhone(); toast.success('Номер скопирован'); }}
-              className="w-full py-3 text-sm font-body text-white/50 hover:text-white transition-colors flex items-center justify-center gap-2"
-              data-testid="vcard-copy-btn"
-            >
-              <Copy className="w-4 h-4" />
-              Скопировать номер
             </button>
           </div>
         </div>
