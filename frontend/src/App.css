@@ -8,6 +8,8 @@
     transition: all 0.3s ease;
     border: 2px solid #d4a637;
     padding: 12px 24px;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 .btn-gold:hover {
     background-color: #e8c356;

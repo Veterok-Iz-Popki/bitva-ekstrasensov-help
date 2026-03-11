@@ -32,15 +32,15 @@ export default function ReviewsCarousel({ reviews = [] }) {
   return (
     <div className="relative w-full" data-testid="reviews-carousel">
       {/* Card */}
-      <div className="relative max-w-4xl mx-auto">
+      <div className="relative max-w-4xl mx-auto px-10 md:px-16">
         {/* Arrow Left */}
         <button
           onClick={prev}
-          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 md:-translate-x-14 z-10 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center text-white/70 hover:text-white transition-colors"
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center text-white/70 hover:text-white transition-colors"
           data-testid="carousel-prev-btn"
           aria-label="Previous review"
         >
-          <ChevronLeft className="w-8 h-8 md:w-10 md:h-10" strokeWidth={2} />
+          <ChevronLeft className="w-7 h-7 md:w-10 md:h-10" strokeWidth={2} />
         </button>
 
         {/* Review Content */}
@@ -86,11 +86,11 @@ export default function ReviewsCarousel({ reviews = [] }) {
         {/* Arrow Right */}
         <button
           onClick={next}
-          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 md:translate-x-14 z-10 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center text-white/70 hover:text-white transition-colors"
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center text-white/70 hover:text-white transition-colors"
           data-testid="carousel-next-btn"
           aria-label="Next review"
         >
-          <ChevronRight className="w-8 h-8 md:w-10 md:h-10" strokeWidth={2} />
+          <ChevronRight className="w-7 h-7 md:w-10 md:h-10" strokeWidth={2} />
         </button>
       </div>
 
@@ -103,7 +103,7 @@ export default function ReviewsCarousel({ reviews = [] }) {
 
       {/* Dot indicators - show max 15, with grouping for larger sets */}
       {total > 1 && (
-        <div className="flex justify-center gap-2 mt-6" data-testid="carousel-dots">
+        <div className="flex justify-center flex-wrap gap-2 mt-6 max-w-full px-4" data-testid="carousel-dots">
           {total <= 15 ? (
             reviews.map((_, i) => (
               <button
