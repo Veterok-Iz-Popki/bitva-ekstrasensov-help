@@ -17,23 +17,23 @@ function isMobilePhone() {
 }
 
 function downloadVCard() {
-  const vcf = [
-    'BEGIN:VCARD',
-    'VERSION:3.0',
-    'N:Экстрасенсов;Битва;;;',
-    'FN:Битва Экстрасенсов',
-    'TEL;TYPE=CELL:+79284217358',
-    'END:VCARD',
-  ].join('\r\n');
-  const blob = new Blob([vcf], { type: 'text/vcard;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'bitva-ekstrasensov.vcf';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  // On mobile, use server endpoint for reliable vCard opening
+  const apiUrl = process.env.REACT_APP_BACKEND_URL || '';
+  const serverUrl = `${apiUrl}/api/contact.vcf`;
+
+  try {
+    // Server-served .vcf is the most reliable on mobile
+    const a = document.createElement('a');
+    a.href = serverUrl;
+    a.download = 'bitva-ekstrasensov.vcf';
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => document.body.removeChild(a), 3000);
+  } catch {
+    // Fallback: direct window.location
+    window.location.href = serverUrl;
+  }
 }
 
 function formatDigits(digits) {

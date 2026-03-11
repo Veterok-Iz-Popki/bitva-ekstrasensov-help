@@ -131,6 +131,16 @@ const api = express.Router();
 
 api.get('/', (req, res) => res.json({ message: 'Битва экстрасенсов API' }));
 
+// vCard contact download
+api.get('/contact.vcf', (req, res) => {
+  const vcf = 'BEGIN:VCARD\r\nVERSION:3.0\r\nN:Экстрасенсов;Битва;;;\r\nFN:Битва Экстрасенсов\r\nTEL;TYPE=CELL:+79284217358\r\nEND:VCARD';
+  res.set({
+    'Content-Type': 'text/vcard; charset=utf-8',
+    'Content-Disposition': 'attachment; filename="bitva-ekstrasensov.vcf"',
+  });
+  res.send(vcf);
+});
+
 api.get('/pages/:slug', async (req, res) => {
   const [rows] = await db.query('SELECT page_slug, blocks, updated_at FROM pages WHERE page_slug = ?', [req.params.slug]);
   if (!rows.length) return res.json({ page_slug: req.params.slug, blocks: {} });
