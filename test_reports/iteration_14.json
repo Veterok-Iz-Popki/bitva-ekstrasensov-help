@@ -1,0 +1,69 @@
+{
+  "summary": "Testing of new psychic booking flow completed successfully. All 12 features verified: buttons on participant pages now navigate to /zapis-na-priem?psychic=slug instead of opening modals, booking page shows personalized titles with correct Russian dative case declensions, back links work correctly, form submissions save psychic_slug and psychic_name to database, and admin panel displays Экстрасенс column in applications table.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "passed_tests": [
+    "GET /api/participants/elena-golunova returns correct data for booking page",
+    "GET /api/participants/aleksandr-sheps returns correct data",
+    "GET /api/participants/viktoriya-raidos returns correct data",
+    "GET /api/participants/nadezhda-shevchenko returns correct data",
+    "GET /api/participants/oleg-sheps returns correct data",
+    "POST /api/applications with psychic_slug and psychic_name saves correctly",
+    "POST /api/applications without psychic fields works (generic booking)",
+    "GET /api/admin/applications returns psychic_slug and psychic_name fields",
+    "Admin login works with provided credentials",
+    "Elena Golunova page: top CTA button navigates to /zapis-na-priem?psychic=elena-golunova",
+    "Elena Golunova booking: title shows 'Обратиться к Елене Голуновой' (dative case)",
+    "Elena Golunova booking: back link shows 'Елена Голунова' and links to participant page",
+    "Aleksandr Sheps page: CTA navigates to /zapis-na-priem?psychic=aleksandr-sheps",
+    "Aleksandr Sheps booking: title shows 'Обратиться к Александру Шепсу'",
+    "Viktoriya Raidos page: CTA navigates to /zapis-na-priem?psychic=viktoriya-raidos",
+    "Viktoriya Raidos booking: title shows 'Обратиться к Виктории Райдосу'",
+    "Nadezhda Shevchenko page: CTA navigates to /zapis-na-priem?psychic=nadezhda-shevchenko",
+    "Nadezhda Shevchenko booking: title shows 'Обратиться к Надежде Шевченко'",
+    "Oleg Sheps page: bottom CTA button navigates to /zapis-na-priem?psychic=oleg-sheps",
+    "Oleg Sheps booking: title shows 'Обратиться к Олегу Шепсу'",
+    "No modal/popup opens on participant pages - application-modal element correctly removed",
+    "Generic booking page /zapis-na-priem shows title 'Запись на приём к экстрасенсу'",
+    "Generic booking page has no back link (correct behavior)",
+    "Admin applications table shows 'Экстрасенс' column header",
+    "Admin applications table displays psychic names (Елена Голунова, Александр Шепс, etc.)",
+    "Admin application detail dialog shows 'Экстрасенс' field with psychic name in gold",
+    "Form submission from booking page with psychic param saves psychic data correctly",
+    "Form shows success toast 'Заявка успешно отправлена! Мы свяжемся с вами.'"
+  ],
+  "test_report_links": [
+    "/app/backend/tests/test_psychic_booking_flow.py",
+    "/app/test_reports/pytest/psychic_booking_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [
+    "/app/backend/tests/test_psychic_booking_flow.py"
+  ],
+  "success_rate": {
+    "backend": "100% (11/11 pytest tests passed)",
+    "frontend": "100% (17/17 Playwright tests passed)"
+  },
+  "test_credentials": {
+    "admin_login": "nikoa2020@gmail.com",
+    "admin_password": "aspire5542gl1952tq"
+  },
+  "seed_data_creation": "Created test applications via API (TEST_* prefix) and form submission (Playwright7212)",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "The new psychic booking flow is fully implemented and working. Participant detail pages now use <Link to='/zapis-na-priem?psychic=slug'> instead of modal popups. BookingPage correctly reads ?psychic= query param, fetches participant data, and displays personalized title with Russian dative case declension. ApplicationForm sends psychic_slug and psychic_name in POST request. Admin panel ApplicationsAdmin.js shows Экстрасенс column in table and detail dialog. All 8 participants work: elena-golunova, angelina-izosimova, viktoriya-raidos, nadezhda-shevchenko, aleksandr-sheps, oleg-sheps, zuliya-radzhabova, vlad-cherevatyy.",
+  "features_verified": {
+    "navigation_flow": "Participant page CTA buttons -> Booking page with ?psychic param -> Form submission with psychic data -> Admin visibility",
+    "russian_declensions_working": "Dative case (к Елене Голуновой, к Александру Шепсу, к Виктории Райдосу, etc.)",
+    "modal_removed": "application-modal element no longer exists on participant pages",
+    "admin_psychic_column": "Table header 'Экстрасенс' with data and detail dialog shows psychic name"
+  }
+}

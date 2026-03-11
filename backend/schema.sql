@@ -18,6 +18,8 @@ CREATE TABLE IF NOT EXISTS applications (
   age VARCHAR(50) DEFAULT '',
   city VARCHAR(255) DEFAULT '',
   problem TEXT,
+  psychic_slug VARCHAR(255) DEFAULT '',
+  psychic_name VARCHAR(255) DEFAULT '',
   status VARCHAR(50) DEFAULT 'new',
   notes TEXT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP

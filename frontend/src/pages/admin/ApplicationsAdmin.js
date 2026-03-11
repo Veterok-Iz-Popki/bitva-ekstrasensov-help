@@ -140,6 +140,7 @@ export default function ApplicationsAdmin() {
             <TableRow className="border-teal-light/20 hover:bg-transparent">
               <TableHead className="text-white/40 font-body">ФИО</TableHead>
               <TableHead className="text-white/40 font-body">Телефон</TableHead>
+              <TableHead className="text-white/40 font-body hidden md:table-cell">Экстрасенс</TableHead>
               <TableHead className="text-white/40 font-body hidden md:table-cell">Город</TableHead>
               <TableHead className="text-white/40 font-body hidden lg:table-cell">Возраст</TableHead>
               <TableHead className="text-white/40 font-body">Статус</TableHead>
@@ -157,6 +158,7 @@ export default function ApplicationsAdmin() {
               <TableRow key={item.id} className="border-teal-light/20 hover:bg-teal/30">
                 <TableCell className="font-body text-white font-medium">{fullName}</TableCell>
                 <TableCell className="font-body text-white/70">{item.phone}</TableCell>
+                <TableCell className="font-body text-gold/70 hidden md:table-cell">{item.psychic_name || '—'}</TableCell>
                 <TableCell className="font-body text-white/50 hidden md:table-cell">{item.city || '—'}</TableCell>
                 <TableCell className="font-body text-white/50 hidden lg:table-cell">{item.age || '—'}</TableCell>
                 <TableCell>
@@ -189,7 +191,7 @@ export default function ApplicationsAdmin() {
             })}
             {filtered.length === 0 && (
               <TableRow>
-                <TableCell colSpan={7} className="text-center text-white/30 font-body py-8">
+                <TableCell colSpan={8} className="text-center text-white/30 font-body py-8">
                   {statusFilter === 'all' ? 'Нет заявок' : 'Нет заявок с выбранным статусом'}
                 </TableCell>
               </TableRow>
@@ -243,6 +245,12 @@ export default function ApplicationsAdmin() {
                   <span className="text-white/40">Дата:</span>
                   <p className="text-white">{new Date(selected.created_at).toLocaleString('ru-RU')}</p>
                 </div>
+                {selected.psychic_name && (
+                  <div className="col-span-2">
+                    <span className="text-white/40">Экстрасенс:</span>
+                    <p className="text-gold font-semibold">{selected.psychic_name}</p>
+                  </div>
+                )}
               </div>
               {(selected.problem || selected.description) && (
                 <div>

@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, ChevronDown, X } from 'lucide-react';
+import { ArrowLeft, ChevronDown } from 'lucide-react';
 import api, { setSEO, setJsonLd } from '../lib/api';
-import ApplicationForm from '../components/ApplicationForm';
 
 function getFirstName(name) {
   return (name || '').trim().split(' ')[0];
 }
 
-/* Simple Russian genitive for common name patterns */
 function toGenitive(fullName) {
   if (!fullName) return fullName;
   const [first = '', last = ''] = fullName.trim().split(' ');
@@ -17,7 +15,7 @@ function toGenitive(fullName) {
   else if (first.endsWith('а')) gF = first.slice(0, -1) + 'ы';
   else if (first.endsWith('я')) gF = first.slice(0, -1) + 'и';
   else if (first.endsWith('й')) gF = first.slice(0, -1) + 'я';
-  else if (first.endsWith('д') || first.endsWith('г') || first.endsWith('р') || first.endsWith('к') || first.endsWith('л')) gF = first + 'а';
+  else if (/[бвгджзклмнпрстфхцчшщ]$/.test(first)) gF = first + 'а';
   let gL = last;
   if (last.endsWith('ова') || last.endsWith('ева')) gL = last.slice(0, -1) + 'ой';
   else if (last.endsWith('ов') || last.endsWith('ев')) gL = last + 'а';
@@ -57,7 +55,7 @@ function toInstrumental(fullName) {
   else if (first.endsWith('а')) iF = first.slice(0, -1) + 'ой';
   else if (first.endsWith('я')) iF = first.slice(0, -1) + 'ей';
   else if (first.endsWith('й')) iF = first.slice(0, -1) + 'ем';
-  else if (first.endsWith('д') || first.endsWith('г') || first.endsWith('р')) iF = first + 'ом';
+  else if (/[бвгджзклмнпрстфхцчшщ]$/.test(first)) iF = first + 'ом';
   let iL = last;
   if (last.endsWith('ова') || last.endsWith('ева')) iL = last.slice(0, -1) + 'ой';
   else if (last.endsWith('ов') || last.endsWith('ев')) iL = last + 'ым';
@@ -76,7 +74,6 @@ export default function ParticipantDetailPage() {
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
-  const [showForm, setShowForm] = useState(false);
 
   const INITIAL_REVIEWS = 5;
 
@@ -107,12 +104,6 @@ export default function ParticipantDetailPage() {
     }).catch(() => setNotFound(true)).finally(() => setLoading(false));
   }, [slug]);
 
-  useEffect(() => {
-    if (showForm) document.body.style.overflow = 'hidden';
-    else document.body.style.overflow = '';
-    return () => { document.body.style.overflow = ''; };
-  }, [showForm]);
-
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center pt-20">
       <div className="text-white/40 font-body">Загрузка...</div>
@@ -133,6 +124,8 @@ export default function ParticipantDetailPage() {
   const specs = participant.specializations || [];
   const visibleReviews = showAllReviews ? reviews : reviews.slice(0, INITIAL_REVIEWS);
   const hasMore = reviews.length > INITIAL_REVIEWS;
+
+  const bookingUrl = `/zapis-na-priem?psychic=${slug}`;
 
   const ReviewsBlock = ({ testIdPrefix = 'review' }) => (
     <>
@@ -165,33 +158,6 @@ export default function ParticipantDetailPage() {
 
   return (
     <div className="pt-24 md:pt-32 pb-16" data-testid="participant-detail-page">
-      {/* Application Form Modal */}
-      {showForm && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          data-testid="application-modal"
-          onClick={() => setShowForm(false)}
-        >
-          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" />
-          <div
-            className="relative z-10 w-full max-w-lg teal-card p-6 md:p-8 max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={() => setShowForm(false)}
-              className="absolute top-3 right-3 text-white/40 hover:text-white transition-colors"
-              data-testid="close-modal-btn"
-            >
-              <X className="w-6 h-6" />
-            </button>
-            <ApplicationForm
-              title={`Обратиться к ${datName}`}
-              subtitle="Заполните форму и мы свяжемся с вами"
-            />
-          </div>
-        </div>
-      )}
-
       <div className="max-w-6xl mx-auto px-4 md:px-8">
         {/* Back navigation */}
         <Link
@@ -223,7 +189,6 @@ export default function ParticipantDetailPage() {
               />
             </div>
 
-            {/* Reviews - desktop only */}
             {reviews.length > 0 && (
               <div className="hidden md:block mt-8" data-testid="reviews-desktop">
                 <ReviewsBlock testIdPrefix="review" />
@@ -233,14 +198,12 @@ export default function ParticipantDetailPage() {
 
           {/* === RIGHT COLUMN: Status, Specs, Services, CTA, Description === */}
           <div className="profile-right">
-            {/* Status */}
             <div className="profile-section-label">Статус</div>
             <p className="font-body text-white/80 text-base mb-4" data-testid="participant-status">
               {participant.name} — {participant.title || 'участник проекта «Битва Экстрасенсов»'}.
             </p>
             <div className="profile-hr" />
 
-            {/* Specialization */}
             {specs.length > 0 && (
               <>
                 <div className="profile-section-label">Специализация</div>
@@ -253,7 +216,6 @@ export default function ParticipantDetailPage() {
               </>
             )}
 
-            {/* Service boxes */}
             <div className="space-y-3 mb-4">
               <div className="profile-service-box" data-testid="service-help">
                 Помощь<br />{genName}.
@@ -272,13 +234,14 @@ export default function ParticipantDetailPage() {
               <p className="font-heading text-xl md:text-2xl font-bold text-white mb-4">
                 Не упустите свой шанс
               </p>
-              <button
-                onClick={() => setShowForm(true)}
-                className="btn-gold px-8 py-3 text-lg font-body font-semibold rounded-full"
-                data-testid="cta-apply-btn-top"
-              >
-                Обратиться
-              </button>
+              <Link to={bookingUrl}>
+                <button
+                  className="btn-gold px-8 py-3 text-lg font-body font-semibold rounded-full"
+                  data-testid="cta-apply-btn-top"
+                >
+                  Обратиться
+                </button>
+              </Link>
               <p className="font-heading text-lg md:text-xl text-white/80 mt-3">
                 Количество обращений ограниченно!
               </p>
@@ -308,13 +271,14 @@ export default function ParticipantDetailPage() {
 
             {/* Bottom CTA */}
             <div className="mt-6">
-              <button
-                onClick={() => setShowForm(true)}
-                className="btn-gold px-10 py-4 text-lg md:text-xl font-body font-semibold rounded-full"
-                data-testid="cta-apply-btn-bottom"
-              >
-                Обратиться
-              </button>
+              <Link to={bookingUrl}>
+                <button
+                  className="btn-gold px-10 py-4 text-lg md:text-xl font-body font-semibold rounded-full"
+                  data-testid="cta-apply-btn-bottom"
+                >
+                  Обратиться
+                </button>
+              </Link>
             </div>
           </div>
         </div>

@@ -87,6 +87,7 @@ async function sendNotificationEmail(application) {
           <tr><td style="padding:10px;border-bottom:1px solid #ddd;font-weight:bold">Возраст:</td><td style="padding:10px;border-bottom:1px solid #ddd">${application.age || '-'}</td></tr>
           <tr><td style="padding:10px;border-bottom:1px solid #ddd;font-weight:bold">Город:</td><td style="padding:10px;border-bottom:1px solid #ddd">${application.city || '-'}</td></tr>
           <tr><td style="padding:10px;font-weight:bold;vertical-align:top">Проблема:</td><td style="padding:10px">${application.problem || '-'}</td></tr>
+          ${application.psychic_name ? `<tr><td style="padding:10px;border-top:1px solid #ddd;font-weight:bold;color:#d4a637">Экстрасенс:</td><td style="padding:10px;border-top:1px solid #ddd;font-weight:bold">${application.psychic_name}</td></tr>` : ''}
         </table>
         <p style="color:#666;font-size:12px;margin-top:20px">Дата заявки: ${application.created_at || '-'}</p>
       </div>
@@ -95,7 +96,9 @@ async function sendNotificationEmail(application) {
     await resend.emails.send({
       from: SENDER_EMAIL,
       to: [settings.notification_email],
-      subject: `Новая заявка от ${fullName} — Битва экстрасенсов`,
+      subject: application.psychic_name
+        ? `Новая заявка от ${fullName} к ${application.psychic_name} — Битва экстрасенсов`
+        : `Новая заявка от ${fullName} — Битва экстрасенсов`,
       html,
     });
     console.log(`Notification email sent to ${settings.notification_email}`);
@@ -208,11 +211,11 @@ api.post('/applications', async (req, res) => {
   const id = uuidv4();
 
   await db.query(
-    'INSERT INTO applications (id, lastName, firstName, patronymic, name, phone, age, city, problem, status, notes, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)',
-    [id, data.lastName, data.firstName, data.patronymic, fullName, data.phone, data.age || '', data.city || '', data.problem, 'new', '', now]
+    'INSERT INTO applications (id, lastName, firstName, patronymic, name, phone, age, city, problem, psychic_slug, psychic_name, status, notes, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+    [id, data.lastName, data.firstName, data.patronymic, fullName, data.phone, data.age || '', data.city || '', data.problem, data.psychic_slug || '', data.psychic_name || '', 'new', '', now]
   );
 
-  sendNotificationEmail({ ...data, name: fullName, created_at: now }).catch(() => {});
+  sendNotificationEmail({ ...data, name: fullName, psychic_slug: data.psychic_slug, psychic_name: data.psychic_name, created_at: now }).catch(() => {});
   return res.json({ status: 'success', message: 'Заявка успешно отправлена' });
 });
 
@@ -278,10 +281,10 @@ api.delete('/admin/applications/:id', requireAdmin, async (req, res) => {
 api.get('/admin/applications/export/csv', requireAdmin, async (req, res) => {
   const [rows] = await db.query('SELECT * FROM applications ORDER BY created_at DESC LIMIT 10000');
   const BOM = '\ufeff';
-  const header = 'Дата;Фамилия;Имя;Отчество;Телефон;Город;Возраст;Проблема;Статус;Заметки\n';
+  const header = 'Дата;Фамилия;Имя;Отчество;Телефон;Город;Возраст;Проблема;Экстрасенс;Статус;Заметки\n';
   const lines = rows.map(r => {
     const date = r.created_at ? String(r.created_at).slice(0, 19).replace('T', ' ') : '';
-    return [date, r.lastName, r.firstName, r.patronymic, r.phone, r.city, r.age, r.problem, r.status, r.notes].map(v => `"${(v || '').replace(/"/g, '""')}"`).join(';');
+    return [date, r.lastName, r.firstName, r.patronymic, r.phone, r.city, r.age, r.problem, r.psychic_name, r.status, r.notes].map(v => `"${(v || '').replace(/"/g, '""')}"`).join(';');
   }).join('\n');
 
   res.setHeader('Content-Type', 'text/csv; charset=utf-8');

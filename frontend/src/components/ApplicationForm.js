@@ -55,7 +55,7 @@ function extractDigitsAfter7(value) {
   return all.slice(0, 10);
 }
 
-export default function ApplicationForm({ title, subtitle }) {
+export default function ApplicationForm({ title, subtitle, psychicSlug, psychicName }) {
   const [form, setForm] = useState({
     lastName: '',
     firstName: '',
@@ -200,7 +200,11 @@ export default function ApplicationForm({ title, subtitle }) {
     
     setLoading(true);
     try {
-      await api.post('/applications', form);
+      await api.post('/applications', {
+        ...form,
+        psychic_slug: psychicSlug || '',
+        psychic_name: psychicName || '',
+      });
       toast.success('Заявка успешно отправлена! Мы свяжемся с вами.');
       setForm({
         lastName: '',
