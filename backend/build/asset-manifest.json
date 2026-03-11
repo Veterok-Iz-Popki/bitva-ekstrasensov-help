@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/pod-backups/psychic-profiles/build/static/css/main.71f21201.css",
+    "main.js": "/pod-backups/psychic-profiles/build/static/js/main.c4ff2a6d.js",
+    "index.html": "/pod-backups/psychic-profiles/build/index.html",
+    "main.71f21201.css.map": "/pod-backups/psychic-profiles/build/static/css/main.71f21201.css.map",
+    "main.c4ff2a6d.js.map": "/pod-backups/psychic-profiles/build/static/js/main.c4ff2a6d.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.71f21201.css",
+    "static/js/main.c4ff2a6d.js"
+  ]
+}

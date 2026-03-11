@@ -3,9 +3,38 @@ import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
 import { Label } from '../components/ui/label';
 import { toast } from 'sonner';
+import { X } from 'lucide-react';
 import api from '../lib/api';
 
 const PREFIX = '+7';
+
+function isMobilePhone() {
+  if (typeof window === 'undefined') return false;
+  const ua = navigator.userAgent || '';
+  // Detect mobile phones only (not tablets)
+  const mobileRegex = /Android.*Mobile|iPhone|iPod|BlackBerry|IEMobile|Opera Mini|Windows Phone/i;
+  return mobileRegex.test(ua) && window.innerWidth < 768;
+}
+
+function downloadVCard() {
+  const vcf = [
+    'BEGIN:VCARD',
+    'VERSION:3.0',
+    'N:Экстрасенсов;Битва;;;',
+    'FN:Битва Экстрасенсов',
+    'TEL;TYPE=CELL:+79284217358',
+    'END:VCARD',
+  ].join('\r\n');
+  const blob = new Blob([vcf], { type: 'text/vcard;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'bitva-ekstrasensov.vcf';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
 
 function formatDigits(digits) {
   if (!digits) return PREFIX;
@@ -38,6 +67,7 @@ export default function ApplicationForm({ title, subtitle }) {
     honeypot: ''
   });
   const [loading, setLoading] = useState(false);
+  const [showVcardPopup, setShowVcardPopup] = useState(false);
   const phoneRef = useRef(null);
   const prevDigitsRef = useRef('');
 
@@ -182,6 +212,10 @@ export default function ApplicationForm({ title, subtitle }) {
         problem: '',
         honeypot: ''
       });
+      // On mobile phones — offer to save contact
+      if (isMobilePhone()) {
+        setShowVcardPopup(true);
+      }
     } catch (err) {
       if (err.response?.status === 429) {
         toast.error('Слишком много запросов. Попробуйте позже.');
@@ -316,6 +350,43 @@ export default function ApplicationForm({ title, subtitle }) {
           {loading ? 'Отправка...' : 'Отправить'}
         </button>
       </form>
+
+      {/* vCard popup — mobile only */}
+      {showVcardPopup && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center p-4"
+          data-testid="vcard-popup-overlay"
+          onClick={() => setShowVcardPopup(false)}
+        >
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" />
+          <div
+            className="relative z-10 w-full max-w-sm teal-card p-6 text-center"
+            onClick={(e) => e.stopPropagation()}
+            data-testid="vcard-popup"
+          >
+            <button
+              onClick={() => setShowVcardPopup(false)}
+              className="absolute top-3 right-3 text-white/40 hover:text-white transition-colors"
+              data-testid="vcard-popup-close"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <h3 className="font-heading text-xl font-bold text-gold mb-2">
+              Спасибо! Ваша заявка отправлена
+            </h3>
+            <p className="font-body text-white/60 text-sm mb-5">
+              Сохраните наш номер, чтобы не пропустить звонок
+            </p>
+            <button
+              onClick={() => { downloadVCard(); setShowVcardPopup(false); }}
+              className="btn-gold w-full py-3 text-sm font-body font-semibold uppercase tracking-wide"
+              data-testid="vcard-save-btn"
+            >
+              Сохранить контакт
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
