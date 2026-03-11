@@ -135,8 +135,8 @@ api.get('/', (req, res) => res.json({ message: 'Битва экстрасенс�
 api.get('/contact.vcf', (req, res) => {
   const vcf = 'BEGIN:VCARD\r\nVERSION:3.0\r\nN:Экстрасенсов;Битва;;;\r\nFN:Битва Экстрасенсов\r\nTEL;TYPE=CELL:+79284217358\r\nEND:VCARD';
   res.set({
-    'Content-Type': 'text/x-vcard; charset=utf-8',
-    'Content-Disposition': 'inline; filename="bitva-ekstrasensov.vcf"',
+    'Content-Type': 'text/vcard; charset=utf-8',
+    'Content-Disposition': 'inline; filename="contact.vcf"',
   });
   res.send(vcf);
 });
