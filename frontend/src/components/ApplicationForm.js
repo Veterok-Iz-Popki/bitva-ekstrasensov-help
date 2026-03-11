@@ -17,23 +17,10 @@ function isMobilePhone() {
 }
 
 function downloadVCard() {
-  // On mobile, use server endpoint for reliable vCard opening
+  // Open server-served .vcf directly — NO download attribute
+  // This triggers the native "Add Contact" dialog on mobile OS
   const apiUrl = process.env.REACT_APP_BACKEND_URL || '';
-  const serverUrl = `${apiUrl}/api/contact.vcf`;
-
-  try {
-    // Server-served .vcf is the most reliable on mobile
-    const a = document.createElement('a');
-    a.href = serverUrl;
-    a.download = 'bitva-ekstrasensov.vcf';
-    a.style.display = 'none';
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => document.body.removeChild(a), 3000);
-  } catch {
-    // Fallback: direct window.location
-    window.location.href = serverUrl;
-  }
+  window.location.href = `${apiUrl}/api/contact.vcf`;
 }
 
 function formatDigits(digits) {
