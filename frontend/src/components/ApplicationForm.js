@@ -3,6 +3,7 @@ import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
 import { Label } from '../components/ui/label';
 import { toast } from 'sonner';
+import { X, Phone } from 'lucide-react';
 import api from '../lib/api';
 
 const PREFIX = '+7';
@@ -38,6 +39,7 @@ export default function ApplicationForm({ title, subtitle, psychicSlug, psychicN
     honeypot: ''
   });
   const [loading, setLoading] = useState(false);
+  const [showCallPopup, setShowCallPopup] = useState(false);
   const phoneRef = useRef(null);
   const prevDigitsRef = useRef('');
 
@@ -186,6 +188,7 @@ export default function ApplicationForm({ title, subtitle, psychicSlug, psychicN
         problem: '',
         honeypot: ''
       });
+      setShowCallPopup(true);
     } catch (err) {
       if (err.response?.status === 429) {
         toast.error('Слишком много запросов. Попробуйте позже.');
@@ -320,6 +323,49 @@ export default function ApplicationForm({ title, subtitle, psychicSlug, psychicN
           {loading ? 'Отправка...' : 'Отправить'}
         </button>
       </form>
+
+      {showCallPopup && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center p-4"
+          data-testid="call-popup-overlay"
+          onClick={() => setShowCallPopup(false)}
+        >
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" />
+          <div
+            className="relative z-10 w-full max-w-sm teal-card p-6 text-center"
+            onClick={(e) => e.stopPropagation()}
+            data-testid="call-popup"
+          >
+            <button
+              onClick={() => setShowCallPopup(false)}
+              className="absolute top-3 right-3 text-white/40 hover:text-white transition-colors"
+              data-testid="call-popup-close"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <h3 className="font-heading text-xl font-bold text-gold mb-2">
+              Спасибо! Ваша заявка отправлена
+            </h3>
+            <p className="font-body text-white/60 text-sm mb-4">
+              Вы можете сразу связаться с нами по телефону
+            </p>
+
+            <p className="font-heading text-2xl font-bold text-white mb-5 tracking-wide" data-testid="call-popup-phone">
+              +7 928 421-73-58
+            </p>
+
+            <a
+              href="tel:+79284217358"
+              className="btn-gold w-full py-3 text-sm font-body font-semibold uppercase tracking-wide flex items-center justify-center gap-2 no-underline"
+              data-testid="call-popup-call-btn"
+            >
+              <Phone className="w-4 h-4" />
+              Позвонить
+            </a>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
