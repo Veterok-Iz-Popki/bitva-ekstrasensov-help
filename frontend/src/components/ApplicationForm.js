@@ -392,10 +392,6 @@ export default function ApplicationForm({ title, subtitle, psychicSlug, psychicN
               Сохраните наш номер, чтобы не пропустить звонок
             </p>
 
-            <div className="font-body text-2xl font-bold text-white mb-5 tracking-wide" data-testid="contact-phone-display">
-              {CONTACT_PHONE_DISPLAY}
-            </div>
-
             {/* Save contact — platform-specific */}
             <button
               onClick={() => {
@@ -403,23 +399,10 @@ export default function ApplicationForm({ title, subtitle, psychicSlug, psychicN
                 if (device === 'android') openContactAndroid();
                 else if (device === 'iphone') openContactIPhone();
               }}
-              className="btn-gold w-full py-3 text-sm font-body font-semibold uppercase tracking-wide mb-3"
+              className="btn-gold w-full py-3 text-sm font-body font-semibold uppercase tracking-wide"
               data-testid="vcard-save-btn"
             >
               Сохранить контакт
-            </button>
-
-            {/* Fallback: copy number */}
-            <button
-              onClick={() => {
-                copyPhoneToClipboard().then(() => {
-                  toast.success('Номер скопирован');
-                });
-              }}
-              className="w-full py-2.5 text-sm font-body text-white/50 hover:text-white transition-colors border border-white/15 rounded"
-              data-testid="vcard-copy-btn"
-            >
-              Скопировать номер
             </button>
           </div>
         </div>
