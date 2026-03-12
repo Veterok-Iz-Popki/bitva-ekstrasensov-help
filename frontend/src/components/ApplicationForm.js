@@ -351,13 +351,13 @@ export default function ApplicationForm({ title, subtitle, psychicSlug, psychicN
               Вы можете сразу связаться с нами по телефону
             </p>
 
-            <p className="font-heading text-2xl font-bold text-white mb-5 tracking-wide" data-testid="call-popup-phone">
+            <p className="font-body text-2xl font-bold text-white mb-5" data-testid="call-popup-phone">
               +7 928 421-73-58
             </p>
 
             <a
               href="tel:+79284217358"
-              className="btn-gold w-full py-3 text-sm font-body font-semibold uppercase tracking-wide flex items-center justify-center gap-2 no-underline"
+              className="btn-gold w-full py-3 text-sm font-body font-semibold uppercase tracking-wide items-center justify-center gap-2 no-underline flex md:hidden"
               data-testid="call-popup-call-btn"
             >
               <Phone className="w-4 h-4" />
