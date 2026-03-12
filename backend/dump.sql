@@ -61,6 +61,8 @@ CREATE TABLE `applications` (
   `age` varchar(50) DEFAULT '',
   `city` varchar(255) DEFAULT '',
   `problem` text DEFAULT NULL,
+  `psychic_slug` varchar(255) DEFAULT '',
+  `psychic_name` varchar(255) DEFAULT '',
   `status` varchar(50) DEFAULT 'new',
   `notes` text DEFAULT NULL,
   `created_at` datetime DEFAULT current_timestamp(),
@@ -501,10 +503,6 @@ INSERT INTO `site_settings` VALUES
 ('site_settings','info@example.com','+7 (800) 123-45-67','Москва, Россия','','Пн-Вс: 9:00 — 21:00','2024 Битва экстрасенсов. Все права защищены.',1,'','Битва Экстрасенсов',56,48);
 /*!40000 ALTER TABLE `site_settings` ENABLE KEYS */;
 UNLOCK TABLES;
-
---
--- Dumping routines for database 'psychic_battle'
---
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -515,4 +513,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-03-06 17:48:58
+-- Dump completed on 2026-03-12 12:20:58
