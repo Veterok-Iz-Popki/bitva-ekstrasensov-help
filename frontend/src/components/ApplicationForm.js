@@ -195,7 +195,7 @@ export default function ApplicationForm({ title, subtitle, psychicSlug, psychicN
         problem: '',
         honeypot: ''
       });
-      // On mobile phones — offer to save contact via Google
+      // On mobile — offer to save contact
       if (isMobilePhone()) {
         setShowVcardPopup(true);
       }
@@ -334,7 +334,7 @@ export default function ApplicationForm({ title, subtitle, psychicSlug, psychicN
         </button>
       </form>
 
-      {/* Google Contacts popup — mobile only */}
+      {/* Save contact popup — mobile only */}
       {showVcardPopup && (
         <div
           className="fixed inset-0 z-[60] flex items-center justify-center p-4"
@@ -362,13 +362,12 @@ export default function ApplicationForm({ title, subtitle, psychicSlug, psychicN
               Сохраните наш номер, чтобы не пропустить звонок
             </p>
 
-            {/* Direct <a> link to Google OAuth — pure user gesture */}
             <a
-              href={`${API_URL}/api/google/auth?return=${encodeURIComponent(window.location.pathname + window.location.search)}`}
+              href={`${API_URL}/api/contact.vcf`}
               className="btn-gold w-full py-3 text-sm font-body font-semibold uppercase tracking-wide block no-underline text-center"
-              data-testid="google-save-btn"
+              data-testid="save-contact-btn"
             >
-              Сохранить через Google
+              Сохранить контакт
             </a>
           </div>
         </div>

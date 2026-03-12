@@ -32,25 +32,6 @@ export default function BookingPage() {
   const [psychic, setPsychic] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Handle Google Contacts callback
-  useEffect(() => {
-    const contactStatus = searchParams.get('contact');
-    if (contactStatus === 'success') {
-      toast.success('Контакт успешно добавлен в Google Контакты');
-    } else if (contactStatus === 'error') {
-      toast.error('Не удалось добавить контакт');
-    } else if (contactStatus === 'cancelled') {
-      toast.info('Авторизация отменена');
-    }
-    if (contactStatus) {
-      // Clean URL without reloading
-      const newParams = new URLSearchParams(searchParams);
-      newParams.delete('contact');
-      const newUrl = window.location.pathname + (newParams.toString() ? '?' + newParams.toString() : '');
-      window.history.replaceState({}, '', newUrl);
-    }
-  }, [searchParams]);
-
   useEffect(() => {
     window.scrollTo(0, 0);
     const fetches = [
