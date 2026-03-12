@@ -7,20 +7,42 @@ import { X } from 'lucide-react';
 import api from '../lib/api';
 
 const PREFIX = '+7';
-
-function isMobilePhone() {
-  if (typeof window === 'undefined') return false;
-  const ua = navigator.userAgent || '';
-  // Detect mobile phones only (not tablets)
-  const mobileRegex = /Android.*Mobile|iPhone|iPod|BlackBerry|IEMobile|Opera Mini|Windows Phone/i;
-  return mobileRegex.test(ua) && window.innerWidth < 768;
-}
-
+const CONTACT_PHONE = '+79284217358';
+const CONTACT_NAME = 'Битва Экстрасенсов';
 const CONTACT_PHONE_DISPLAY = '+7 (928) 421-73-58';
 
-function openVCard() {
+function getDeviceType() {
+  if (typeof window === 'undefined') return 'desktop';
+  const ua = navigator.userAgent || '';
+  if (/iPhone|iPod/i.test(ua) && window.innerWidth < 768) return 'iphone';
+  if (/Android.*Mobile/i.test(ua) && window.innerWidth < 768) return 'android';
+  return 'desktop';
+}
+
+function openContactAndroid() {
+  const intentUrl = `intent://contacts/#Intent;action=android.intent.action.INSERT;type=vnd.android.cursor.dir/contact;S.name=${encodeURIComponent(CONTACT_NAME)};S.phone=${encodeURIComponent(CONTACT_PHONE)};end`;
+  window.location.href = intentUrl;
+}
+
+function openContactIPhone() {
   const apiUrl = process.env.REACT_APP_BACKEND_URL || '';
   window.location.href = `${apiUrl}/api/contact.vcf`;
+}
+
+function copyPhoneToClipboard() {
+  if (navigator.clipboard) {
+    return navigator.clipboard.writeText(CONTACT_PHONE);
+  }
+  // Fallback for older browsers
+  const ta = document.createElement('textarea');
+  ta.value = CONTACT_PHONE;
+  ta.style.position = 'fixed';
+  ta.style.left = '-9999px';
+  document.body.appendChild(ta);
+  ta.select();
+  document.execCommand('copy');
+  document.body.removeChild(ta);
+  return Promise.resolve();
 }
 
 function formatDigits(digits) {
@@ -204,7 +226,7 @@ export default function ApplicationForm({ title, subtitle, psychicSlug, psychicN
         honeypot: ''
       });
       // On mobile phones — offer to save contact
-      if (isMobilePhone()) {
+      if (getDeviceType() !== 'desktop') {
         setShowVcardPopup(true);
       }
     } catch (err) {
@@ -370,18 +392,34 @@ export default function ApplicationForm({ title, subtitle, psychicSlug, psychicN
               Сохраните наш номер, чтобы не пропустить звонок
             </p>
 
-            {/* Phone number display */}
             <div className="font-body text-2xl font-bold text-white mb-5 tracking-wide" data-testid="contact-phone-display">
               {CONTACT_PHONE_DISPLAY}
             </div>
 
-            {/* Primary: Save contact (opens .vcf) */}
+            {/* Save contact — platform-specific */}
             <button
-              onClick={() => { openVCard(); }}
-              className="btn-gold w-full py-3 text-sm font-body font-semibold uppercase tracking-wide"
+              onClick={() => {
+                const device = getDeviceType();
+                if (device === 'android') openContactAndroid();
+                else if (device === 'iphone') openContactIPhone();
+              }}
+              className="btn-gold w-full py-3 text-sm font-body font-semibold uppercase tracking-wide mb-3"
               data-testid="vcard-save-btn"
             >
               Сохранить контакт
+            </button>
+
+            {/* Fallback: copy number */}
+            <button
+              onClick={() => {
+                copyPhoneToClipboard().then(() => {
+                  toast.success('Номер скопирован');
+                });
+              }}
+              className="w-full py-2.5 text-sm font-body text-white/50 hover:text-white transition-colors border border-white/15 rounded"
+              data-testid="vcard-copy-btn"
+            >
+              Скопировать номер
             </button>
           </div>
         </div>
