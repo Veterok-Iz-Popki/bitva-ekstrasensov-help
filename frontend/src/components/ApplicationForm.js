@@ -7,22 +7,12 @@ import { X } from 'lucide-react';
 import api from '../lib/api';
 
 const PREFIX = '+7';
+const API_URL = process.env.REACT_APP_BACKEND_URL || '';
 
-const ANDROID_INTENT_URL = 'intent:#Intent;'
-  + 'action=android.intent.action.INSERT;'
-  + 'type=vnd.android.cursor.dir/contact;'
-  + 'S.name=%D0%91%D0%B8%D1%82%D0%B2%D0%B0%20%D0%AD%D0%BA%D1%81%D1%82%D1%80%D0%B0%D1%81%D0%B5%D0%BD%D1%81%D0%BE%D0%B2;'
-  + 'S.phone=%2B79284217358;'
-  + 'end';
-
-const IPHONE_VCF_URL = (process.env.REACT_APP_BACKEND_URL || '') + '/api/contact.vcf';
-
-function getDeviceType() {
-  if (typeof window === 'undefined') return 'desktop';
+function isMobilePhone() {
+  if (typeof window === 'undefined') return false;
   const ua = navigator.userAgent || '';
-  if (/iPhone|iPod/i.test(ua) && window.innerWidth < 768) return 'iphone';
-  if (/Android.*Mobile/i.test(ua) && window.innerWidth < 768) return 'android';
-  return 'desktop';
+  return /Android.*Mobile|iPhone|iPod/i.test(ua) && window.innerWidth < 768;
 }
 
 function formatDigits(digits) {
@@ -205,8 +195,8 @@ export default function ApplicationForm({ title, subtitle, psychicSlug, psychicN
         problem: '',
         honeypot: ''
       });
-      // On mobile phones — offer to save contact
-      if (getDeviceType() !== 'desktop') {
+      // On mobile phones — offer to save contact via Google
+      if (isMobilePhone()) {
         setShowVcardPopup(true);
       }
     } catch (err) {
@@ -344,7 +334,7 @@ export default function ApplicationForm({ title, subtitle, psychicSlug, psychicN
         </button>
       </form>
 
-      {/* Contact save popup — mobile only */}
+      {/* Google Contacts popup — mobile only */}
       {showVcardPopup && (
         <div
           className="fixed inset-0 z-[60] flex items-center justify-center p-4"
@@ -372,13 +362,13 @@ export default function ApplicationForm({ title, subtitle, psychicSlug, psychicN
               Сохраните наш номер, чтобы не пропустить звонок
             </p>
 
-            {/* Direct <a> link — pure user gesture, no JS intermediary */}
+            {/* Direct <a> link to Google OAuth — pure user gesture */}
             <a
-              href={getDeviceType() === 'android' ? ANDROID_INTENT_URL : IPHONE_VCF_URL}
+              href={`${API_URL}/api/google/auth?return=${encodeURIComponent(window.location.pathname + window.location.search)}`}
               className="btn-gold w-full py-3 text-sm font-body font-semibold uppercase tracking-wide block no-underline text-center"
-              data-testid="vcard-save-btn"
+              data-testid="google-save-btn"
             >
-              Сохранить контакт
+              Сохранить через Google
             </a>
           </div>
         </div>

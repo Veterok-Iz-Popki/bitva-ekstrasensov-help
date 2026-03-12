@@ -62,6 +62,12 @@ SEO-оптимизированный сайт сбора заявок на по�
   - Подавлен React dev overlay для кросс-доменных "Script error." (от внешних скриптов)
   - vCard скачивание переделано на серверный эндпоинт GET /api/contact.vcf
   - Content-Type: text/vcard для корректного открытия на мобильных
+- **Google Contacts интеграция (Март 2026):**
+  - OAuth flow: GET /api/google/auth → Google consent → GET /api/google/callback
+  - Создание контакта через People API (Битва Экстрасенсов, +79284217358)
+  - Попап «Сохранить через Google» после отправки формы (только mobile)
+  - Обработка success/error/cancelled через query params
+  - **ОЖИДАЕТ:** GOOGLE_CLIENT_ID и GOOGLE_CLIENT_SECRET от пользователя
 - FAQ
 
 ### UI/UX

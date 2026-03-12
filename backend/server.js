@@ -6,6 +6,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
+const { google } = require('googleapis');
 require('dotenv').config({ path: __dirname + '/.env' });
 
 const db = require('./db');
@@ -149,6 +150,72 @@ api.get('/contact-download.vcf', (req, res) => {
     'Content-Disposition': 'attachment; filename="contact.vcf"',
   });
   res.send(vcf);
+});
+
+
+// ===== GOOGLE CONTACTS OAUTH =====
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI || (process.env.SITE_URL ? process.env.SITE_URL + '/api/google/callback' : '');
+
+function getOAuth2Client() {
+  if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !GOOGLE_REDIRECT_URI) return null;
+  return new google.auth.OAuth2(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI);
+}
+
+// Step 1: Redirect user to Google OAuth consent screen
+api.get('/google/auth', (req, res) => {
+  const oauth2Client = getOAuth2Client();
+  if (!oauth2Client) return res.status(500).json({ error: 'Google OAuth not configured' });
+
+  const returnUrl = req.query.return || '/zapis-na-priem';
+  const authUrl = oauth2Client.generateAuthUrl({
+    access_type: 'online',
+    scope: ['https://www.googleapis.com/auth/contacts'],
+    state: Buffer.from(JSON.stringify({ returnUrl })).toString('base64'),
+    prompt: 'consent',
+  });
+  res.redirect(authUrl);
+});
+
+// Step 2: Handle Google OAuth callback, create contact, redirect back
+api.get('/google/callback', async (req, res) => {
+  const oauth2Client = getOAuth2Client();
+  if (!oauth2Client) return res.redirect('/zapis-na-priem?contact=error');
+
+  const { code, state } = req.query;
+  let returnUrl = '/zapis-na-priem';
+  try {
+    if (state) {
+      const parsed = JSON.parse(Buffer.from(state, 'base64').toString());
+      returnUrl = parsed.returnUrl || returnUrl;
+    }
+  } catch {}
+
+  if (!code) return res.redirect(returnUrl + '?contact=cancelled');
+
+  try {
+    const { tokens } = await oauth2Client.getToken(code);
+    oauth2Client.setCredentials(tokens);
+
+    const people = google.people({ version: 'v1', auth: oauth2Client });
+    await people.people.createContact({
+      requestBody: {
+        names: [{ givenName: 'Битва', familyName: 'Экстрасенсов' }],
+        phoneNumbers: [{ value: '+79284217358', type: 'mobile' }],
+      },
+    });
+
+    res.redirect(returnUrl + '?contact=success');
+  } catch (err) {
+    console.error('Google Contacts error:', err.message);
+    res.redirect(returnUrl + '?contact=error');
+  }
+});
+
+// Check if Google Contacts is configured
+api.get('/google/status', (req, res) => {
+  res.json({ configured: !!(GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET && GOOGLE_REDIRECT_URI) });
 });
 
 api.get('/pages/:slug', async (req, res) => {
