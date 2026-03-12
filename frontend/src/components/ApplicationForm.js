@@ -3,42 +3,9 @@ import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
 import { Label } from '../components/ui/label';
 import { toast } from 'sonner';
-import { X } from 'lucide-react';
 import api from '../lib/api';
 
 const PREFIX = '+7';
-const API_URL = process.env.REACT_APP_BACKEND_URL || '';
-
-function isMobilePhone() {
-  if (typeof window === 'undefined') return false;
-  const ua = navigator.userAgent || '';
-  return /Android.*Mobile|iPhone|iPod/i.test(ua) && window.innerWidth < 768;
-}
-
-function isAndroid() {
-  return /Android/i.test(navigator.userAgent || '');
-}
-
-function handleSaveContact() {
-  const vcfUrl = API_URL + '/api/contact.vcf';
-
-  if (isAndroid()) {
-    let intentWorked = false;
-    const onHide = () => { intentWorked = true; };
-    document.addEventListener('visibilitychange', onHide);
-
-    window.location.href = 'intent://contacts/#Intent;action=android.intent.action.INSERT;type=vnd.android.cursor.dir/contact;S.name=%D0%91%D0%B8%D1%82%D0%B2%D0%B0%20%D0%AD%D0%BA%D1%81%D1%82%D1%80%D0%B0%D1%81%D0%B5%D0%BD%D1%81%D0%BE%D0%B2;S.phone=%2B79284217358;end';
-
-    setTimeout(() => {
-      document.removeEventListener('visibilitychange', onHide);
-      if (!intentWorked && !document.hidden) {
-        window.location.href = vcfUrl;
-      }
-    }, 800);
-  } else {
-    window.location.href = vcfUrl;
-  }
-}
 
 function formatDigits(digits) {
   if (!digits) return PREFIX;
@@ -71,7 +38,6 @@ export default function ApplicationForm({ title, subtitle, psychicSlug, psychicN
     honeypot: ''
   });
   const [loading, setLoading] = useState(false);
-  const [showVcardPopup, setShowVcardPopup] = useState(false);
   const phoneRef = useRef(null);
   const prevDigitsRef = useRef('');
 
@@ -220,10 +186,6 @@ export default function ApplicationForm({ title, subtitle, psychicSlug, psychicN
         problem: '',
         honeypot: ''
       });
-      // On mobile — offer to save contact
-      if (isMobilePhone()) {
-        setShowVcardPopup(true);
-      }
     } catch (err) {
       if (err.response?.status === 429) {
         toast.error('Слишком много запросов. Попробуйте позже.');
@@ -358,45 +320,6 @@ export default function ApplicationForm({ title, subtitle, psychicSlug, psychicN
           {loading ? 'Отправка...' : 'Отправить'}
         </button>
       </form>
-
-      {/* Save contact popup — mobile only */}
-      {showVcardPopup && (
-        <div
-          className="fixed inset-0 z-[60] flex items-center justify-center p-4"
-          data-testid="vcard-popup-overlay"
-          onClick={() => setShowVcardPopup(false)}
-        >
-          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" />
-          <div
-            className="relative z-10 w-full max-w-sm teal-card p-6 text-center"
-            onClick={(e) => e.stopPropagation()}
-            data-testid="vcard-popup"
-          >
-            <button
-              onClick={() => setShowVcardPopup(false)}
-              className="absolute top-3 right-3 text-white/40 hover:text-white transition-colors"
-              data-testid="vcard-popup-close"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <h3 className="font-heading text-xl font-bold text-gold mb-2">
-              Спасибо! Ваша заявка отправлена
-            </h3>
-            <p className="font-body text-white/60 text-sm mb-5">
-              Сохраните наш номер, чтобы не пропустить звонок
-            </p>
-
-            <button
-              onClick={handleSaveContact}
-              className="btn-gold w-full py-3 text-sm font-body font-semibold uppercase tracking-wide block text-center"
-              data-testid="save-contact-btn"
-            >
-              Сохранить контакт
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
