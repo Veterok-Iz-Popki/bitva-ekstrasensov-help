@@ -23,13 +23,18 @@ function handleSaveContact() {
   const vcfUrl = API_URL + '/api/contact.vcf';
 
   if (isAndroid()) {
-    const intentUrl = 'intent://contacts/#Intent;action=android.intent.action.INSERT;type=vnd.android.cursor.dir/contact;S.name=%D0%91%D0%B8%D1%82%D0%B2%D0%B0%20%D0%AD%D0%BA%D1%81%D1%82%D1%80%D0%B0%D1%81%D0%B5%D0%BD%D1%81%D0%BE%D0%B2;S.phone=%2B79284217358;end';
-    window.location.href = intentUrl;
+    let intentWorked = false;
+    const onHide = () => { intentWorked = true; };
+    document.addEventListener('visibilitychange', onHide);
+
+    window.location.href = 'intent://contacts/#Intent;action=android.intent.action.INSERT;type=vnd.android.cursor.dir/contact;S.name=%D0%91%D0%B8%D1%82%D0%B2%D0%B0%20%D0%AD%D0%BA%D1%81%D1%82%D1%80%D0%B0%D1%81%D0%B5%D0%BD%D1%81%D0%BE%D0%B2;S.phone=%2B79284217358;end';
+
     setTimeout(() => {
-      if (!document.hidden) {
+      document.removeEventListener('visibilitychange', onHide);
+      if (!intentWorked && !document.hidden) {
         window.location.href = vcfUrl;
       }
-    }, 600);
+    }, 800);
   } else {
     window.location.href = vcfUrl;
   }
