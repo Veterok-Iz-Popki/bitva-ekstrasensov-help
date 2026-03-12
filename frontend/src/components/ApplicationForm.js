@@ -15,6 +15,26 @@ function isMobilePhone() {
   return /Android.*Mobile|iPhone|iPod/i.test(ua) && window.innerWidth < 768;
 }
 
+function isAndroid() {
+  return /Android/i.test(navigator.userAgent || '');
+}
+
+function handleSaveContact() {
+  const vcfUrl = API_URL + '/api/contact.vcf';
+
+  if (isAndroid()) {
+    const intentUrl = 'intent://contacts/#Intent;action=android.intent.action.INSERT;type=vnd.android.cursor.dir/contact;S.name=%D0%91%D0%B8%D1%82%D0%B2%D0%B0%20%D0%AD%D0%BA%D1%81%D1%82%D1%80%D0%B0%D1%81%D0%B5%D0%BD%D1%81%D0%BE%D0%B2;S.phone=%2B79284217358;end';
+    window.location.href = intentUrl;
+    setTimeout(() => {
+      if (!document.hidden) {
+        window.location.href = vcfUrl;
+      }
+    }, 600);
+  } else {
+    window.location.href = vcfUrl;
+  }
+}
+
 function formatDigits(digits) {
   if (!digits) return PREFIX;
   let f = PREFIX + ' (';
@@ -362,13 +382,13 @@ export default function ApplicationForm({ title, subtitle, psychicSlug, psychicN
               Сохраните наш номер, чтобы не пропустить звонок
             </p>
 
-            <a
-              href={`${API_URL}/api/contact.vcf`}
-              className="btn-gold w-full py-3 text-sm font-body font-semibold uppercase tracking-wide block no-underline text-center"
+            <button
+              onClick={handleSaveContact}
+              className="btn-gold w-full py-3 text-sm font-body font-semibold uppercase tracking-wide block text-center"
               data-testid="save-contact-btn"
             >
               Сохранить контакт
-            </a>
+            </button>
           </div>
         </div>
       )}
