@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, ChevronDown } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import api, { setSEO, setJsonLd } from '../lib/api';
 
 function getFirstName(name) {
@@ -71,15 +71,11 @@ export default function ParticipantDetailPage() {
   const { slug } = useParams();
   const [participant, setParticipant] = useState(null);
   const [reviews, setReviews] = useState([]);
-  const [showAllReviews, setShowAllReviews] = useState(false);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
-  const INITIAL_REVIEWS = 5;
-
   useEffect(() => {
     setLoading(true);
-    setShowAllReviews(false);
     window.scrollTo(0, 0);
     Promise.all([
       api.get(`/participants/${slug}`),
@@ -122,15 +118,13 @@ export default function ParticipantDetailPage() {
   const datName = toDative(participant.name);
   const instrName = toInstrumental(participant.name);
   const specs = participant.specializations || [];
-  const visibleReviews = showAllReviews ? reviews : reviews.slice(0, INITIAL_REVIEWS);
-  const hasMore = reviews.length > INITIAL_REVIEWS;
 
   const bookingUrl = `/zapis-na-priem?psychic=${slug}`;
 
   const ReviewsBlock = ({ testIdPrefix = 'review' }) => (
     <>
       <div className="profile-reviews-header">Отзывы</div>
-      {visibleReviews.map((r, i) => (
+      {reviews.map((r, i) => (
         <div key={r.id || i} className="mb-5" data-testid={`${testIdPrefix}-card-${i}`}>
           <div className="profile-review-author" data-testid={`${testIdPrefix}-author-${i}`}>
             {r.author_name}{r.author_city ? `, ${r.author_city}` : ''}
@@ -140,16 +134,6 @@ export default function ParticipantDetailPage() {
           </div>
         </div>
       ))}
-      {hasMore && !showAllReviews && (
-        <button
-          onClick={() => setShowAllReviews(true)}
-          className="btn-outline-gold px-6 py-2 font-body text-sm inline-flex items-center gap-2 mt-2"
-          data-testid={`${testIdPrefix}-show-more-btn`}
-        >
-          Показать ещё ({reviews.length - INITIAL_REVIEWS})
-          <ChevronDown className="w-4 h-4" />
-        </button>
-      )}
       <p className="profile-disclaimer mt-6">
         Мы не даём гарантии помощи без ознакомления с ситуацией. Результаты могут отличаться в зависимости от обстоятельств. Мы не несём ответственности за отзывы и рекомендации клиентов.
       </p>
@@ -217,15 +201,21 @@ export default function ParticipantDetailPage() {
             )}
 
             <div className="space-y-3 mb-4">
-              <div className="profile-service-box" data-testid="service-help">
-                Помощь<br />{genName}.
-              </div>
-              <div className="profile-service-box" data-testid="service-consultation">
-                Консультация<br />{genName}.
-              </div>
-              <div className="profile-service-box" data-testid="service-appointment">
-                Записаться на Личный Приём<br />к {datName}.
-              </div>
+              <Link to={bookingUrl} className="block no-underline" data-testid="service-help">
+                <div className="profile-service-box cursor-pointer hover:border-gold/60 transition-colors">
+                  Помощь<br />{genName}.
+                </div>
+              </Link>
+              <Link to={bookingUrl} className="block no-underline" data-testid="service-consultation">
+                <div className="profile-service-box cursor-pointer hover:border-gold/60 transition-colors">
+                  Консультация<br />{genName}.
+                </div>
+              </Link>
+              <Link to={bookingUrl} className="block no-underline" data-testid="service-appointment">
+                <div className="profile-service-box cursor-pointer hover:border-gold/60 transition-colors">
+                  Записаться на Личный Приём<br />к {datName}.
+                </div>
+              </Link>
             </div>
             <div className="profile-hr" />
 
