@@ -8,31 +8,21 @@ import api from '../lib/api';
 
 const PREFIX = '+7';
 
+const ANDROID_INTENT_URL = 'intent:#Intent;'
+  + 'action=android.intent.action.INSERT;'
+  + 'type=vnd.android.cursor.dir/contact;'
+  + 'S.name=%D0%91%D0%B8%D1%82%D0%B2%D0%B0%20%D0%AD%D0%BA%D1%81%D1%82%D1%80%D0%B0%D1%81%D0%B5%D0%BD%D1%81%D0%BE%D0%B2;'
+  + 'S.phone=%2B79284217358;'
+  + 'end';
+
+const IPHONE_VCF_URL = (process.env.REACT_APP_BACKEND_URL || '') + '/api/contact.vcf';
+
 function getDeviceType() {
   if (typeof window === 'undefined') return 'desktop';
   const ua = navigator.userAgent || '';
   if (/iPhone|iPod/i.test(ua) && window.innerWidth < 768) return 'iphone';
   if (/Android.*Mobile/i.test(ua) && window.innerWidth < 768) return 'android';
   return 'desktop';
-}
-
-function openContactIPhone() {
-  // inline .vcf — Safari opens native "Add Contact" dialog
-  const apiUrl = process.env.REACT_APP_BACKEND_URL || '';
-  window.location.href = `${apiUrl}/api/contact.vcf`;
-}
-
-function openContactAndroid() {
-  // Try Android intent first — opens "Create Contact" screen directly
-  // S.name sets full name, S.phone sets phone number
-  const intentUrl = 'intent:#Intent;'
-    + 'action=android.intent.action.INSERT;'
-    + 'type=vnd.android.cursor.dir/contact;'
-    + 'S.name=%D0%91%D0%B8%D1%82%D0%B2%D0%B0%20%D0%AD%D0%BA%D1%81%D1%82%D1%80%D0%B0%D1%81%D0%B5%D0%BD%D1%81%D0%BE%D0%B2;'
-    + 'S.phone=%2B79284217358;'
-    + 'S.browser_fallback_url=' + encodeURIComponent((process.env.REACT_APP_BACKEND_URL || '') + '/api/contact.vcf') + ';'
-    + 'end';
-  window.location.href = intentUrl;
 }
 
 function formatDigits(digits) {
@@ -382,18 +372,14 @@ export default function ApplicationForm({ title, subtitle, psychicSlug, psychicN
               Сохраните наш номер, чтобы не пропустить звонок
             </p>
 
-            {/* Save contact — platform-specific */}
-            <button
-              onClick={() => {
-                const device = getDeviceType();
-                if (device === 'android') openContactAndroid();
-                else if (device === 'iphone') openContactIPhone();
-              }}
-              className="btn-gold w-full py-3 text-sm font-body font-semibold uppercase tracking-wide"
+            {/* Direct <a> link — pure user gesture, no JS intermediary */}
+            <a
+              href={getDeviceType() === 'android' ? ANDROID_INTENT_URL : IPHONE_VCF_URL}
+              className="btn-gold w-full py-3 text-sm font-body font-semibold uppercase tracking-wide block no-underline text-center"
               data-testid="vcard-save-btn"
             >
               Сохранить контакт
-            </button>
+            </a>
           </div>
         </div>
       )}
