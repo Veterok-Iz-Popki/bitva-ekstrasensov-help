@@ -23,15 +23,16 @@ function openContactIPhone() {
 }
 
 function openContactAndroid() {
-  // attachment .vcf — Chrome downloads the file and Android shows
-  // "Open with Contacts" notification / prompt automatically
-  const apiUrl = process.env.REACT_APP_BACKEND_URL || '';
-  const a = document.createElement('a');
-  a.href = `${apiUrl}/api/contact-download.vcf`;
-  a.style.display = 'none';
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(() => document.body.removeChild(a), 1000);
+  // Try Android intent first — opens "Create Contact" screen directly
+  // S.name sets full name, S.phone sets phone number
+  const intentUrl = 'intent:#Intent;'
+    + 'action=android.intent.action.INSERT;'
+    + 'type=vnd.android.cursor.dir/contact;'
+    + 'S.name=%D0%91%D0%B8%D1%82%D0%B2%D0%B0%20%D0%AD%D0%BA%D1%81%D1%82%D1%80%D0%B0%D1%81%D0%B5%D0%BD%D1%81%D0%BE%D0%B2;'
+    + 'S.phone=%2B79284217358;'
+    + 'S.browser_fallback_url=' + encodeURIComponent((process.env.REACT_APP_BACKEND_URL || '') + '/api/contact.vcf') + ';'
+    + 'end';
+  window.location.href = intentUrl;
 }
 
 function formatDigits(digits) {
