@@ -7,9 +7,6 @@ import { X } from 'lucide-react';
 import api from '../lib/api';
 
 const PREFIX = '+7';
-const CONTACT_PHONE = '+79284217358';
-const CONTACT_NAME = 'Битва Экстрасенсов';
-const CONTACT_PHONE_DISPLAY = '+7 (928) 421-73-58';
 
 function getDeviceType() {
   if (typeof window === 'undefined') return 'desktop';
@@ -19,30 +16,22 @@ function getDeviceType() {
   return 'desktop';
 }
 
-function openContactAndroid() {
-  const intentUrl = `intent://contacts/#Intent;action=android.intent.action.INSERT;type=vnd.android.cursor.dir/contact;S.name=${encodeURIComponent(CONTACT_NAME)};S.phone=${encodeURIComponent(CONTACT_PHONE)};end`;
-  window.location.href = intentUrl;
-}
-
 function openContactIPhone() {
+  // inline .vcf — Safari opens native "Add Contact" dialog
   const apiUrl = process.env.REACT_APP_BACKEND_URL || '';
   window.location.href = `${apiUrl}/api/contact.vcf`;
 }
 
-function copyPhoneToClipboard() {
-  if (navigator.clipboard) {
-    return navigator.clipboard.writeText(CONTACT_PHONE);
-  }
-  // Fallback for older browsers
-  const ta = document.createElement('textarea');
-  ta.value = CONTACT_PHONE;
-  ta.style.position = 'fixed';
-  ta.style.left = '-9999px';
-  document.body.appendChild(ta);
-  ta.select();
-  document.execCommand('copy');
-  document.body.removeChild(ta);
-  return Promise.resolve();
+function openContactAndroid() {
+  // attachment .vcf — Chrome downloads the file and Android shows
+  // "Open with Contacts" notification / prompt automatically
+  const apiUrl = process.env.REACT_APP_BACKEND_URL || '';
+  const a = document.createElement('a');
+  a.href = `${apiUrl}/api/contact-download.vcf`;
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => document.body.removeChild(a), 1000);
 }
 
 function formatDigits(digits) {

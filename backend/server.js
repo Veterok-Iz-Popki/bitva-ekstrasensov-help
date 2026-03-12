@@ -131,12 +131,22 @@ const api = express.Router();
 
 api.get('/', (req, res) => res.json({ message: 'Битва экстрасенсов API' }));
 
-// vCard contact download
+// vCard contact — inline (iPhone Safari opens "Add Contact")
 api.get('/contact.vcf', (req, res) => {
   const vcf = 'BEGIN:VCARD\r\nVERSION:3.0\r\nN:Экстрасенсов;Битва;;;\r\nFN:Битва Экстрасенсов\r\nTEL;TYPE=CELL:+79284217358\r\nEND:VCARD';
   res.set({
     'Content-Type': 'text/vcard; charset=utf-8',
     'Content-Disposition': 'inline; filename="contact.vcf"',
+  });
+  res.send(vcf);
+});
+
+// vCard contact — attachment (Android Chrome downloads then opens via system)
+api.get('/contact-download.vcf', (req, res) => {
+  const vcf = 'BEGIN:VCARD\r\nVERSION:3.0\r\nN:Экстрасенсов;Битва;;;\r\nFN:Битва Экстрасенсов\r\nTEL;TYPE=CELL:+79284217358\r\nEND:VCARD';
+  res.set({
+    'Content-Type': 'text/x-vcard',
+    'Content-Disposition': 'attachment; filename="contact.vcf"',
   });
   res.send(vcf);
 });
