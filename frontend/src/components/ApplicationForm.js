@@ -7,6 +7,18 @@ import { X, Phone } from 'lucide-react';
 import api from '../lib/api';
 
 const PREFIX = '+7';
+const API_URL = process.env.REACT_APP_BACKEND_URL || '';
+
+function isIPhone() {
+  const ua = navigator.userAgent || '';
+  return /iPhone|iPod/.test(ua) && !/android/i.test(ua);
+}
+
+function isMobilePhone() {
+  if (typeof window === 'undefined') return false;
+  const ua = navigator.userAgent || '';
+  return /Android.*Mobile|iPhone|iPod/i.test(ua) && window.innerWidth < 768;
+}
 
 function formatDigits(digits) {
   if (!digits) return PREFIX;
@@ -347,22 +359,41 @@ export default function ApplicationForm({ title, subtitle, psychicSlug, psychicN
             <h3 className="font-heading text-xl font-bold text-gold mb-2">
               Спасибо! Ваша заявка отправлена
             </h3>
-            <p className="font-body text-white/60 text-sm mb-4">
-              Вы можете сразу связаться с нами по телефону
-            </p>
 
-            <p className="font-body text-2xl font-bold text-white mb-5" data-testid="call-popup-phone">
-              +7 928 421-73-58
-            </p>
-
-            <a
-              href="tel:+79284217358"
-              className="btn-gold w-full py-3 text-sm font-body font-semibold uppercase tracking-wide items-center justify-center gap-2 no-underline flex md:hidden"
-              data-testid="call-popup-call-btn"
-            >
-              <Phone className="w-4 h-4" />
-              Позвонить
-            </a>
+            {isIPhone() ? (
+              <>
+                <p className="font-body text-white/60 text-sm mb-4">
+                  Сохраните наш номер, чтобы не пропустить звонок
+                </p>
+                <p className="font-body text-2xl font-bold text-white mb-5" data-testid="call-popup-phone">
+                  +7 928 421-73-58
+                </p>
+                <a
+                  href={`${API_URL}/api/contact.vcf`}
+                  className="btn-gold w-full py-3 text-sm font-body font-semibold uppercase tracking-wide flex items-center justify-center gap-2 no-underline"
+                  data-testid="save-contact-btn"
+                >
+                  Сохранить контакт
+                </a>
+              </>
+            ) : (
+              <>
+                <p className="font-body text-white/60 text-sm mb-4">
+                  Вы можете сразу связаться с нами по телефону
+                </p>
+                <p className="font-body text-2xl font-bold text-white mb-5" data-testid="call-popup-phone">
+                  +7 928 421-73-58
+                </p>
+                <a
+                  href="tel:+79284217358"
+                  className="btn-gold w-full py-3 text-sm font-body font-semibold uppercase tracking-wide items-center justify-center gap-2 no-underline flex md:hidden"
+                  data-testid="call-popup-call-btn"
+                >
+                  <Phone className="w-4 h-4" />
+                  Позвонить
+                </a>
+              </>
+            )}
           </div>
         </div>
       )}
