@@ -256,12 +256,12 @@ export default function HomePage() {
             {BENEFITS.map((item, i) => {
               const Icon = item.icon;
               return (
-                <div key={i} className="flex flex-col items-center text-center" data-testid={`benefit-card-${i}`}>
-                  <div className="benefit-icon-circle mb-3">
+                <Link key={i} to="/zapis-na-priem" className="flex flex-col items-center text-center group cursor-pointer no-underline" data-testid={`benefit-card-${i}`}>
+                  <div className="benefit-icon-circle mb-3 group-hover:border-gold group-hover:shadow-[0_0_16px_rgba(212,175,55,0.3)] transition-all duration-300">
                     <Icon className="w-7 h-7" />
                   </div>
-                  <p className="text-white/60 font-body text-sm leading-snug max-w-[120px]">{item.label}</p>
-                </div>
+                  <p className="text-white/60 font-body text-sm leading-snug max-w-[120px] group-hover:text-gold/80 transition-colors">{item.label}</p>
+                </Link>
               );
             })}
           </div>
