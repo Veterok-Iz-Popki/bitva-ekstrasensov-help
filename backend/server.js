@@ -133,7 +133,14 @@ api.get('/', (req, res) => res.json({ message: 'Битва экстрасенс�
 
 // vCard contact — inline (iPhone Safari opens "Add Contact")
 api.get('/contact.vcf', (req, res) => {
-  const vcf = 'BEGIN:VCARD\r\nVERSION:3.0\r\nN:Экстрасенсов;Битва;;;\r\nFN:Битва Экстрасенсов\r\nTEL;TYPE=CELL:+79284217358\r\nEND:VCARD';
+  const vcf = [
+    'BEGIN:VCARD',
+    'VERSION:3.0',
+    'N;CHARSET=UTF-8:Экстрасенсов;Битва;;;',
+    'FN;CHARSET=UTF-8:Битва Экстрасенсов',
+    'TEL;TYPE=CELL:+79284217358',
+    'END:VCARD',
+  ].join('\r\n');
   res.set({
     'Content-Type': 'text/vcard; charset=utf-8',
     'Content-Disposition': 'inline; filename="contact.vcf"',

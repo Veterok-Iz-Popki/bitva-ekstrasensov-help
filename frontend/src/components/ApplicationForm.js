@@ -362,11 +362,8 @@ export default function ApplicationForm({ title, subtitle, psychicSlug, psychicN
 
             {isIPhone() ? (
               <>
-                <p className="font-body text-white/60 text-sm mb-4">
+                <p className="font-body text-white/60 text-sm mb-5">
                   Сохраните наш номер, чтобы не пропустить звонок
-                </p>
-                <p className="font-body text-2xl font-bold text-white mb-5" data-testid="call-popup-phone">
-                  +7 928 421-73-58
                 </p>
                 <a
                   href={`${API_URL}/api/contact.vcf`}
