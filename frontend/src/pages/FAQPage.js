@@ -72,8 +72,8 @@ export default function FAQPage() {
         {/* CTA */}
         <div className="mt-12 text-center">
           <p className="text-white/50 font-body text-sm mb-4">Не нашли ответ на свой вопрос?</p>
-          <Link to="/kontakty">
-            <button className="btn-outline-gold px-8 py-3 font-body text-sm">
+          <Link to="/zapis-na-priem">
+            <button className="btn-outline-gold px-8 py-3 font-body text-sm" data-testid="faq-contact-btn">
               Связаться с нами
             </button>
           </Link>
