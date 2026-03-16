@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/table';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
@@ -7,22 +7,22 @@ import { Label } from '../../components/ui/label';
 import { Switch } from '../../components/ui/switch';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../components/ui/dialog';
 import { Badge } from '../../components/ui/badge';
-import { Plus, Pencil, Trash2, ArrowUp, ArrowDown, Play } from 'lucide-react';
+import { Plus, Pencil, Trash2, ArrowUp, ArrowDown, Play, Upload, Film, Image } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '../../lib/api';
 
+const API_URL = process.env.REACT_APP_BACKEND_URL || '';
 const emptyForm = { video_url: '', title: '', description: '', thumbnail_url: '', order: 0, is_published: true };
-
-function getYtThumb(url) {
-  const m = url?.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&?/]+)/);
-  return m ? `https://img.youtube.com/vi/${m[1]}/mqdefault.jpg` : null;
-}
 
 export default function VideoAdmin() {
   const [items, setItems] = useState([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editId, setEditId] = useState(null);
   const [form, setForm] = useState({ ...emptyForm });
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const videoInputRef = useRef(null);
+  const posterInputRef = useRef(null);
 
   const load = () => { api.get('/admin/gallery/videos').then(r => setItems(r.data || [])).catch(() => {}); };
   useEffect(() => { load(); }, []);
@@ -45,13 +45,66 @@ export default function VideoAdmin() {
     setDialogOpen(true);
   };
 
-  const handleSave = async () => {
-    if (!form.video_url) { toast.error('Укажите ссылку на видео'); return; }
+  const uploadFiles = async (videoFile, posterFile) => {
+    if (!videoFile && !posterFile) return {};
+    setUploading(true);
+    setUploadProgress(0);
+    const fd = new FormData();
+    if (videoFile) fd.append('video', videoFile);
+    if (posterFile) fd.append('poster', posterFile);
     try {
-      if (editId) { await api.put(`/admin/gallery/videos/${editId}`, form); toast.success('Видео обновлено'); }
-      else { await api.post('/admin/gallery/videos', form); toast.success('Видео добавлено'); }
-      setDialogOpen(false); load();
-    } catch { toast.error('Ошибка'); }
+      const token = localStorage.getItem('admin_token');
+      const xhr = new XMLHttpRequest();
+      const result = await new Promise((resolve, reject) => {
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) setUploadProgress(Math.round((e.loaded / e.total) * 100));
+        };
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) resolve(JSON.parse(xhr.responseText));
+          else reject(new Error('Upload failed'));
+        };
+        xhr.onerror = () => reject(new Error('Upload failed'));
+        xhr.open('POST', `${API_URL}/api/admin/upload-video`);
+        xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+        xhr.send(fd);
+      });
+      return result;
+    } finally {
+      setUploading(false);
+      setUploadProgress(0);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!form.video_url && !videoInputRef.current?.files?.[0]) {
+      toast.error('Загрузите видеофайл');
+      return;
+    }
+    try {
+      const videoFile = videoInputRef.current?.files?.[0];
+      const posterFile = posterInputRef.current?.files?.[0];
+      let videoUrl = form.video_url;
+      let posterUrl = form.thumbnail_url;
+
+      if (videoFile || posterFile) {
+        const uploaded = await uploadFiles(videoFile, posterFile);
+        if (uploaded.video_url) videoUrl = uploaded.video_url;
+        if (uploaded.poster_url) posterUrl = uploaded.poster_url;
+      }
+
+      const payload = { ...form, video_url: videoUrl, thumbnail_url: posterUrl };
+      if (editId) {
+        await api.put(`/admin/gallery/videos/${editId}`, payload);
+        toast.success('Видео обновлено');
+      } else {
+        await api.post('/admin/gallery/videos', payload);
+        toast.success('Видео добавлено');
+      }
+      setDialogOpen(false);
+      load();
+    } catch {
+      toast.error('Ошибка загрузки');
+    }
   };
 
   const deleteItem = async (id) => {
@@ -64,6 +117,8 @@ export default function VideoAdmin() {
     await api.put(`/admin/gallery/videos/${item.id}`, { ...item, order: newOrder });
     load();
   };
+
+  const fullUrl = (u) => u && u.startsWith('/') ? API_URL + u : u;
 
   return (
     <div data-testid="admin-video">
@@ -80,45 +135,44 @@ export default function VideoAdmin() {
             <TableRow className="border-teal-light/20 hover:bg-transparent">
               <TableHead className="text-white/40 font-body w-20">Превью</TableHead>
               <TableHead className="text-white/40 font-body">Название</TableHead>
-              <TableHead className="text-white/40 font-body">URL</TableHead>
               <TableHead className="text-white/40 font-body w-20">Порядок</TableHead>
               <TableHead className="text-white/40 font-body w-24">Статус</TableHead>
               <TableHead className="text-white/40 font-body text-right w-32">Действия</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {items.map((item) => {
-              const thumb = item.thumbnail_url || getYtThumb(item.video_url);
-              return (
-                <TableRow key={item.id} className="border-teal-light/20 hover:bg-teal/30">
-                  <TableCell>
-                    {thumb ? (
-                      <img src={thumb} alt="" className="w-16 h-10 object-cover rounded" />
-                    ) : <div className="w-16 h-10 bg-teal-dark/80 rounded flex items-center justify-center"><Play className="w-4 h-4 text-white/20" /></div>}
-                  </TableCell>
-                  <TableCell className="font-body text-white text-sm">{item.title || '—'}</TableCell>
-                  <TableCell className="font-body text-white/50 text-xs max-w-[200px] truncate">{item.video_url}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => moveItem(item, -1)}><ArrowUp className="w-3 h-3 text-white/50" /></Button>
-                      <span className="text-white/60 text-xs font-body w-4 text-center">{item.order}</span>
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => moveItem(item, 1)}><ArrowDown className="w-3 h-3 text-white/50" /></Button>
+            {items.map((item) => (
+              <TableRow key={item.id} className="border-teal-light/20 hover:bg-teal/30">
+                <TableCell>
+                  {item.thumbnail_url ? (
+                    <img src={fullUrl(item.thumbnail_url)} alt="" className="w-16 h-10 object-cover rounded" />
+                  ) : (
+                    <div className="w-16 h-10 bg-teal-dark/80 rounded flex items-center justify-center">
+                      <Film className="w-4 h-4 text-white/20" />
                     </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={item.is_published ? 'default' : 'secondary'} className="font-body text-xs">
-                      {item.is_published ? 'Видно' : 'Скрыто'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-1">
-                      <Button variant="ghost" size="icon" onClick={() => openEdit(item)}><Pencil className="w-4 h-4 text-white/50 hover:text-gold" /></Button>
-                      <Button variant="ghost" size="icon" onClick={() => deleteItem(item.id)}><Trash2 className="w-4 h-4 text-white/50 hover:text-red-400" /></Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
+                  )}
+                </TableCell>
+                <TableCell className="font-body text-white text-sm">{item.title || '—'}</TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-1">
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => moveItem(item, -1)}><ArrowUp className="w-3 h-3 text-white/50" /></Button>
+                    <span className="text-white/60 text-xs font-body w-4 text-center">{item.order}</span>
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => moveItem(item, 1)}><ArrowDown className="w-3 h-3 text-white/50" /></Button>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Badge variant={item.is_published ? 'default' : 'secondary'} className="font-body text-xs">
+                    {item.is_published ? 'Видно' : 'Скрыто'}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex items-center justify-end gap-1">
+                    <Button variant="ghost" size="icon" onClick={() => openEdit(item)}><Pencil className="w-4 h-4 text-white/50 hover:text-gold" /></Button>
+                    <Button variant="ghost" size="icon" onClick={() => deleteItem(item.id)}><Trash2 className="w-4 h-4 text-white/50 hover:text-red-400" /></Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
         {items.length === 0 && <p className="text-white/30 font-body text-center py-8">Нет видео</p>}
@@ -130,17 +184,56 @@ export default function VideoAdmin() {
             <DialogTitle className="font-heading text-white text-xl">{editId ? 'Редактировать' : 'Добавить'} видео</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
+            {/* Video file upload */}
             <div className="space-y-2">
-              <Label className="text-white/70 font-body text-sm">Ссылка на видео (YouTube / Vimeo / Rutube)</Label>
-              <Input
-                value={form.video_url}
-                onChange={(e) => setForm({ ...form, video_url: e.target.value })}
-                placeholder="https://www.youtube.com/watch?v=..."
-                className="bg-teal-dark/80 border-teal-light/30 text-white h-10"
-                data-testid="video-url-input"
-              />
-              <p className="text-white/30 text-xs font-body">Поддерживаются: YouTube, Vimeo, Rutube</p>
+              <Label className="text-white/70 font-body text-sm">Видеофайл (MP4, WebM)</Label>
+              {form.video_url && (
+                <p className="text-green-400/80 text-xs font-body flex items-center gap-1">
+                  <Film className="w-3 h-3" /> Видео загружено
+                </p>
+              )}
+              <div
+                className="border-2 border-dashed border-teal-light/30 rounded-lg p-4 text-center cursor-pointer hover:border-gold/50 transition-colors"
+                onClick={() => videoInputRef.current?.click()}
+              >
+                <Upload className="w-6 h-6 text-white/30 mx-auto mb-2" />
+                <p className="text-white/50 text-xs font-body">
+                  {form.video_url ? 'Заменить видео' : 'Нажмите для загрузки видео'}
+                </p>
+                <input
+                  ref={videoInputRef}
+                  type="file"
+                  accept="video/mp4,video/webm,video/quicktime"
+                  className="hidden"
+                  data-testid="video-file-input"
+                />
+              </div>
             </div>
+
+            {/* Poster upload */}
+            <div className="space-y-2">
+              <Label className="text-white/70 font-body text-sm">Обложка / превью (JPG, PNG)</Label>
+              {form.thumbnail_url && (
+                <img src={fullUrl(form.thumbnail_url)} alt="preview" className="w-24 h-14 object-cover rounded" />
+              )}
+              <div
+                className="border-2 border-dashed border-teal-light/30 rounded-lg p-3 text-center cursor-pointer hover:border-gold/50 transition-colors"
+                onClick={() => posterInputRef.current?.click()}
+              >
+                <Image className="w-5 h-5 text-white/30 mx-auto mb-1" />
+                <p className="text-white/50 text-xs font-body">
+                  {form.thumbnail_url ? 'Заменить обложку' : 'Загрузить обложку'}
+                </p>
+                <input
+                  ref={posterInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  data-testid="poster-file-input"
+                />
+              </div>
+            </div>
+
             <div className="space-y-2">
               <Label className="text-white/70 font-body text-sm">Название</Label>
               <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="bg-teal-dark/80 border-teal-light/30 text-white h-10" />
@@ -151,22 +244,31 @@ export default function VideoAdmin() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-white/70 font-body text-sm">Превью URL (необязательно)</Label>
-                <Input value={form.thumbnail_url} onChange={(e) => setForm({ ...form, thumbnail_url: e.target.value })} placeholder="Авто для YouTube" className="bg-teal-dark/80 border-teal-light/30 text-white h-10" />
-              </div>
-              <div className="space-y-2">
                 <Label className="text-white/70 font-body text-sm">Порядок</Label>
                 <Input type="number" value={form.order} onChange={(e) => setForm({ ...form, order: parseInt(e.target.value) || 0 })} className="bg-teal-dark/80 border-teal-light/30 text-white h-10" />
               </div>
+              <div className="flex items-end pb-1">
+                <div className="flex items-center gap-3">
+                  <Switch checked={form.is_published} onCheckedChange={(val) => setForm({ ...form, is_published: val })} />
+                  <Label className="text-white/70 font-body text-sm">Опубликовано</Label>
+                </div>
+              </div>
             </div>
-            <div className="flex items-center gap-3">
-              <Switch checked={form.is_published} onCheckedChange={(val) => setForm({ ...form, is_published: val })} />
-              <Label className="text-white/70 font-body text-sm">Опубликовано</Label>
-            </div>
+
+            {uploading && (
+              <div className="space-y-1">
+                <div className="h-2 bg-teal-dark/80 rounded-full overflow-hidden">
+                  <div className="h-full bg-gold transition-all duration-300" style={{ width: `${uploadProgress}%` }} />
+                </div>
+                <p className="text-white/50 text-xs font-body text-center">Загрузка: {uploadProgress}%</p>
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setDialogOpen(false)} className="text-white/60 font-body">Отмена</Button>
-            <Button onClick={handleSave} className="bg-gold text-teal-darker hover:bg-gold/90 font-body" data-testid="save-video-btn">Сохранить</Button>
+            <Button onClick={handleSave} disabled={uploading} className="bg-gold text-teal-darker hover:bg-gold/90 font-body" data-testid="save-video-btn">
+              {uploading ? 'Загрузка...' : 'Сохранить'}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

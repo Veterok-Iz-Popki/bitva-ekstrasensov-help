@@ -76,6 +76,8 @@ CREATE TABLE `applications` (
 
 LOCK TABLES `applications` WRITE;
 /*!40000 ALTER TABLE `applications` DISABLE KEYS */;
+INSERT INTO `applications` VALUES
+('8e47a17e-847e-4c8f-870a-4123ae925fff','аыфвфыв','фывфыв','фывф','аыфвфыв фывфыв фывф','+7 (545) 646-54-65','ываыв','выаы','ываыва','','','new','','2026-03-16 11:20:04');
 /*!40000 ALTER TABLE `applications` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -513,4 +515,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-03-12 12:20:58
+-- Dump completed on 2026-03-16 11:20:21

@@ -434,6 +434,36 @@ api.delete('/admin/gallery/photos/:id', requireAdmin, async (req, res) => {
 
 // ===== ADMIN GALLERY VIDEOS =====
 
+const videoUpload = multer({
+  storage: multer.diskStorage({
+    destination: UPLOADS_DIR,
+    filename: (req, file, cb) => {
+      const ext = path.extname(file.originalname).toLowerCase() || '.mp4';
+      cb(null, uuidv4() + ext);
+    },
+  }),
+  limits: { fileSize: 200 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = ['video/mp4', 'video/webm', 'video/quicktime', 'image/jpeg', 'image/png', 'image/webp'];
+    if (!allowed.includes(file.mimetype)) return cb(new Error('Неподдерживаемый тип файла'));
+    cb(null, true);
+  },
+});
+
+api.post('/admin/upload-video', requireAdmin, videoUpload.fields([
+  { name: 'video', maxCount: 1 },
+  { name: 'poster', maxCount: 1 },
+]), async (req, res) => {
+  const result = {};
+  if (req.files?.video?.[0]) {
+    result.video_url = `/api/uploads/${req.files.video[0].filename}`;
+  }
+  if (req.files?.poster?.[0]) {
+    result.poster_url = `/api/uploads/${req.files.poster[0].filename}`;
+  }
+  return res.json({ status: 'success', ...result });
+});
+
 api.get('/admin/gallery/videos', requireAdmin, async (req, res) => {
   const [rows] = await db.query('SELECT * FROM gallery_videos ORDER BY `order` ASC LIMIT 200');
   return res.json(rows);
