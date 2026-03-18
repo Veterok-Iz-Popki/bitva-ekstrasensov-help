@@ -136,7 +136,7 @@ api.get('/contact.vcf', (req, res) => {
   const vcf = [
     'BEGIN:VCARD',
     'VERSION:3.0',
-    'N;CHARSET=UTF-8:Экстрасенсов;Битва;;;',
+    'N;CHARSET=UTF-8:;Битва Экстрасенсов;;;',
     'FN;CHARSET=UTF-8:Битва Экстрасенсов',
     'TEL;TYPE=CELL:+79284217358',
     'END:VCARD',
