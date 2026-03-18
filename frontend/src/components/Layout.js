@@ -210,7 +210,7 @@ function Footer() {
   return (
     <footer data-testid="main-footer" className="border-t border-teal-light/20 bg-teal-darker/95 mt-12">
       <div className="max-w-6xl mx-auto px-4 md:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Brand */}
           <div>
             <Link to="/" className="inline-block mb-3">
@@ -230,7 +230,6 @@ function Footer() {
           <div>
             <h4 className="font-heading text-sm font-semibold text-gold mb-4">Навигация</h4>
             <nav className="flex flex-col gap-2">
-              <Link to="/" className="text-sm text-white/50 hover:text-gold transition-colors font-body">Главная</Link>
               {NAV_ITEMS.map((item) => (
                 <Link key={item.path} to={item.path} className="text-sm text-white/50 hover:text-gold transition-colors font-body">
                   {item.label}
@@ -240,16 +239,6 @@ function Footer() {
                 Записаться на приём
               </Link>
             </nav>
-          </div>
-
-          {/* Contacts */}
-          <div>
-            <h4 className="font-heading text-sm font-semibold text-gold mb-4">Контакты</h4>
-            <div className="flex flex-col gap-2 text-sm text-white/50 font-body">
-              {settings.email && <p>{settings.email}</p>}
-              {settings.working_hours && <p>{settings.working_hours}</p>}
-              <p>Приём по предварительной записи</p>
-            </div>
           </div>
 
           {/* Disclaimer */}
