@@ -130,7 +130,7 @@ export default function ParticipantDetailPage() {
             {r.author_name}{r.author_city ? `, ${r.author_city}` : ''}
           </div>
           <div className="profile-review-text" data-testid={`${testIdPrefix}-text-${i}`}>
-            &laquo;{r.text}&raquo;
+            {r.text}
           </div>
         </div>
       ))}
