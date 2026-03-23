@@ -1,338 +1,186 @@
 <analysis>**original_problem_statement:**
-Изначально пользователь запросил создание SEO-оптимизированного сайта «Битва экстрасенсов — официальный сайт помощи». В процессе разработки проект превратился в полнофункциональный сайт с продвинутой CMS для управления всем контентом (участники, страницы, отзывы, галереи, SEO).
+Изначально пользователь запросил создание SEO-оптимизированного сайта «Битва экстрасенсов — официальный сайт помощи». В процессе разработки проект превратился в полнофункциональный сайт с CMS для управления контентом.
 
-В ходе этой сессии были выполнены следующие крупные задачи:
-1.  По запросу пользователя была произведена полная миграция бэкенда с **Python/FastAPI/MongoDB** на **Node.js/Express/MariaDB**.
-2.  Была полностью обновлена база экстрасенсов (8 новых участников с уникальным контентом и фото).
-3.  Была значительно переработана главная страница: добавлен карусель отзывов, новые CTA-блоки, изменен лейаут карточек экстрасенсов.
-4.  Были внесены многочисленные правки в UI, включая исправление маски телефона в форме заявки.
-5.  Пользователь получил подробные инструкции по самостоятельному деплою проекта на VPS.
-6.  Последний запрос — унифицировать дизайн личных страниц всех экстрасенсов по предоставленному образцу.
+В ходе этой сессии пользователь последовательно запрашивал следующие изменения и исправления:
+-   Исправление отдачи файла  с правильными HTTP-заголовками.
+-   Полное удаление ранее реализованной интеграции с Google Contacts API.
+-   Исправление критической ошибки отправки формы заявки, связанной с отсутствием колонок в таблице  после восстановления БД.
+-   Реализация сложной логики сохранения контакта для Android (Intent с fallback на .vcf), а затем ее улучшение.
+-   **Полное удаление всей функции сохранения контакта по просьбе пользователя.**
+-   Реализация нового сценария: после отправки формы появляется popup-окно с номером телефона и кнопкой Позвонить.
+-   Доработка popup-окна: изменение шрифта номера и скрытие кнопки Позвонить на desktop/tablet.
+-   Исправление ссылок на личных страницах экстрасенсов, чтобы они вели на форму обращения к конкретному экстрасенсу.
+-   Удаление кнопки Показать еще для отзывов на личных страницах, чтобы все отзывы отображались сразу.
+-   Реализация загрузки видео-файлов на сервер через админ-панель и создание страницы Видео с ленивой загрузкой.
+-   Превращение иконок преимуществ на главной странице в кликабельные ссылки на форму обращения.
+-   Исправление неработающей кнопки Связаться с нами на странице Вопросы-Ответы.
+-   **Повторная реализация функции сохранения контакта, но теперь только для iPhone** с использованием .vcf.
+-   Исправление формата vCard, чтобы контакт на iPhone сохранялся с корректным именем (Битва Экстрасенсов).
+-   Редактирование подвала сайта (footer): удаление дублирующей ссылки и блока с контактами.
+-   Замена главных фотографий на страницах всех 8 экстрасенсов.
+-   Замена биографических текстов для всех 8 экстрасенсов.
+-   Обновление списка отзывов для Елены Голуновой.
+-   Многократное восстановление работоспособности сайта после падения базы данных MariaDB.
 
 **User's preferred language**: Русский
 
 **what currently exists?**
-Существует полнофункциональное full-stack приложение с фронтендом на React и бэкендом на Node.js/Express и MariaDB. Весь контент (тексты, фото, SEO) управляется через CMS-админку. Реализована JWT-аутентификация, CRUD-операции для всего контента, отправка email-уведомлений через Resend. Последними изменениями были полная замена бэкенд-стека, обновление списка экстрасенсов и переработка их карточек на главной странице.
+Полнофункциональное full-stack приложение с фронтендом на React и бэкендом на Node.js/Express/MariaDB. Весь контент (экстрасенсы, отзывы, страницы, видео, FAQ) управляется через админ-панель.
+
+Ключевые реализованные функции:
+-   Главная страница с каруселью отзывов, списком экстрасенсов и кликабельными иконками преимуществ.
+-   Индивидуальные страницы для каждого из 8 экстрасенсов с уникальными фото и текстами.
+-   Страница Видео с загруженными на сервер роликами и ленивой загрузкой через HTML5-плеер.
+-   Страница Вопросы-Ответы с работающей кнопкой Связаться с нами.
+-   Отдельная страница для подачи заявки (), которая персонализируется в зависимости от того, с какой страницы экстрасенса был совершен переход.
+-   После успешной отправки формы появляется popup-окно:
+    -   **На iPhone:** предложение сохранить контакт через .vcf.
+    -   **На других мобильных:** предложение позвонить по номеру.
+    -   **На desktop/tablet:** отображение номера телефона без кнопок.
+-   Админ-панель для управления контентом (участники, отзывы, видео, FAQ, страницы, SEO) и просмотра заявок.
+-   Подвал сайта (footer) очищен от лишней информации.
 
 **Last working item**:
-*   **Last item agent was working:** Унификация личных страниц всех экстрасенсов, чтобы они соответствовали структуре и дизайну страницы-референса (). Агент только начал работу, проанализировав страницу-референс.
-*   **Status:** NOT STARTED
-*   **Agent Testing Done:** N
-*   **Which testing method agent to use?** frontend testing agent (для проверки всех 8 страниц на соответствие новому шаблону и адаптивности) или последовательные скриншоты каждой страницы.
-*   **User Testing Done:** N
+-   Last item agent was working: Обновление отзывов для страницы Елена Голунова. Пользователь предоставил список отзывов, который агент уже загрузил в предыдущем шаге. Агент подтвердил, что предоставленные отзывы уже находятся в базе данных.
+-   Status: USER VERIFICATION PENDING
+-   Agent Testing Done: Y
+-   Which testing method agent to use? NA
+-   User Testing Done: N
 
 **All Pending/In progress Issue list**:
-*   **Issue 1:** (P0) Унифицировать дизайн и структуру личных страниц всех 8 экстрасенсов.
-    *   **Attempted fixes:** Нет, задача только что получена.
-    *   **Next debug checklist:**
-        1.  Изучить текущую структуру .
-        2.  Проанализировать структуру страницы-референса (hero-блок, фото, имя, подзаголовок, основной текст, блок преимуществ, отзывы, CTA).
-        3.  Полностью переработать JSX и стили в , чтобы он соответствовал новому шаблону.
-        4.  Проверить, поддерживает ли модель данных  в  все необходимые для нового дизайна поля. При необходимости добавить новые колонки в таблицу  в  и обновить API.
-        5.  Убедиться, что все новые блоки контента можно редактировать через админ-панель (может потребовать обновления ).
-        6.  Проверить, что все 8 страниц экстрасенсов (,  и т.д.) корректно отображаются в новом дизайне со своим уникальным контентом.
-    *   **Why fix this issue and what will be achieved with the fix?** Для приведения всех ключевых страниц сайта к единому профессиональному виду согласно требованию пользователя.
-    *   **Status:** NOT STARTED
-    *   **Is recurring issue?** N
-    *   **Should Test frontend/backend/both after fix?** frontend
-    *   **Blocked on other issue:** None
+-   **Issue 1:** (P0) Нестабильность базы данных MariaDB в среде выполнения.
+    -   **Description:** База данных MariaDB периодически падает и теряет все данные. Это приводит к тому, что сайт становится пустым, а API возвращает ошибки. Эта проблема многократно возникала в течение всей сессии.
+    -   **Attempted fixes:** Агент каждый раз успешно восстанавливал БД путем ее переустановки, запуска и последующего восстановления данных из дампа .
+    -   **Next debug checklist:** Это проблема среды выполнения, а не кода. При возникновении ошибок, связанных с данными или подключением к БД, первым делом нужно выполнить 
+> backend@1.0.0 setup
+> npm run db:init && npm run db:seed
+
+
+> backend@1.0.0 db:init
+> node scripts/db-init.js
+
+[dotenv@17.3.1] injecting env (9) from scripts/.env -- tip: ⚡️ secrets for agents: https://dotenvx.com/as2 для восстановления.
+    -   **Why fix this issue and what will be achieved with the fix?** Это критический блокиратор, который останавливает работу всего сайта. Его исправление (восстановление) возвращает сайт в рабочее состояние.
+    -   **Status:** RECURRING
+    -   **Is recurring issue?** Y
+    -   **Should Test frontend/backend/both after fix?** both (проверить, что API отдает контент и фронтенд его отображает).
+    -   **Blocked on other issue:** None
 
 **In progress Task List**:
-*   None.
+  - None
 
 **Upcoming and Future Tasks**
-*   **Upcoming Tasks:**
-    *   (P1) Добавить автоматическую генерацию .
-        *   **План:** Создать эндпоинт  в , который будет динамически собирать все публичные URL из базы данных (участники, страницы и т.д.) и генерировать валидный XML-файл. Доменное имя брать из переменной окружения.
+- **Upcoming Tasks:**
+    - (P1) Добавить автоматическую генерацию  для улучшения SEO.
+        - **План:** Создать эндпоинт  в , который будет динамически собирать все публичные URL (главная, участники, видео, faq и т.д.) и генерировать валидный XML-файл.
+- **Future Tasks:**
+    - (P2) Рефакторинг .
+        - **План:** Разбить монолитный файл  на модули (routes, controllers, services) для улучшения читаемости и поддержки кода.
 
 **Completed work in this session**
-*   **Основное:**
-    *   **Миграция бэкенда:** Полностью переписан бэкенд с Python/FastAPI/MongoDB на **Node.js/Express/MariaDB**.
-    *   **Замена контента:** Заменены все участники на 8 новых с уникальными текстами, фото и SEO-данными.
-    *   **Инструкции по деплою:** Предоставлены подробные пошаговые инструкции для развертывания проекта на собственном VPS.
-*   **Frontend (Главная страница):**
-    *   Реализована карусель отзывов.
-    *   Добавлены два новых CTA-блока.
-    *   Переработан дизайн блока экстрасенсов (горизонтальные карточки 2 в ряд).
-    *   Изменен стиль кнопок Обратиться.
-    *   Оптимизированы отступы между блоками.
-*   **Backend и DX:**
-    *   Созданы npm <command>
-
-Usage:
-
-npm install        install all the dependencies in your project
-npm install <foo>  add the <foo> dependency to your project
-npm test           run this project's tests
-npm run <foo>      run the script named <foo>
-npm <command> -h   quick help on <command>
-npm -l             display usage info for all commands
-npm help <term>    search for help on <term>
-npm help npm       more involved overview
-
-All commands:
-
-    access, adduser, audit, bugs, cache, ci, completion,
-    config, dedupe, deprecate, diff, dist-tag, docs, doctor,
-    edit, exec, explain, explore, find-dupes, fund, get, help,
-    help-search, hook, init, install, install-ci-test,
-    install-test, link, ll, login, logout, ls, org, outdated,
-    owner, pack, ping, pkg, prefix, profile, prune, publish,
-    query, rebuild, repo, restart, root, run-script, sbom,
-    search, set, shrinkwrap, star, stars, start, stop, team,
-    test, token, uninstall, unpublish, unstar, update, version,
-    view, whoami
-
-Specify configs in the ini-formatted file:
-    /root/.npmrc
-or on the command line via: npm <command> --key=value
-
-More configuration info: npm help config
-Configuration fields: npm help 7 config
-
-npm@10.8.2 /usr/lib/node_modules/npm скрипты для управления БД (, , , ).
-    *   Порт бэкенда сделан настраиваемым через .
-    *   Сборка фронтенда теперь помещается в  для раздачи единым Node.js сервером.
-    *   Удален весь старый Python-код.
-*   **Исправления багов:**
-    *   Многократно исправлена логика маски телефона в форме заявки.
-    *   Исправлены конфликты зависимостей npm <command>
-
-Usage:
-
-npm install        install all the dependencies in your project
-npm install <foo>  add the <foo> dependency to your project
-npm test           run this project's tests
-npm run <foo>      run the script named <foo>
-npm <command> -h   quick help on <command>
-npm -l             display usage info for all commands
-npm help <term>    search for help on <term>
-npm help npm       more involved overview
-
-All commands:
-
-    access, adduser, audit, bugs, cache, ci, completion,
-    config, dedupe, deprecate, diff, dist-tag, docs, doctor,
-    edit, exec, explain, explore, find-dupes, fund, get, help,
-    help-search, hook, init, install, install-ci-test,
-    install-test, link, ll, login, logout, ls, org, outdated,
-    owner, pack, ping, pkg, prefix, profile, prune, publish,
-    query, rebuild, repo, restart, root, run-script, sbom,
-    search, set, shrinkwrap, star, stars, start, stop, team,
-    test, token, uninstall, unpublish, unstar, update, version,
-    view, whoami
-
-Specify configs in the ini-formatted file:
-    /root/.npmrc
-or on the command line via: npm <command> --key=value
-
-More configuration info: npm help config
-Configuration fields: npm help 7 config
-
-npm@10.8.2 /usr/lib/node_modules/npm (, ).
-    *   Исправлена ошибка линтинга .
+- Полностью удалена функция сохранения контакта, а затем частично восстановлена только для iPhone через .vcf.
+- Исправлена ошибка отправки формы заявки ().
+- Реализована страница Видео с локальным хранением файлов и ленивой загрузкой.
+- Реализован popup с предложением Позвонить после отправки формы.
+- Сделаны кликабельными ссылки на страницах экстрасенсов, иконки на главной и кнопка на странице FAQ, ведущие на форму заявки.
+- Убрана кнопка Показать еще у отзывов на страницах экстрасенсов.
+- Исправлен подвал сайта (убран дубль ссылки и блок контактов).
+- Обновлены главные фотографии для всех 8 экстрасенсов.
+- Обновлены биографии для всех 8 экстрасенсов.
+- Обновлены отзывы для экстрасенса Елены Голуновой.
+- Многократно восстанавливалась работоспособность сайта после падений MariaDB.
 
 **Earlier issues found/mentioned but not fixed**
-*   None not already listed in .
+- None. Все проблемы, о которых сообщал пользователь, были либо решены, либо являются повторяющейся проблемой среды (MariaDB).
 
 **Known issue recurrence from previous fork**
-*   **Проблема:** В среде разработки Emergent база данных MariaDB нестабильна и может терять данные при перезапуске контейнера.
-*   **Решение в Emergent:** Был добавлен supervisor-конфиг для MariaDB и многократно выполнялась переустановка и наполнение базы ().
-*   **Примечание для следующего агента:** Это проблема исключительно текущей среды. На реальном VPS с постоянным хранилищем этой проблемы не будет. Если данные пропали — выполните  в директории .
+- **Issue recurrence in previous fork:** База данных MariaDB в среде разработки Emergent нестабильна и теряет все данные при перезапуске контейнера.
+- **Recurrence count:** Очень высокая (более 10 раз за сессию).
+- **Status:** RECURRING (есть стабильный воркэраунд).
+- **Note:** Это проблема исключительно текущей среды. Если сайт пустой или выдает ошибки данных — первым делом необходимо выполнить 
+> backend@1.0.0 setup
+> npm run db:init && npm run db:seed
+
+
+> backend@1.0.0 db:init
+> node scripts/db-init.js
+
+[dotenv@17.3.1] injecting env (9) from scripts/.env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-*   **Backend:** Node.js, Express.js, MariaDB (с драйвером ), JWT (), Resend (для email), Multer (для загрузки файлов).
+*   **Backend:** Node.js, Express.js, MariaDB (драйвер ), JWT (), Resend (email), Multer (загрузка файлов).
 *   **Frontend:** React, Tailwind CSS, shadcn/ui, react-router-dom.
-*   **Архитектура развертывания:** Единый Node.js процесс, который отдает и API (), и статику фронтенда.
+*   **Архитектура:** Монолитный Node.js API, который также отдает статику собранного React-приложения. Контент полностью управляется через CMS.
 
 **key DB schema**
-*   : 
-*   : 
-*   : 
-*   : 
-*   : 
+-   : 
+-   : 
+-   : 
+-   : 
+-   : 
+-   : 
 
 **changes in tech stack**
-*   **Ключевое изменение:** Бэкенд полностью переписан с **Python/FastAPI/MongoDB** на **Node.js/Express/MariaDB**.
+-   None.
 
 **All files of reference**
-*   : Новый монолитный файл бэкенда, содержащий все API.
-*   : Источник истины для структуры базы данных MariaDB.
-*   , : Файлы с начальными данными для всего сайта.
-*   : Скрипты для управления БД и зависимости.
-*   : **Ключевой файл для следующей задачи.**
-*   : Сильно изменен для нового дизайна.
+-   : Основной файл бэкенда. Добавлялись и удалялись эндпоинты, обновлялись SQL-запросы.
+-   : Ключевой компонент с логикой отправки формы и отображения popup-окон.
+-   : Шаблон страницы экстрасенса. Были изменены логика отображения отзывов и ссылки.
+-   : Полностью переписан для реализации ленивой загрузки видео с локального хранилища.
+-   : Полностью переписан для загрузки видео-файлов вместо указания URL.
+-   : Отредактирован для исправления подвала (footer).
+-   : Часто обновлялся для сохранения изменений в контенте (фото, тексты, отзывы).
+-   : Файл конфигурации соединения с БД.
 
 **Areas that need refactoring**:
-*    является монолитным файлом, содержащим более 30 API-эндпоинтов. Для улучшения читаемости и поддержки его следует разбить на модули по функциональности (например, , , ).
+-    является монолитным. Его разбиение на модули (routes, controllers) значительно улучшит поддержку.
 
 **key api endpoints**
-*    - Получить всех активных участников.
-*    - Получить детальную информацию об участнике.
-*    - Отправить заявку.
-*    - Авторизация администратора.
-*    - Получить все опубликованные отзывы.
-*   Все CRUD-эндпоинты для админки, начинающиеся с 
+-   
+-   
+-   
+-    (новый эндпоинт для загрузки видео)
+-   
+-    (эндпоинт для скачивания vCard для iPhone)
+-   CRUD-эндпоинты для админки: 
 
 **Critical Info for New Agent**
-*   **Стек изменился!** Бэкенд теперь на Node.js и MariaDB. Весь Python-код удален. Не пытайтесь искать  или использовать 
-Usage:   
-  pip <command> [options]
-
-Commands:
-  install                     Install packages.
-  lock                        Generate a lock file.
-  download                    Download packages.
-  uninstall                   Uninstall packages.
-  freeze                      Output installed packages in requirements format.
-  inspect                     Inspect the python environment.
-  list                        List installed packages.
-  show                        Show information about installed packages.
-  check                       Verify installed packages have compatible 
-dependencies.
-  config                      Manage local and global configuration.
-  search                      Search PyPI for packages.
-  cache                       Inspect and manage pip's wheel cache.
-  index                       Inspect information available from package 
-indexes.
-  wheel                       Build wheels from your requirements.
-  hash                        Compute hashes of package archives.
-  completion                  A helper command used for command completion.
-  debug                       Show information useful for debugging.
-  help                        Show help for commands.
-
-General Options:
-  -h, --help                  Show help.
-  --debug                     Let unhandled exceptions propagate outside the
-                              main subroutine, instead of logging them to
-                              stderr.
-  --isolated                  Run pip in an isolated mode, ignoring
-                              environment variables and user configuration.
-  --require-virtualenv        Allow pip to only run in a virtual environment;
-                              exit with an error otherwise.
-  --python <python>           Run pip with the specified Python interpreter.
-  -v, --verbose               Give more output. Option is additive, and can be
-                              used up to 3 times.
-  -V, --version               Show version and exit.
-  -q, --quiet                 Give less output. Option is additive, and can be
-                              used up to 3 times (corresponding to WARNING,
-                              ERROR, and CRITICAL logging levels).
-  --log <path>                Path to a verbose appending log.
-  --no-input                  Disable prompting for input.
-  --keyring-provider <keyring_provider>
-                              Enable the credential lookup via the keyring
-                              library if user input is allowed. Specify which
-                              mechanism to use [auto, disabled, import,
-                              subprocess]. (default: auto)
-  --proxy <proxy>             Specify a proxy in the form
-                              scheme://[user:passwd@]proxy.server:port.
-  --retries <retries>         Maximum attempts to establish a new HTTP
-                              connection. (default: 5)
-  --timeout <sec>             Set the socket timeout (default 15 seconds).
-  --exists-action <action>    Default action when a path already exists:
-                              (s)witch, (i)gnore, (w)ipe, (b)ackup, (a)bort.
-  --trusted-host <hostname>   Mark this host or host:port pair as trusted,
-                              even though it does not have valid or any HTTPS.
-  --cert <path>               Path to PEM-encoded CA certificate bundle. If
-                              provided, overrides the default. See 'SSL
-                              Certificate Verification' in pip documentation
-                              for more information.
-  --client-cert <path>        Path to SSL client certificate, a single file
-                              containing the private key and the certificate
-                              in PEM format.
-  --cache-dir <dir>           Store the cache data in <dir>.
-  --no-cache-dir              Disable the cache.
-  --disable-pip-version-check
-                              Don't periodically check PyPI to determine
-                              whether a new version of pip is available for
-                              download. Implied with --no-
-                              index.
-  --no-color                  Suppress colored output.
-  --use-feature <feature>     Enable new functionality, that may be backward
-                              incompatible.
-  --use-deprecated <feature>  Enable deprecated functionality, that will be
-                              removed in the future.
-  --resume-retries <resume_retries>
-                              Maximum attempts to resume or restart an
-                              incomplete download. (default: 5). Все команды выполняются через npm <command>
-
-Usage:
-
-npm install        install all the dependencies in your project
-npm install <foo>  add the <foo> dependency to your project
-npm test           run this project's tests
-npm run <foo>      run the script named <foo>
-npm <command> -h   quick help on <command>
-npm -l             display usage info for all commands
-npm help <term>    search for help on <term>
-npm help npm       more involved overview
-
-All commands:
-
-    access, adduser, audit, bugs, cache, ci, completion,
-    config, dedupe, deprecate, diff, dist-tag, docs, doctor,
-    edit, exec, explain, explore, find-dupes, fund, get, help,
-    help-search, hook, init, install, install-ci-test,
-    install-test, link, ll, login, logout, ls, org, outdated,
-    owner, pack, ping, pkg, prefix, profile, prune, publish,
-    query, rebuild, repo, restart, root, run-script, sbom,
-    search, set, shrinkwrap, star, stars, start, stop, team,
-    test, token, uninstall, unpublish, unstar, update, version,
-    view, whoami
-
-Specify configs in the ini-formatted file:
-    /root/.npmrc
-or on the command line via: npm <command> --key=value
-
-More configuration info: npm help config
-Configuration fields: npm help 7 config
-
-npm@10.8.2 /usr/lib/node_modules/npm или yarn install v1.22.22
-[1/4] Resolving packages...
-[2/4] Fetching packages...
-[3/4] Linking dependencies...
-[4/4] Building fresh packages...
-success Saved lockfile.
-Done in 0.03s. в папке .
-*   **Нестабильность БД в Emergent:** Локальная MariaDB может падать. Если сайт пустой (нет экстрасенсов, отзывов) — перейдите в  и выполните . Это восстановит и создаст базу данных с нуля. На реальном сервере такой проблемы не будет.
-*   **Основная задача:** Сосредоточьтесь на унификации дизайна личных страниц экстрасенсов. Это крупная фронтенд-задача.
+-   **НЕСТАБИЛЬНОСТЬ БД:** MariaDB в этой среде падает и теряет все данные. Если видите пустой сайт, ошибки данных или бэкенд не стартует с  — немедленно перейдите в  и выполните . Это стандартная и многократно проверенная процедура восстановления.
+-   **Управление контентом:** Весь контент (фото, тексты, отзывы, видео) управляется через базу данных. При обновлении контента необходимо вносить изменения в БД (через SQL или API админки) и затем обновлять дамп командой  для сохранения изменений.
+-   **Роутинг:** Обратите внимание, что URL страниц на фронтенде могут отличаться от ожидаемых (например, , а не ). Проверяйте файл  для корректных путей.
 
 **documents and test reports created in this job**
-*   
-*   
-*   
-*   
-*   
-*   Многочисленные отчеты в .
+-    (обновлялся после некоторых задач).
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **#518:** Запрос на унификацию всех личных страниц экстрасенсов по образцу страницы Голуновой. (PENDING)
-2.  **#516:** Запрос на изменение стиля кнопок Обратиться в карточках экстрасенсов. (DONE)
-3.  **#504:** Запрос на изменение лейаута блока экстрасенсов на главной странице (2 колонки, горизонтальные карточки). (DONE)
-4.  **#469:** Запрос на полную замену списка экстрасенсов на 8 новых с уникальным контентом. (DONE)
-5.  **#461:** Сообщение о пропаже контента (решено восстановлением БД).
-6.  **#459:** Сообщение об ошибке в консоли (определено как ошибка браузерного расширения).
-7.  **#457:** Вопрос о том, где указывать email для уведомлений.
-8.  **#453:** Ошибка  при запуске Node.js 23 (исправлено).
-9.  **#449:** Просьба добавить команду для тестового запуска сервера ().
-10. **#439:** Просьба изменить путь сборки фронтенда в .
+1.  **#547:** Пользователь предоставил правильные отзывы для Елены Голуновой (агент подтвердил, что они уже были загружены). (PENDING USER VERIFICATION)
+2.  **#534:** Запрос на обновление отзывов для Елены Голуновой (первоначальный). (DONE)
+3.  **#528, #522, #516, #495, #452, #397, #391:** Пользователь сообщает сайт почини. (DONE, recurring DB issue)
+4.  **#501:** Запрос на замену биографических текстов для всех 8 экстрасенсов. (DONE)
+5.  **#486:** Запрос на замену фото Влада Череватого. (DONE)
+6.  **#479:** Запрос на замену фото Зулии Раджабовой. (DONE)
+7.  **#472:** Запрос на замену фото Олега Шепса. (DONE)
+8.  **#465:** Запрос на замену фото Александра Шепса. (DONE)
+9.  **#458:** Запрос на замену фото Надежды Шевченко. (DONE)
+10. **#445:** Запрос на замену фото Виктории Райдос. (DONE)
 
 **Project Health Check:**
-*   **Broken:** None.
-*   **Mocked:** None.
+-   **Broken:** MariaDB (нестабильна в текущей среде, требует периодического восстановления с помощью ).
+-   **Mocked:** None.
 
 **3rd Party Integrations**
-*   **Resend:** Для отправки email-уведомлений.
-*   **MariaDB:** Основная база данных.
+-   **Resend:** Для отправки email-уведомлений.
+-   **MariaDB:** Основная база данных.
 
 **Testing status**
-*   **Testing agent used after significant changes:** YES. Агент тестирования был успешно запущен после миграции бэкенда и подтвердил работоспособность 100% тестов.
-*   **Troubleshoot agent used after agent stuck in loop:** NO.
-*   **Test files created:** None.
-*   **Known regressions:** None.
+-   **Testing agent used after significant changes:** NO (в этой сессии не использовался).
+-   **Troubleshoot agent used after agent stuck in loop:** NO.
+-   **Test files created:** None.
+-   **Known regressions:** Падение MariaDB приводит к полной потере данных до восстановления из дампа.
 
 **Credentials to test flow:**
 *   **URL админ-панели:** 
@@ -340,4 +188,4 @@ Done in 0.03s. в папке .
 *   **Пароль:** 
 
 **What agent forgot to execute**
-*   Агент не приступил к реализации последнего запроса пользователя (унификация страниц экстрасенсов), так как он был получен в самом конце сессии. Эта задача является основным .</analysis>
+- Агент последовательно выполнял все запросы пользователя. Отложенные задачи (, рефакторинг) не были приоритезированы пользователем.</analysis>
