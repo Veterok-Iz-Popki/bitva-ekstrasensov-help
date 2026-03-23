@@ -244,7 +244,8 @@ export default function ParticipantDetailPage() {
               ))}
             </div>
 
-            {/* How to section */}
+            {/* How to section — only shown if not already in full_description */}
+            {!(participant.full_description || '').includes('Данная страница') && (
             <div className="profile-description" data-testid="participant-help-info">
               <p>Данная страница является личной страницей помощи <strong>{genName}</strong>.</p>
               <p>Здесь вы имеете возможность:</p>
@@ -258,6 +259,7 @@ export default function ParticipantDetailPage() {
               <p>2. <strong>Заполните форму</strong> (для того чтобы {firstName} лично с вами связался(-ась))</p>
               <p>3. <strong>Ждите звонок!!!</strong></p>
             </div>
+            )}
 
             {/* Bottom CTA */}
             <div className="mt-6">
