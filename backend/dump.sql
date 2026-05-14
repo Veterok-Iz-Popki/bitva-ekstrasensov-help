@@ -77,8 +77,10 @@ CREATE TABLE `applications` (
 LOCK TABLES `applications` WRITE;
 /*!40000 ALTER TABLE `applications` DISABLE KEYS */;
 INSERT INTO `applications` VALUES
+('395a284a-da81-4d03-9964-cdbec23f75f1','dasds','asdasd','asdasd','dasds asdasd asdasd','+7 (446) 546-46-54','323','dasd','asdasd','','','new','','2026-05-14 09:13:16'),
 ('4080b602-db21-4f54-94c1-444ab8aae247','Hdhh','Shshs','Shshs','Hdhh Shshs Shshs','+7 (494) 646-46-46','Sjsj','Sjsjs','Shshshsh','elena-golunova','Елена Голунова','new','','2026-03-18 16:51:47'),
 ('8e47a17e-847e-4c8f-870a-4123ae925fff','аыфвфыв','фывфыв','фывф','аыфвфыв фывфыв фывф','+7 (545) 646-54-65','ываыв','выаы','ываыва','','','new','','2026-03-16 11:20:04'),
+('b19efd98-b771-4dce-8a36-c16447684c72','dasd','asdasd','asd','dasd asdasd asd','+7 (213) 213-12-32','adas','dasdas','dasdad','elena-golunova','Елена Голунова','new','','2026-05-14 09:15:14'),
 ('c72dbb9d-962e-4568-ad04-cd14a6e775aa','Аоаао','Влвлв','Влвлв','Аоаао Влвлв Влвлв','+7 (794) 949-61-61','Вово','Влво','Ыововово','elena-golunova','Елена Голунова','new','','2026-03-18 16:53:04');
 /*!40000 ALTER TABLE `applications` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -621,4 +623,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-12 11:25:25
+-- Dump completed on 2026-05-14  9:29:44

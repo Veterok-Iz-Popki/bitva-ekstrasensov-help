@@ -166,14 +166,23 @@ api.get('/participants/:slug', async (req, res) => {
 });
 
 api.get('/reviews', async (req, res) => {
-  const limit = parseInt(req.query.limit) || 30;
-  const [rows] = await db.query('SELECT r.*, p.name as participant_name FROM reviews r LEFT JOIN participants p ON r.participant_slug = p.slug WHERE r.is_published = TRUE ORDER BY r.created_at DESC LIMIT ?', [limit]);
-  // Shuffle
-  for (let i = rows.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [rows[i], rows[j]] = [rows[j], rows[i]];
+  const limit = parseInt(req.query.limit) || 40;
+  // Get reviews evenly from all psychics: 5 random per psychic
+  const [slugs] = await db.query('SELECT DISTINCT slug FROM participants');
+  let allReviews = [];
+  for (const s of slugs) {
+    const [rows] = await db.query(
+      'SELECT r.*, p.name as participant_name FROM reviews r LEFT JOIN participants p ON r.participant_slug = p.slug WHERE r.participant_slug = ? AND r.is_published = TRUE ORDER BY RAND() LIMIT 5',
+      [s.slug]
+    );
+    allReviews = allReviews.concat(rows);
   }
-  return res.json(rows);
+  // Shuffle all collected reviews
+  for (let i = allReviews.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [allReviews[i], allReviews[j]] = [allReviews[j], allReviews[i]];
+  }
+  return res.json(allReviews.slice(0, limit));
 });
 
 api.get('/participants/:slug/reviews', async (req, res) => {

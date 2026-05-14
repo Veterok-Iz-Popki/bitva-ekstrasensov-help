@@ -40,7 +40,7 @@ export default function HomePage() {
       api.get('/pages/home'),
       api.get('/seo/home'),
       api.get('/participants'),
-      api.get('/reviews?limit=30'),
+      api.get('/reviews?limit=40'),
     ]).then(([pageRes, seoRes, partRes, revRes]) => {
       setPage(pageRes.data);
       setParticipants(partRes.data || []);
