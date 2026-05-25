@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/pod-backups/psychic-battle-2/build/static/css/main.cfc2b317.css",
-    "main.js": "/pod-backups/psychic-battle-2/build/static/js/main.20267b55.js",
+    "main.js": "/pod-backups/psychic-battle-2/build/static/js/main.aa306aa9.js",
     "index.html": "/pod-backups/psychic-battle-2/build/index.html",
     "main.cfc2b317.css.map": "/pod-backups/psychic-battle-2/build/static/css/main.cfc2b317.css.map",
-    "main.20267b55.js.map": "/pod-backups/psychic-battle-2/build/static/js/main.20267b55.js.map"
+    "main.aa306aa9.js.map": "/pod-backups/psychic-battle-2/build/static/js/main.aa306aa9.js.map"
   },
   "entrypoints": [
     "static/css/main.cfc2b317.css",
-    "static/js/main.20267b55.js"
+    "static/js/main.aa306aa9.js"
   ]
 }
