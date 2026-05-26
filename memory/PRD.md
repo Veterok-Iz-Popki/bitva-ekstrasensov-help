@@ -21,14 +21,28 @@ SEO-оптимизированный сайт «Битва экстрасенс�
 - Полное обновление SEO-текстов главной страницы (без упоминания городов, кроме «Россия»)
 
 ## Оптимизация Google PageSpeed (DONE — 2026-02)
+
+### Изображения / WebP
 - Все изображения в `/app/backend/uploads/` сконвертированы в WebP (`cwebp -q 85`)
 - Новый компонент `<PictureImg>` (`/app/frontend/src/components/PictureImg.js`) — рендерит `<picture>` с WebP-source и fallback на оригинал
 - Заменены `<img>` на `<PictureImg>` в: `HomePage`, `ParticipantDetailPage`, `ParticipantsPage`, `GalleryPage`, `VideoPage`, `Layout` (header/footer)
 - LCP-картинки (логотипы шапки, hero, фото детали) помечены `loading="eager"` + `fetchpriority="high"`
 - Остальные `<img>` уже с `loading="lazy"` + `decoding="async"` через PictureImg
+
+### Кэширование
 - Backend: `Cache-Control: public, max-age=31536000, immutable` для `/api/uploads/*`
 - Backend: длинный кэш для статики React-build (`maxAge: 1y, immutable`), но `index.html` — `no-cache`
 - Backend: автогенерация `.webp` варианта при загрузке нового файла через `/api/admin/upload` (sharp)
+
+### JS / Render-blocking (этап 2)
+- Code splitting через `React.lazy()` для ВСЕХ маршрутов кроме HomePage:
+  - Public: ParticipantDetailPage, BookingPage, FAQPage, TopicPage, ServicePage, GalleryPage, VideoPage
+  - Admin: весь `/admin/*` (AdminLayout + 11 страниц) — не грузится для публичных пользователей
+- Suspense fallback в стиле существующих экранов "Загрузка..."
+- **Результат**: `main.js` 660KB → 355KB uncompressed (~109.84KB gzipped), 28 lazy chunks по 1.6–18 KB
+- Google Fonts (Inter) загружается асинхронно через `media="print" onload="this.media='all'"` + `<noscript>` fallback (устранено render-blocking)
+- `emergent-main.js` помечен `defer`
+- CRA main bundle уже имеет `defer`
 
 ## Статус обновления отзывов (25 шт каждый) — DONE
 - Все 8 экстрасенсов: DONE

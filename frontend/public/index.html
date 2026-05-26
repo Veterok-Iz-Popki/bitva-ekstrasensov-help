@@ -7,7 +7,9 @@
         <meta name="description" content="A product of emergent.sh" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap" rel="stylesheet" />
+        <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+        <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap" rel="stylesheet" /></noscript>
         <!--
         manifest.json provides metadata used when your web app is installed on a
         user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
@@ -23,7 +25,7 @@
         -->
         <title>Emergent | Fullstack App</title>
         <script>window.addEventListener("error",function(e){if(e.error instanceof DOMException&&e.error.name==="DataCloneError"&&e.message&&e.message.includes("PerformanceServerTiming")){e.stopImmediatePropagation();e.preventDefault()}if(!e.error&&e.message==="Script error."){e.stopImmediatePropagation();e.preventDefault();return true}},true);window.addEventListener("unhandledrejection",function(e){if(e.reason&&e.reason.message==="Script error."){e.stopImmediatePropagation();e.preventDefault()}},true);</script>
-        <script src="https://assets.emergent.sh/scripts/emergent-main.js"></script>
+        <script src="https://assets.emergent.sh/scripts/emergent-main.js" defer></script>
         <!--
         These two scripts have been added for the Visual Edits, please do not edit or remove them
         -->
