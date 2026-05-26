@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api, { setSEO } from '../lib/api';
+import PictureImg from '../components/PictureImg';
 
 export default function ParticipantsPage() {
   const [participants, setParticipants] = useState([]);
@@ -53,7 +54,7 @@ export default function ParticipantsPage() {
             >
               {/* Photo - circular */}
               <div className="participant-photo-h">
-                <img
+                <PictureImg
                   src={p.photo_url}
                   alt={p.name}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"

@@ -651,6 +651,19 @@ api.post('/admin/upload', requireAdmin, upload.single('file'), async (req, res) 
       img = img.webp({ quality: 85 });
     }
     await img.toFile(filepath);
+
+    // Also generate .webp variant for non-webp originals (for <picture> fallback)
+    if (!['webp'].includes(ext.toLowerCase())) {
+      try {
+        const webpName = filename.replace(/\.[^.]+$/, '.webp');
+        await sharp(req.file.buffer)
+          .resize(1200, 1200, { fit: 'inside', withoutEnlargement: true })
+          .webp({ quality: 85 })
+          .toFile(path.join(UPLOADS_DIR, webpName));
+      } catch (e) {
+        console.error('WebP generation failed:', e.message);
+      }
+    }
   } catch {
     fs.writeFileSync(filepath, req.file.buffer);
   }
@@ -671,6 +684,8 @@ api.post('/admin/seed', requireAdmin, async (req, res) => {
 api.get('/uploads/:filename', (req, res) => {
   const filepath = path.join(UPLOADS_DIR, req.params.filename);
   if (!fs.existsSync(filepath)) return res.status(404).json({ detail: 'Файл не найден' });
+  // Long-term cache: file names are UUIDs/slugs, content is immutable
+  res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
   return res.sendFile(filepath);
 });
 
@@ -680,8 +695,18 @@ app.use('/api', api);
 // Serve frontend build
 const BUILD_DIR = path.join(__dirname, 'build');
 if (fs.existsSync(BUILD_DIR)) {
-  app.use(express.static(BUILD_DIR));
+  app.use(express.static(BUILD_DIR, {
+    maxAge: '1y',
+    immutable: true,
+    setHeaders: (res, filePath) => {
+      // index.html must be revalidated to pick up new asset hashes
+      if (filePath.endsWith('index.html')) {
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      }
+    },
+  }));
   app.get('/{*splat}', (req, res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.sendFile(path.join(BUILD_DIR, 'index.html'));
   });
 }

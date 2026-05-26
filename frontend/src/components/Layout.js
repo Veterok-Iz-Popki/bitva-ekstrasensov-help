@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import api from '../lib/api';
+import PictureImg from './PictureImg';
 
 const NAV_ITEMS = [
   { path: '/', label: 'Главная' },
@@ -105,12 +106,14 @@ function Header() {
         {/* Desktop layout */}
         <div className="hidden md:flex items-center justify-between h-20">
           <Link to="/" className="flex items-center shrink-0" data-testid="logo-link">
-            <img 
-              src={logoUrl} 
-              alt={logoAlt} 
+            <PictureImg
+              src={logoUrl}
+              alt={logoAlt}
               className="w-auto rounded-xl"
               style={{ height: `${logoHeightDesktop}px` }}
               data-testid="header-logo"
+              loading="eager"
+              fetchpriority="high"
             />
           </Link>
 
@@ -146,11 +149,13 @@ function Header() {
           {/* Row 1: Logo centered */}
           <div className="flex items-center justify-center">
             <Link to="/" data-testid="mobile-logo-link">
-              <img 
-                src={logoUrl} 
-                alt={logoAlt} 
+              <PictureImg
+                src={logoUrl}
+                alt={logoAlt}
                 className="w-auto rounded-xl"
                 style={{ height: `${logoHeightMobile}px` }}
+                loading="eager"
+                fetchpriority="high"
               />
             </Link>
           </div>
@@ -214,11 +219,12 @@ function Footer() {
           {/* Brand */}
           <div>
             <Link to="/" className="inline-block mb-3">
-              <img 
-                src={logoUrl} 
-                alt={logoAlt} 
+              <PictureImg
+                src={logoUrl}
+                alt={logoAlt}
                 className="h-12 w-auto rounded-lg"
                 data-testid="footer-logo"
+                loading="lazy"
               />
             </Link>
             <p className="text-xs text-white/40 leading-relaxed font-body">

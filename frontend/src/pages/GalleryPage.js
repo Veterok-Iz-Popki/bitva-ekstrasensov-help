@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import api, { setSEO, setJsonLd } from '../lib/api';
+import PictureImg from '../components/PictureImg';
 
 export default function GalleryPage() {
   const [photos, setPhotos] = useState([]);
@@ -81,7 +82,7 @@ export default function GalleryPage() {
                 className="group relative aspect-square overflow-hidden rounded-lg border border-teal-light/20 hover:border-gold/50 transition-all duration-300 cursor-pointer bg-teal-dark/50"
                 data-testid={`gallery-photo-${idx}`}
               >
-                <img
+                <PictureImg
                   src={photo.image_url}
                   alt={photo.alt_text || photo.title || 'Фото'}
                   loading="lazy"
@@ -130,11 +131,12 @@ export default function GalleryPage() {
           </button>
 
           <div className="max-w-[90vw] max-h-[85vh] flex flex-col items-center" onClick={(e) => e.stopPropagation()}>
-            <img
+            <PictureImg
               src={photos[lightboxIdx].image_url}
               alt={photos[lightboxIdx].alt_text || photos[lightboxIdx].title || 'Фото'}
               className="max-w-full max-h-[75vh] object-contain rounded-lg"
               data-testid="lightbox-image"
+              loading="eager"
             />
             {(photos[lightboxIdx].title || photos[lightboxIdx].description) && (
               <div className="mt-4 text-center max-w-xl">

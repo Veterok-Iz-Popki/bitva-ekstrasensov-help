@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Shield, Users, HelpCircle, Globe, MessageCircle, UserCheck } from 'lucide-react';
 import api, { setSEO, setJsonLd } from '../lib/api';
 import ReviewsCarousel from '../components/ReviewsCarousel';
+import PictureImg from '../components/PictureImg';
 
 const PROBLEM_CATEGORIES = [
   { label: 'Порча', path: '/porcha' },
@@ -104,21 +105,25 @@ export default function HomePage() {
           {/* Логотипы Битва + ТНТ - из CMS */}
           <div className="flex items-center justify-center gap-4 md:gap-6 mb-6 animate-fade-up" style={{ animationDelay: '0.15s' }} data-testid="hero-logos">
             {b.hero_logo_bitva_url && (
-              <img
+              <PictureImg
                 src={b.hero_logo_bitva_url}
                 alt={b.hero_logo_bitva_alt || 'Битва экстрасенсов'}
                 className="w-auto object-contain"
                 style={{ height: `${b.hero_logo_bitva_height_mobile || 40}px` }}
                 data-testid="logo-bitva"
+                loading="eager"
+                fetchpriority="high"
               />
             )}
             {b.hero_logo_tnt_url && (
-              <img
+              <PictureImg
                 src={b.hero_logo_tnt_url}
                 alt={b.hero_logo_tnt_alt || 'ТНТ'}
                 className="w-auto object-contain"
                 style={{ height: `${b.hero_logo_tnt_height_mobile || 40}px` }}
                 data-testid="logo-tnt"
+                loading="eager"
+                fetchpriority="high"
               />
             )}
             <style>{`
@@ -202,11 +207,13 @@ export default function HomePage() {
                   {/* Square photo */}
                   <Link to={`/uchastniki/${p.slug}`} className="shrink-0">
                     <div className="w-28 h-32 md:w-36 md:h-40 rounded-md overflow-hidden border-2 border-white/20">
-                      <img
+                      <PictureImg
                         src={p.photo_url}
                         alt={p.name}
                         className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                         loading="lazy"
+                        width="144"
+                        height="160"
                       />
                     </div>
                   </Link>

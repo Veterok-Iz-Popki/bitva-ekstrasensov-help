@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Play } from 'lucide-react';
 import api, { setSEO, setJsonLd } from '../lib/api';
+import PictureImg from '../components/PictureImg';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';
 const fullUrl = (u) => u && u.startsWith('/') ? API_URL + u : u;
@@ -43,7 +44,7 @@ function LazyVideo({ video, idx }) {
             data-testid={`video-play-btn-${idx}`}
           >
             {posterSrc ? (
-              <img
+              <PictureImg
                 src={posterSrc}
                 alt={video.title || 'Видео'}
                 loading="lazy"

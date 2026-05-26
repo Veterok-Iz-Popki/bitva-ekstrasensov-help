@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import api, { setSEO, setJsonLd } from '../lib/api';
+import PictureImg from '../components/PictureImg';
 
 function getFirstName(name) {
   return (name || '').trim().split(' ')[0];
@@ -166,10 +167,12 @@ export default function ParticipantDetailPage() {
           {/* === LEFT COLUMN: Photo + Reviews (desktop) === */}
           <div className="profile-left">
             <div className="profile-photo-wrapper" data-testid="participant-photo">
-              <img
+              <PictureImg
                 src={participant.photo_url}
                 alt={`Официальный сайт ${genName}, фото`}
                 className="w-full h-auto object-cover rounded-lg"
+                loading="eager"
+                fetchpriority="high"
               />
             </div>
 
