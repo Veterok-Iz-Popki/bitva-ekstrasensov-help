@@ -51,6 +51,7 @@ export default function ParticipantsPage() {
               to={`/uchastniki/${p.slug}`}
               className="participant-card-h group"
               data-testid={`participant-card-${p.slug}`}
+              aria-label={`Перейти к странице экстрасенса ${p.name}`}
             >
               {/* Photo - circular */}
               <div className="participant-photo-h">

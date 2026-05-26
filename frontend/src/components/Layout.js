@@ -26,12 +26,11 @@ function Header() {
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [settings, setSettings] = useState(null);
-  const [headerH, setHeaderH] = useState(0);
   const headerRef = useRef(null);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -39,18 +38,25 @@ function Header() {
     api.get('/settings').then(res => setSettings(res.data)).catch(() => {});
   }, []);
 
-  // Measure header height for spacer
+  // Measure header height for CSS variable spacer (используется в @media max-md spacer)
+  // Чтение layout — обёрнуто в requestAnimationFrame для избежания forced reflow на resize.
   useEffect(() => {
+    let rafId = 0;
     const measure = () => {
-      if (headerRef.current) {
-        const h = headerRef.current.offsetHeight;
-        setHeaderH(h);
-        document.documentElement.style.setProperty('--mobile-header-height', `${h}px`);
-      }
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        if (headerRef.current) {
+          const h = headerRef.current.offsetHeight;
+          document.documentElement.style.setProperty('--mobile-header-height', `${h}px`);
+        }
+      });
     };
     measure();
-    window.addEventListener('resize', measure);
-    return () => window.removeEventListener('resize', measure);
+    window.addEventListener('resize', measure, { passive: true });
+    return () => {
+      cancelAnimationFrame(rafId);
+      window.removeEventListener('resize', measure);
+    };
   }, [settings]);
 
   // Handle hash scroll after navigation
@@ -167,7 +173,7 @@ function Header() {
                 key={item.path}
                 to={item.path}
                 onClick={(e) => handleNavClick(e, item)}
-                className="text-[15px] font-body text-white/90 hover:text-gold transition-colors"
+                className="inline-flex items-center min-h-[44px] px-2 text-[15px] font-body text-white/90 hover:text-gold transition-colors"
               >
                 {item.label}
               </Link>
@@ -181,7 +187,7 @@ function Header() {
                 key={item.path}
                 to={item.path}
                 onClick={(e) => handleNavClick(e, item)}
-                className={`text-[13px] font-body transition-colors whitespace-nowrap ${
+                className={`inline-flex items-center min-h-[40px] px-2 text-[13px] font-body transition-colors whitespace-nowrap ${
                   isActive(item.path) ? 'text-gold' : 'text-white/60 hover:text-gold'
                 }`}
               >

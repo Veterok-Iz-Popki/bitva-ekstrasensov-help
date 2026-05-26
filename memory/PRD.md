@@ -40,9 +40,25 @@ SEO-оптимизированный сайт «Битва экстрасенс�
   - Admin: весь `/admin/*` (AdminLayout + 11 страниц) — не грузится для публичных пользователей
 - Suspense fallback в стиле существующих экранов "Загрузка..."
 - **Результат**: `main.js` 660KB → 355KB uncompressed (~109.84KB gzipped), 28 lazy chunks по 1.6–18 KB
-- Google Fonts (Inter) загружается асинхронно через `media="print" onload="this.media='all'"` + `<noscript>` fallback (устранено render-blocking)
+- Все Google Fonts (Inter + Playfair + Fira Sans) объединены в один async-link с `preload`+`media="print" onload`
 - `emergent-main.js` помечен `defer`
 - CRA main bundle уже имеет `defer`
+
+### CSS / DOM / Accessibility (этап 3)
+- **CSS**:
+  - Удалены неиспользуемые классы из `App.css`: `participant-card-v`, `participant-photo-circle`, `stagger-1..4`, `text-gold-glow` (-280 строк)
+  - `@import url(...)` Google Fonts перенесён из `index.css` (render-blocking внутри CSS) в `<link rel="preload"+async>` в `index.html`. CSS bundle уменьшился, шрифты грузятся параллельно
+  - Размер CSS gzip: 12.86 → 12.68 KB
+- **DOM / Forced reflow**:
+  - Удалён dead state `useState(headerH)` в `Layout.js` — он сетился, но никогда не читался → лишние re-render'ы на каждый resize
+  - `measure()` в Layout.js обёрнута в `requestAnimationFrame` для устранения forced reflow (`offsetHeight` read + style write)
+  - Scroll-listener переведён на `{ passive: true }`
+- **Image dimensions**: Карточки участников на главной получили `width="144" height="160"` для резервации места (CLS)
+- **Accessibility**:
+  - Все `<li>` в коде корректно вложены в `<ul>` (HomePage, TopicPage, ServicePage). Orphan `<li>` в preview-iframe — артефакт `<span data-ve-dynamic>` overlay'я Emergent, не влияет на конечного пользователя
+  - Heading hierarchy: H1 → H2 → H3 → H2 → H3 — корректно
+  - Tap-target: мобильные nav-ссылки получили `min-h-[40px]/[44px]` + `inline-flex items-center` для соответствия WCAG (без визуального изменения)
+  - `aria-label` добавлен для одинаковых "Обратиться" / карточек участников на HomePage и ParticipantsPage (каждая ссылка теперь имеет уникальное доступное имя)
 
 ## Статус обновления отзывов (25 шт каждый) — DONE
 - Все 8 экстрасенсов: DONE
