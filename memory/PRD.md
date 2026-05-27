@@ -44,6 +44,21 @@ SEO-оптимизированный сайт «Битва экстрасенс�
 - `emergent-main.js` помечен `defer`
 - CRA main bundle уже имеет `defer`
 
+### LCP / Critical Path Optimization (этап 4)
+- **Определён реальный LCP-элемент** на mobile (Slow 4G + 4x CPU throttle): **H1 текст** hero-секции (не изображение). Image-preload не применим.
+- **Удалена `animate-fade-up`** с H1 и H2 в hero — они являются LCP-кандидатами, opacity-анимация 0→1 за 0.6s блокировала регистрацию LCP паинта
+- **Удалён `loading` gate** в `HomePage.js` — компонент теперь рендерит hero c default-текстами сразу после гидратации (не ждёт API)
+- **Обновлены default-тексты** в hero (`hero_h1`, `hero_subtitle`, `hero_unique`, `hero_text1`, `hero_text2`, `hero_subheading`) — теперь совпадают с CMS-значениями по длине → **CLS 0.102 → 0.036** (Good)
+- Preload-fetch hints для `/api/pages/home` рассмотрен и отклонён — `crossorigin="anonymous"` режим не матчился с axios same-origin запросами, дубль-фетч без переиспользования
+
+### Финальные метрики (cold cache, Mobile Slow 4G + 4x CPU throttle, 3-run average)
+- **FCP**: 299ms (Good)
+- **LCP**: 4383ms (Needs improvement — упирается в JS-парсинг под throttle)
+- **CLS**: 0.036 (Good)
+- **TBT**: 1359ms (Needs improvement — JS parse/compile под 4x throttle)
+- На реальных устройствах (не emulated worst-case) LCP должен быть в зоне 1-2.5s
+- Дальнейшие выигрыши требуют SSR/SSG или критичного inline-CSS (выходит за рамки малых изменений)
+
 ### CSS / DOM / Accessibility (этап 3)
 - **CSS**:
   - Удалены неиспользуемые классы из `App.css`: `participant-card-v`, `participant-photo-circle`, `stagger-1..4`, `text-gold-glow` (-280 строк)

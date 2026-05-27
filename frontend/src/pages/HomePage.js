@@ -34,7 +34,6 @@ export default function HomePage() {
   const [page, setPage] = useState(null);
   const [participants, setParticipants] = useState([]);
   const [reviews, setReviews] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([
@@ -55,7 +54,7 @@ export default function HomePage() {
         "description": seo?.description || "",
         "url": window.location.origin
       });
-    }).catch(() => {}).finally(() => setLoading(false));
+    }).catch(() => {});
   }, []);
 
   const b = page?.blocks || {};
@@ -79,27 +78,19 @@ export default function HomePage() {
     parseServiceCat(b.service_cat_4)
   ].filter(c => c.title);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-white/40 font-body">Загрузка...</div>
-      </div>
-    );
-  }
-
   return (
     <div data-testid="home-page">
       {/* ===== HERO SECTION ===== */}
       <section className="pt-24 md:pt-32 pb-10 px-4" data-testid="hero-section">
         <div className="max-w-4xl mx-auto text-center">
-          {/* Main H1 */}
-          <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight animate-fade-up">
-            {b.hero_h1 || 'Помощь сильнейших экстрасенсов, ясновидящих, целителей, магов и ведьм России'}
+          {/* Main H1 — NO opacity animation (LCP element, must paint immediately) */}
+          <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
+            {b.hero_h1 || 'Битва экстрасенсов — официальный сайт помощи сильнейших экстрасенсов, ясновидящих, магов и целителей России'}
           </h1>
 
-          {/* Subtitle with decoration */}
-          <h2 className="font-heading text-xl md:text-2xl text-gold font-medium mb-6 animate-fade-up" style={{ animationDelay: '0.1s' }}>
-            {b.hero_subtitle || 'Сайт помощи экстрасенсов'}
+          {/* Subtitle */}
+          <h2 className="font-heading text-xl md:text-2xl text-gold font-medium mb-6">
+            {b.hero_subtitle || 'Официальный портал магической помощи от участников проекта «Битва экстрасенсов»'}
           </h2>
 
           {/* Логотипы Битва + ТНТ - из CMS */}
@@ -137,19 +128,19 @@ export default function HomePage() {
           {/* TNT logo placeholder + Unique opportunity text */}
           <div className="max-w-3xl mx-auto mb-8 animate-fade-up" style={{ animationDelay: '0.2s' }}>
             <p className="text-gold font-heading text-lg md:text-xl font-semibold italic mb-4">
-              {b.hero_unique || 'Уникальная возможность!'}
+              {b.hero_unique || 'Уникальная возможность получить реальную помощь!'}
             </p>
             <p className="text-white/80 font-body leading-relaxed mb-2 text-base md:text-lg">
-              {b.hero_text1 || 'Лично обратиться к любому участнику «Битва экстрасенсов».'}
+              {b.hero_text1 || 'Обратитесь лично к любому участнику легендарного проекта «Битва экстрасенсов» — победителям, финалистам и сильнейшим экстрасенсам, чьи способности были доказаны перед миллионами зрителей.'}
             </p>
             <p className="text-white/60 font-body leading-relaxed text-base mb-6">
-              {b.hero_text2 || 'И получить диагностику и консультацию экстрасенсов, ясновидящих, магов, целителей и ведьм'}
+              {b.hero_text2 || 'Получите персональную диагностику негатива, консультацию ясновидящей, помощь мага или медиума — онлайн или на личном приёме.'}
             </p>
           </div>
 
           {/* Subheading */}
           <h3 className="font-heading text-xl md:text-2xl text-gold mb-4 animate-fade-up" style={{ animationDelay: '0.3s' }}>
-            {b.hero_subheading || 'помощь и консультация экстрасенса'}
+            {b.hero_subheading || 'магическая помощь и консультация экстрасенса — запись на приём'}
           </h3>
 
           {/* Description text */}
