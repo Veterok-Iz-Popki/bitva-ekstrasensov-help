@@ -770,13 +770,22 @@ if (fs.existsSync(BUILD_DIR)) {
 async function startup() {
   console.log('Starting Node.js backend...');
 
-  // Create default admin if none exists
-  const [[{ c }]] = await db.query('SELECT COUNT(*) as c FROM admin_users');
-  if (c === 0) {
-    const hash = await bcrypt.hash('aspire5542gl1952tq', 10);
+  // Создание / обновление дефолтного админа.
+  // Креды берутся из ENV (ADMIN_USERNAME / ADMIN_PASSWORD), либо дефолт из кода.
+  // Если БД уже содержит юзера с таким username — пароль перезаписывается из ENV (idempotent).
+  // Если юзера нет — создаётся новый.
+  const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'nikoa2020@gmail.com';
+  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'aspire5542gl1952tq';
+
+  const [existing] = await db.query('SELECT id FROM admin_users WHERE username = ?', [ADMIN_USERNAME]);
+  const hash = await bcrypt.hash(ADMIN_PASSWORD, 10);
+  if (existing.length) {
+    await db.query('UPDATE admin_users SET password_hash = ? WHERE username = ?', [hash, ADMIN_USERNAME]);
+    console.log(`Admin user ${ADMIN_USERNAME} password updated from ENV`);
+  } else {
     await db.query('INSERT INTO admin_users (id, username, password_hash, created_at) VALUES (?,?,?,?)',
-      [uuidv4(), 'nikoa2020@gmail.com', hash, dbNow()]);
-    console.log('Default admin user created');
+      [uuidv4(), ADMIN_USERNAME, hash, dbNow()]);
+    console.log(`Admin user ${ADMIN_USERNAME} created`);
   }
 
   // Auto-seed
