@@ -5,7 +5,7 @@
  *
  * Для прочих URL (внешние ссылки, .svg, .webp) рендерит обычный <img>.
  */
-export default function PictureImg({ src, alt = '', className, style, loading = 'lazy', width, height, fetchpriority, ...rest }) {
+export default function PictureImg({ src, alt = '', className, style, loading = 'lazy', width, height, fetchPriority, ...rest }) {
   if (!src) return null;
 
   // Только для наших uploads имеется .webp пара.
@@ -25,7 +25,11 @@ export default function PictureImg({ src, alt = '', className, style, loading = 
     height,
     ...rest,
   };
-  if (fetchpriority) imgProps.fetchpriority = fetchpriority;
+  // React 19+ поддерживает fetchPriority как proper prop. Для совместимости
+  // также добавляем lowercase HTML-атрибут (это валидный HTML5 атрибут).
+  if (fetchPriority) {
+    imgProps.fetchPriority = fetchPriority;
+  }
 
   if (!webpSrc) {
     return <img {...imgProps} />;

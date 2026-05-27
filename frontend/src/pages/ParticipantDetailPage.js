@@ -172,7 +172,7 @@ export default function ParticipantDetailPage() {
                 alt={`Официальный сайт ${genName}, фото`}
                 className="w-full h-auto object-cover rounded-lg"
                 loading="eager"
-                fetchpriority="high"
+                fetchPriority="high"
               />
             </div>
 

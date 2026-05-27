@@ -44,6 +44,18 @@ SEO-оптимизированный сайт «Битва экстрасенс�
 - `emergent-main.js` помечен `defer`
 - CRA main bundle уже имеет `defer`
 
+### Final Audit (этап 7) — Compression + Cleanup
+- **Backend gzip/brotli compression** добавлен через `compression` middleware. Реальные размеры:
+  - main.js: **353 KB → 109 KB** (gz, -69%) / 110 KB (br)
+  - main.css: **67 KB → 12 KB** (gz, -81%)
+  - `/api/reviews?limit=40`: **85 KB → 23 KB** (gz, -73%)
+  - WebP / бинарные форматы пропускаются (уже сжаты)
+- **React warning исправлен**: `fetchpriority` → `fetchPriority` (camelCase для React props) во всех `<PictureImg>` использованиях. Console errors теперь — 0
+- **Preload audit**: всё используется (preconnect + preload как style для шрифтов), дубликатов нет
+- **Lazy loading audit**: ✓ через `<PictureImg>` (default `loading="lazy"` + `decoding="async"`); LCP-элементы (header logos, hero, profile photo) — `loading="eager"` + `fetchPriority="high"`
+- **Font loading**: ✓ `display=swap`, async через `media="print" onload`, preconnect к gstatic/googleapis
+- **CSS cleanup**: уже сделано на этапе 3, остающиеся классы все используются
+
 ### Service Worker / Runtime Cache (этап 6)
 Файл: `/app/frontend/public/sw.js`, регистрация в `index.js` (production-only).
 

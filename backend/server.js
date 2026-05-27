@@ -1,4 +1,5 @@
 const express = require('express');
+const compression = require('compression');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
@@ -25,6 +26,15 @@ if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 
 // Middleware
 app.use(cors({ origin: true, credentials: true }));
+// Gzip compression для всех текстовых ресурсов (JS/CSS/HTML/JSON).
+// Бинарные форматы (WebP, PNG, JPG) skip — они уже сжаты.
+app.use(compression({
+  filter: (req, res) => {
+    if (req.headers['x-no-compression']) return false;
+    return compression.filter(req, res);
+  },
+  threshold: 1024, // не сжимать ответы < 1KB
+}));
 app.use(express.json({ limit: '10mb' }));
 
 // Rate limiting (in-memory)

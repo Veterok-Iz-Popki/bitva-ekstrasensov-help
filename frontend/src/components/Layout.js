@@ -139,7 +139,7 @@ function Header() {
               style={{ height: `${logoHeightDesktop}px` }}
               data-testid="header-logo"
               loading="eager"
-              fetchpriority="high"
+              fetchPriority="high"
             />
           </Link>
 
@@ -181,7 +181,7 @@ function Header() {
                 className="w-auto rounded-xl"
                 style={{ height: `${logoHeightMobile}px` }}
                 loading="eager"
-                fetchpriority="high"
+                fetchPriority="high"
               />
             </Link>
           </div>

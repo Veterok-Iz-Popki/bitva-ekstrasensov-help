@@ -122,7 +122,7 @@ export default function HomePage() {
                 style={{ height: `${b.hero_logo_bitva_height_mobile || 40}px` }}
                 data-testid="logo-bitva"
                 loading="eager"
-                fetchpriority="high"
+                fetchPriority="high"
               />
             )}
             {b.hero_logo_tnt_url && (
@@ -133,7 +133,7 @@ export default function HomePage() {
                 style={{ height: `${b.hero_logo_tnt_height_mobile || 40}px` }}
                 data-testid="logo-tnt"
                 loading="eager"
-                fetchpriority="high"
+                fetchPriority="high"
               />
             )}
             <style>{`
