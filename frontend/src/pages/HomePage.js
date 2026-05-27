@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { Shield, Users, HelpCircle, Globe, MessageCircle, UserCheck } from 'lucide-react';
-import api, { setSEO, setJsonLd } from '../lib/api';
+import api, { setSEO, setJsonLd, getSiteUrl } from '../lib/api';
 import PictureImg from '../components/PictureImg';
 import useInView from '../hooks/useInView';
 
@@ -51,13 +51,20 @@ export default function HomePage() {
     ]).then(([pageRes, seoRes]) => {
       setPage(pageRes.data);
       const seo = seoRes.data;
-      if (seo) setSEO({ title: seo.title, description: seo.description, keywords: seo.keywords });
+      if (seo) setSEO({
+        title: seo.title,
+        description: seo.description,
+        keywords: seo.keywords,
+        canonicalPath: '/',
+        ogTitle: seo.og_title,
+        ogDescription: seo.og_description,
+      });
       setJsonLd({
         "@context": "https://schema.org",
         "@type": "ProfessionalService",
         "name": "Битва экстрасенсов — официальный сайт помощи",
         "description": seo?.description || "",
-        "url": window.location.origin
+        "url": getSiteUrl()
       });
     }).catch(() => {});
   }, []);

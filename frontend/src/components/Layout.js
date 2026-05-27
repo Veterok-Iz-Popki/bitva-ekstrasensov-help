@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import api from '../lib/api';
+import api, { setSiteUrl } from '../lib/api';
 import PictureImg from './PictureImg';
 
 // Shared module-level cache для `/settings` — используется Header + Footer одновременно,
@@ -8,7 +8,11 @@ import PictureImg from './PictureImg';
 let _settingsPromise = null;
 function fetchSettings() {
   if (!_settingsPromise) {
-    _settingsPromise = api.get('/settings').then(res => res.data).catch(() => ({}));
+    _settingsPromise = api.get('/settings').then(res => {
+      // Зафиксировать production site_url для всех setSEO/setJsonLd вызовов
+      if (res.data?.site_url) setSiteUrl(res.data.site_url);
+      return res.data;
+    }).catch(() => ({}));
   }
   return _settingsPromise;
 }

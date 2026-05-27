@@ -71,7 +71,7 @@ async function requireAdmin(req, res, next) {
   }
 }
 
-// Email notification
+// Email notification (заявка)
 async function sendNotificationEmail(application) {
   if (!RESEND_API_KEY) return;
   try {
@@ -114,6 +114,44 @@ async function sendNotificationEmail(application) {
     console.log(`Notification email sent to ${settings.notification_email}`);
   } catch (e) {
     console.error('Failed to send email:', e.message);
+  }
+}
+
+// Email notification (contact / обратный звонок)
+async function sendContactNotification(msg) {
+  if (!RESEND_API_KEY) return;
+  try {
+    const { Resend } = require('resend');
+    const resend = new Resend(RESEND_API_KEY);
+    const [rows] = await db.query("SELECT notification_email, email_notifications_enabled FROM site_settings WHERE id = 'site_settings'");
+    const settings = rows[0] || {};
+    if (!settings.notification_email || !settings.email_notifications_enabled) return;
+
+    const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <div style="background: #0d3040; padding: 20px; text-align: center;">
+        <h1 style="color: #d4a637; margin: 0;">Новое сообщение / звонок</h1>
+        <p style="color: #ffffff; margin: 5px 0 0 0;">Битва экстрасенсов — сайт помощи</p>
+      </div>
+      <div style="background: #f5f5f5; padding: 20px;">
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr><td style="padding:10px;border-bottom:1px solid #ddd;font-weight:bold;width:130px">Имя:</td><td style="padding:10px;border-bottom:1px solid #ddd">${msg.name || '-'}</td></tr>
+          <tr><td style="padding:10px;border-bottom:1px solid #ddd;font-weight:bold">Контакт:</td><td style="padding:10px;border-bottom:1px solid #ddd">${msg.email || '-'}</td></tr>
+          <tr><td style="padding:10px;font-weight:bold;vertical-align:top">Сообщение:</td><td style="padding:10px">${msg.message || '-'}</td></tr>
+        </table>
+        <p style="color:#666;font-size:12px;margin-top:20px">Дата: ${msg.created_at || '-'}</p>
+      </div>
+    </div>`;
+
+    await resend.emails.send({
+      from: SENDER_EMAIL,
+      to: [settings.notification_email],
+      subject: `Новое сообщение от ${msg.name || 'клиента'} — Битва экстрасенсов`,
+      html,
+    });
+    console.log(`Contact notification sent to ${settings.notification_email}`);
+  } catch (e) {
+    console.error('Failed to send contact email:', e.message);
   }
 }
 
@@ -223,8 +261,11 @@ api.get('/seo/:slug', async (req, res) => {
 
 api.get('/settings', async (req, res) => {
   const [rows] = await db.query("SELECT * FROM site_settings WHERE id = 'site_settings'");
-  if (!rows.length) return res.json({ email: '', phone: '', working_hours: '', copyright_text: '' });
-  return res.json(rows[0]);
+  // Публичный production URL — отдаём из env, чтобы фронт строил canonical / og:url / JSON-LD
+  // независимо от того, на каком домене (preview / production) загружена страница.
+  const site_url = process.env.PUBLIC_SITE_URL || '';
+  if (!rows.length) return res.json({ email: '', phone: '', working_hours: '', copyright_text: '', site_url });
+  return res.json({ ...rows[0], site_url });
 });
 
 // ===== PUBLIC FORM SUBMISSIONS =====
@@ -268,6 +309,7 @@ api.post('/contact', async (req, res) => {
     'INSERT INTO contact_messages (id, name, email, message, status, created_at) VALUES (?,?,?,?,?,?)',
     [id, data.name, data.email, data.message, 'new', now]
   );
+  sendContactNotification({ ...data, created_at: now }).catch(() => {});
   return res.json({ status: 'success', message: 'Сообщение отправлено' });
 });
 

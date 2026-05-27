@@ -81,6 +81,7 @@ INSERT INTO `applications` VALUES
 ('4080b602-db21-4f54-94c1-444ab8aae247','Hdhh','Shshs','Shshs','Hdhh Shshs Shshs','+7 (494) 646-46-46','Sjsj','Sjsjs','Shshshsh','elena-golunova','Елена Голунова','new','','2026-03-18 16:51:47'),
 ('8e47a17e-847e-4c8f-870a-4123ae925fff','аыфвфыв','фывфыв','фывф','аыфвфыв фывфыв фывф','+7 (545) 646-54-65','ываыв','выаы','ываыва','','','new','','2026-03-16 11:20:04'),
 ('b19efd98-b771-4dce-8a36-c16447684c72','dasd','asdasd','asd','dasd asdasd asd','+7 (213) 213-12-32','adas','dasdas','dasdad','elena-golunova','Елена Голунова','new','','2026-05-14 09:15:14'),
+('b653afc6-b413-48cf-94e8-667ac5f8d695','Тестов','Иван','Сергеевич','Тестов Иван Сергеевич','+7 999 123 45 67','35','Москва','Тестовая заявка для проверки production email','aleksandr-sheps','Александр Шепс','new','','2026-05-27 12:57:27'),
 ('c72dbb9d-962e-4568-ad04-cd14a6e775aa','Аоаао','Влвлв','Влвлв','Аоаао Влвлв Влвлв','+7 (794) 949-61-61','Вово','Влво','Ыововово','elena-golunova','Елена Голунова','new','','2026-03-18 16:53:04');
 /*!40000 ALTER TABLE `applications` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -109,6 +110,8 @@ CREATE TABLE `contact_messages` (
 
 LOCK TABLES `contact_messages` WRITE;
 /*!40000 ALTER TABLE `contact_messages` DISABLE KEYS */;
+INSERT INTO `contact_messages` VALUES
+('3ff6357d-7941-4043-95b7-d89fce530961','Тест Контакт','+7 999 888 77 66','Тестовое сообщение для проверки contact email','new','2026-05-27 12:57:39');
 /*!40000 ALTER TABLE `contact_messages` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -610,7 +613,7 @@ CREATE TABLE `site_settings` (
 LOCK TABLES `site_settings` WRITE;
 /*!40000 ALTER TABLE `site_settings` DISABLE KEYS */;
 INSERT INTO `site_settings` VALUES
-('site_settings','info@example.com','+7 (800) 123-45-67','Москва, Россия','','Пн-Вс: 9:00 — 21:00','2024 Битва экстрасенсов. Все права защищены.',1,'','Битва Экстрасенсов',56,48);
+('site_settings','info@example.com','+7 (800) 123-45-67','Москва, Россия','krzysztofjankowski510@gmail.com','Пн-Вс: 9:00 — 21:00','2024 Битва экстрасенсов. Все права защищены.',1,'','Битва Экстрасенсов',56,48);
 /*!40000 ALTER TABLE `site_settings` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -623,4 +626,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-27 11:13:56
+-- Dump completed on 2026-05-27 12:57:50
