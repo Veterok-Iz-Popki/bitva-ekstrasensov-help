@@ -3,6 +3,16 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import api from '../lib/api';
 import PictureImg from './PictureImg';
 
+// Shared module-level cache для `/settings` — используется Header + Footer одновременно,
+// чтобы не делать 2 одинаковых запроса на каждой странице.
+let _settingsPromise = null;
+function fetchSettings() {
+  if (!_settingsPromise) {
+    _settingsPromise = api.get('/settings').then(res => res.data).catch(() => ({}));
+  }
+  return _settingsPromise;
+}
+
 const NAV_ITEMS = [
   { path: '/', label: 'Главная' },
   { path: '/#ekstrasensy', label: 'Экстрасенсы' },
@@ -29,13 +39,23 @@ function Header() {
   const headerRef = useRef(null);
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    let rafId = 0;
+    const onScroll = () => {
+      if (rafId) return;
+      rafId = requestAnimationFrame(() => {
+        setScrolled(window.scrollY > 50);
+        rafId = 0;
+      });
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      cancelAnimationFrame(rafId);
+      window.removeEventListener('scroll', onScroll);
+    };
   }, []);
 
   useEffect(() => {
-    api.get('/settings').then(res => setSettings(res.data)).catch(() => {});
+    fetchSettings().then(setSettings);
   }, []);
 
   // Measure header height for CSS variable spacer (используется в @media max-md spacer)
@@ -212,7 +232,7 @@ function Header() {
 
 function Footer() {
   const [settings, setSettings] = useState({});
-  useEffect(() => { api.get('/settings').then((res) => setSettings(res.data)).catch(() => {}); }, []);
+  useEffect(() => { fetchSettings().then(setSettings); }, []);
 
   // Логотип из настроек
   const logoUrl = settings?.logo_url || DEFAULT_LOGO.url;

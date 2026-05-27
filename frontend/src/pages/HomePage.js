@@ -1,9 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { Shield, Users, HelpCircle, Globe, MessageCircle, UserCheck } from 'lucide-react';
 import api, { setSEO, setJsonLd } from '../lib/api';
-import ReviewsCarousel from '../components/ReviewsCarousel';
 import PictureImg from '../components/PictureImg';
+import useInView from '../hooks/useInView';
+
+// ReviewsCarousel — отдельный чанк, грузится только когда секция входит в viewport
+const ReviewsCarousel = lazy(() => import('../components/ReviewsCarousel'));
 
 const PROBLEM_CATEGORIES = [
   { label: 'Порча', path: '/porcha' },
@@ -35,16 +38,18 @@ export default function HomePage() {
   const [participants, setParticipants] = useState([]);
   const [reviews, setReviews] = useState([]);
 
+  // Sentinel-рефы для defer-mount тяжёлых below-the-fold секций.
+  // Секция рендерится только когда пользователь приблизится к ней при скролле.
+  const [participantsRef, participantsInView] = useInView({ rootMargin: '400px' });
+  const [reviewsRef, reviewsInView] = useInView({ rootMargin: '400px' });
+
+  // Critical path: только данные, нужные above-the-fold (hero + SEO)
   useEffect(() => {
     Promise.all([
       api.get('/pages/home'),
       api.get('/seo/home'),
-      api.get('/participants'),
-      api.get('/reviews?limit=40'),
-    ]).then(([pageRes, seoRes, partRes, revRes]) => {
+    ]).then(([pageRes, seoRes]) => {
       setPage(pageRes.data);
-      setParticipants(partRes.data || []);
-      setReviews(revRes.data || []);
       const seo = seoRes.data;
       if (seo) setSEO({ title: seo.title, description: seo.description, keywords: seo.keywords });
       setJsonLd({
@@ -57,26 +62,40 @@ export default function HomePage() {
     }).catch(() => {});
   }, []);
 
+  // Deferred: участники подгружаются только когда пользователь приближается к секции
+  useEffect(() => {
+    if (!participantsInView || participants.length) return;
+    api.get('/participants').then(res => setParticipants(res.data || [])).catch(() => {});
+  }, [participantsInView, participants.length]);
+
+  // Deferred: отзывы тоже подгружаются по мере приближения секции
+  useEffect(() => {
+    if (!reviewsInView || reviews.length) return;
+    api.get('/reviews?limit=40').then(res => setReviews(res.data || [])).catch(() => {});
+  }, [reviewsInView, reviews.length]);
+
   const b = page?.blocks || {};
 
-  const parseServiceCat = (text) => {
-    if (!text) return { title: '', subtitle: '', items: [] };
-    const lines = text.split('\n').filter(Boolean);
-    const firstLine = lines[0] || '';
-    const parts = firstLine.split(/\s+/).filter(Boolean);
-    return {
-      title: parts[0] || '',
-      subtitle: parts.slice(1).join(' ') || '',
-      items: lines.slice(1)
+  // Мемоизируем парсинг service-категорий — пересчитывается только при изменении page.blocks
+  const serviceCats = useMemo(() => {
+    const parseServiceCat = (text) => {
+      if (!text) return { title: '', subtitle: '', items: [] };
+      const lines = text.split('\n').filter(Boolean);
+      const firstLine = lines[0] || '';
+      const parts = firstLine.split(/\s+/).filter(Boolean);
+      return {
+        title: parts[0] || '',
+        subtitle: parts.slice(1).join(' ') || '',
+        items: lines.slice(1)
+      };
     };
-  };
-
-  const serviceCats = [
-    parseServiceCat(b.service_cat_1),
-    parseServiceCat(b.service_cat_2),
-    parseServiceCat(b.service_cat_3),
-    parseServiceCat(b.service_cat_4)
-  ].filter(c => c.title);
+    return [
+      parseServiceCat(b.service_cat_1),
+      parseServiceCat(b.service_cat_2),
+      parseServiceCat(b.service_cat_3),
+      parseServiceCat(b.service_cat_4)
+    ].filter(c => c.title);
+  }, [b.service_cat_1, b.service_cat_2, b.service_cat_3, b.service_cat_4]);
 
   return (
     <div data-testid="home-page">
@@ -180,8 +199,8 @@ export default function HomePage() {
       </section>
 
       {/* ===== PARTICIPANTS GRID ===== */}
-      {participants.length > 0 && (
-        <section id="ekstrasensy" className="py-12 px-4" data-testid="participants-section">
+      <section ref={participantsRef} id="ekstrasensy" className="py-12 px-4" data-testid="participants-section">
+        {participants.length > 0 && (
           <div className="max-w-6xl mx-auto">
             <h2 className="font-heading text-3xl md:text-5xl font-bold text-white text-center mb-10">
               {b.participants_title || 'Лучшие экстрасенсы России'}
@@ -244,8 +263,8 @@ export default function HomePage() {
               ))}
             </div>
           </div>
-        </section>
-      )}
+        )}
+      </section>
 
       {/* ===== BENEFITS ICONS ===== */}
       <section className="py-12 px-4" data-testid="benefits-section">
@@ -267,16 +286,18 @@ export default function HomePage() {
       </section>
 
       {/* ===== REVIEWS CAROUSEL ===== */}
-      {reviews.length > 0 && (
-        <section id="otzyvy" className="py-10 px-4" data-testid="reviews-section">
+      <section ref={reviewsRef} id="otzyvy" className="py-10 px-4" data-testid="reviews-section">
+        {reviews.length > 0 && (
           <div className="max-w-6xl mx-auto">
             <h2 className="font-heading text-3xl md:text-5xl font-bold text-white text-center mb-10">
               {b.reviews_title || 'Отзывы'}
             </h2>
-            <ReviewsCarousel reviews={reviews} />
+            <Suspense fallback={<div className="text-white/40 font-body text-center py-10">Загрузка отзывов…</div>}>
+              <ReviewsCarousel reviews={reviews} />
+            </Suspense>
           </div>
-        </section>
-      )}
+        )}
+      </section>
 
       {/* ===== CTA BETWEEN REVIEWS AND SERVICES ===== */}
       <section className="py-6 md:py-8 px-4" data-testid="cta-mid-section">

@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, memo } from 'react';
 import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-export default function ReviewsCarousel({ reviews = [] }) {
+function ReviewsCarousel({ reviews = [] }) {
   const [current, setCurrent] = useState(0);
   const total = reviews.length;
 
@@ -11,18 +11,19 @@ export default function ReviewsCarousel({ reviews = [] }) {
     setCurrent(((idx % total) + total) % total);
   }, [total]);
 
-  const prev = () => goTo(current - 1);
-  const next = () => goTo(current + 1);
+  const prev = useCallback(() => setCurrent(c => ((c - 1) % total + total) % total), [total]);
+  const next = useCallback(() => setCurrent(c => ((c + 1) % total + total) % total), [total]);
 
-  // Keyboard navigation
+  // Keyboard navigation — стабильный effect зависит только от prev/next (мемоизированы)
   useEffect(() => {
+    if (total === 0) return;
     const handleKey = (e) => {
       if (e.key === 'ArrowLeft') prev();
       if (e.key === 'ArrowRight') next();
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  });
+  }, [prev, next, total]);
 
   if (total === 0) return null;
 
@@ -153,3 +154,6 @@ export default function ReviewsCarousel({ reviews = [] }) {
     </div>
   );
 }
+
+// Реревенеринги только когда меняется массив отзывов (а не на каждом scroll/render родителя)
+export default memo(ReviewsCarousel);
