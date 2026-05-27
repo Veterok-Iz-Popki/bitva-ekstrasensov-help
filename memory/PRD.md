@@ -44,6 +44,33 @@ SEO-оптимизированный сайт «Битва экстрасенс�
 - `emergent-main.js` помечен `defer`
 - CRA main bundle уже имеет `defer`
 
+### Service Worker / Runtime Cache (этап 6)
+Файл: `/app/frontend/public/sw.js`, регистрация в `index.js` (production-only).
+
+**Стратегии кэширования:**
+- **Cache First** — статика (`/static/*` фингерпринтованные JS/CSS chunks, шрифты Google Fonts), и `/api/uploads/*` (WebP, изображения)
+- **Stale-While-Revalidate** — публичные API: `/api/pages`, `/api/seo`, `/api/participants`, `/api/reviews`, `/api/settings`, `/api/faq`, `/api/gallery`, `/api/video`
+- **Network First** — навигационные запросы (HTML), fallback на кэш при offline
+
+**Исключено из кэша:**
+- `/admin/*` (страницы) и `/api/admin/*` (API админки)
+- `/api/auth/*` (логин/токены)
+- Любые запросы с `Authorization` заголовком
+- POST/PUT/DELETE/PATCH методы
+
+**Инвалидация:**
+- `CACHE_VERSION` константа в SW — при бампе все старые кэши удаляются на activate
+- `skipWaiting()` + `clients.claim()` — новая версия SW активируется сразу
+- `sw.js` отдаётся с `Cache-Control: no-cache, no-store, must-revalidate` (backend настроен) — браузер всегда проверяет обновление
+- `index.html` — также `no-cache`, поэтому новые asset-хеши подхватываются мгновенно
+- Дев-режим: SW автоматически unregister'ится при загрузке (не мешает hot-reload, защита от stale-SW)
+
+**Что улучшится для repeat visitors:**
+- Мгновенная загрузка статики и изображений из cache (0 network)
+- API-ответы возвращаются мгновенно из cache, обновление в фоне (SWR)
+- Снижение FCP/LCP до <500ms на повторных визитах
+- Снижение нагрузки на backend и БД
+
 ### Hydration / Initial Render Optimization (этап 5)
 - **Defer-mount below-the-fold секций** через IntersectionObserver (`useInView` hook с `rootMargin: 400px`):
   - `/api/participants` фетчится только при приближении секции участников к viewport

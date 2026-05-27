@@ -699,8 +699,10 @@ if (fs.existsSync(BUILD_DIR)) {
     maxAge: '1y',
     immutable: true,
     setHeaders: (res, filePath) => {
-      // index.html must be revalidated to pick up new asset hashes
-      if (filePath.endsWith('index.html')) {
+      // index.html, sw.js, manifest.json не фингерпринтованы — должны проверяться при каждом запросе,
+      // иначе пользователь застрянет на старой версии после деплоя.
+      const base = path.basename(filePath);
+      if (base === 'index.html' || base === 'sw.js' || base === 'manifest.json') {
         res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       }
     },
