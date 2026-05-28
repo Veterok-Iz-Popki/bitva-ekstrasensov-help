@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Play } from 'lucide-react';
 import api, { setSEO, setJsonLd } from '../lib/api';
@@ -9,39 +9,43 @@ const fullUrl = (u) => u && u.startsWith('/') ? API_URL + u : u;
 
 function LazyVideo({ video, idx }) {
   const [active, setActive] = useState(false);
-  const videoRef = useRef(null);
+  const [buffering, setBuffering] = useState(false);
   const posterSrc = fullUrl(video.thumbnail_url);
   const videoSrc = fullUrl(video.video_url);
-
-  const handlePlay = () => {
-    setActive(true);
-  };
-
-  useEffect(() => {
-    if (active && videoRef.current) {
-      videoRef.current.src = videoSrc;
-      videoRef.current.play().catch(() => {});
-    }
-  }, [active, videoSrc]);
 
   return (
     <article className="teal-card overflow-hidden group" data-testid={`video-card-${idx}`}>
       <div className="relative aspect-video bg-black/50">
         {active ? (
-          <video
-            ref={videoRef}
-            controls
-            autoPlay
-            preload="none"
-            poster={posterSrc || undefined}
-            className="absolute inset-0 w-full h-full object-contain bg-black"
-            data-testid={`video-player-${idx}`}
-          />
+          <>
+            {/* src задаётся через атрибут на mount — браузер сразу делает один range-запрос
+                и начинает потоковое воспроизведение (без переинициализации loader'а). */}
+            <video
+              key={video.id}
+              src={videoSrc}
+              poster={posterSrc || undefined}
+              controls
+              autoPlay
+              playsInline
+              preload="auto"
+              onWaiting={() => setBuffering(true)}
+              onPlaying={() => setBuffering(false)}
+              onCanPlay={() => setBuffering(false)}
+              className="absolute inset-0 w-full h-full object-contain bg-black"
+              data-testid={`video-player-${idx}`}
+            />
+            {buffering && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none" data-testid={`video-loader-${idx}`}>
+                <div className="w-12 h-12 border-4 border-gold/30 border-t-gold rounded-full animate-spin" />
+              </div>
+            )}
+          </>
         ) : (
           <button
-            onClick={handlePlay}
+            onClick={() => { setBuffering(true); setActive(true); }}
             className="w-full h-full relative cursor-pointer"
             data-testid={`video-play-btn-${idx}`}
+            aria-label={`Воспроизвести: ${video.title || 'Видео'}`}
           >
             {posterSrc ? (
               <PictureImg
