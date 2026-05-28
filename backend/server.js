@@ -537,7 +537,23 @@ api.post('/admin/upload-video', requireAdmin, videoUpload.fields([
     result.video_url = `/api/uploads/${req.files.video[0].filename}`;
   }
   if (req.files?.poster?.[0]) {
-    result.poster_url = `/api/uploads/${req.files.poster[0].filename}`;
+    const posterFile = req.files.poster[0];
+    result.poster_url = `/api/uploads/${posterFile.filename}`;
+    // Генерируем .webp для постера видео (если ещё не webp) — иначе <picture> на public-стороне
+    // получит 404 на .webp и в некоторых браузерах отрисует broken-image.
+    const ext = path.extname(posterFile.filename).toLowerCase().slice(1);
+    if (ext && ext !== 'webp') {
+      try {
+        const sharp = require('sharp');
+        const webpName = posterFile.filename.replace(/\.[^.]+$/, '.webp');
+        await sharp(posterFile.path)
+          .resize(1920, 1080, { fit: 'inside', withoutEnlargement: true })
+          .webp({ quality: 85 })
+          .toFile(path.join(UPLOADS_DIR, webpName));
+      } catch (e) {
+        console.error('Poster WebP generation failed:', e.message);
+      }
+    }
   }
   return res.json({ status: 'success', ...result });
 });
