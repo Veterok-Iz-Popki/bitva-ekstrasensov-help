@@ -21,15 +21,33 @@ export default function VideoAdmin() {
   const [form, setForm] = useState({ ...emptyForm });
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [selectedVideo, setSelectedVideo] = useState(null); // { name, size, type }
+  const [selectedPoster, setSelectedPoster] = useState(null); // { name, size, type, previewUrl }
   const videoInputRef = useRef(null);
   const posterInputRef = useRef(null);
 
   const load = () => { api.get('/admin/gallery/videos').then(r => setItems(r.data || [])).catch(() => {}); };
   useEffect(() => { load(); }, []);
 
+  // Cleanup blob URLs при размонтировании / смене обложки
+  useEffect(() => {
+    return () => {
+      if (selectedPoster?.previewUrl) URL.revokeObjectURL(selectedPoster.previewUrl);
+    };
+  }, [selectedPoster?.previewUrl]);
+
+  const resetSelections = () => {
+    if (selectedPoster?.previewUrl) URL.revokeObjectURL(selectedPoster.previewUrl);
+    setSelectedVideo(null);
+    setSelectedPoster(null);
+    if (videoInputRef.current) videoInputRef.current.value = '';
+    if (posterInputRef.current) posterInputRef.current.value = '';
+  };
+
   const openCreate = () => {
     setEditId(null);
     setForm({ ...emptyForm, order: items.length });
+    resetSelections();
     setDialogOpen(true);
   };
   const openEdit = (item) => {
@@ -42,7 +60,44 @@ export default function VideoAdmin() {
       order: item.order ?? 0,
       is_published: item.is_published !== false,
     });
+    resetSelections();
     setDialogOpen(true);
+  };
+
+  // Forматирование размера: 1234567 -> "1.18 MB"
+  const formatBytes = (b) => {
+    if (!b && b !== 0) return '';
+    if (b < 1024) return `${b} B`;
+    if (b < 1024 * 1024) return `${(b / 1024).toFixed(1)} KB`;
+    if (b < 1024 * 1024 * 1024) return `${(b / 1024 / 1024).toFixed(1)} MB`;
+    return `${(b / 1024 / 1024 / 1024).toFixed(2)} GB`;
+  };
+
+  // Извлекаем формат из MIME / имени файла
+  const formatType = (file) => {
+    if (!file) return '';
+    const ext = file.name?.split('.').pop()?.toUpperCase();
+    if (ext) return ext;
+    const m = file.type?.split('/')[1]?.toUpperCase();
+    return m || '';
+  };
+
+  const onVideoChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setSelectedVideo({ name: file.name, size: file.size, type: file.type });
+  };
+
+  const onPosterChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (selectedPoster?.previewUrl) URL.revokeObjectURL(selectedPoster.previewUrl);
+    setSelectedPoster({
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      previewUrl: URL.createObjectURL(file),
+    });
   };
 
   const uploadFiles = async (videoFile, posterFile) => {
@@ -101,6 +156,7 @@ export default function VideoAdmin() {
         toast.success('Видео добавлено');
       }
       setDialogOpen(false);
+      resetSelections();
       load();
     } catch {
       toast.error('Ошибка загрузки');
@@ -187,24 +243,46 @@ export default function VideoAdmin() {
             {/* Video file upload */}
             <div className="space-y-2">
               <Label className="text-white/70 font-body text-sm">Видеофайл (MP4, WebM)</Label>
-              {form.video_url && (
-                <p className="text-green-400/80 text-xs font-body flex items-center gap-1">
-                  <Film className="w-3 h-3" /> Видео загружено
-                </p>
+
+              {/* Существующий загруженный файл (edit mode) */}
+              {form.video_url && !selectedVideo && (
+                <div className="flex items-center gap-2 p-2 rounded bg-teal-dark/60 border border-teal-light/20" data-testid="video-existing">
+                  <Film className="w-4 h-4 text-green-400 shrink-0" />
+                  <div className="text-xs font-body min-w-0 flex-1">
+                    <p className="text-green-400/80">Файл уже загружен</p>
+                    <p className="text-white/40 truncate">{form.video_url.split('/').pop()}</p>
+                  </div>
+                </div>
               )}
+
+              {/* Новый выбранный файл */}
+              {selectedVideo && (
+                <div className="flex items-start gap-2 p-2 rounded bg-teal-dark/60 border border-gold/40" data-testid="video-selected">
+                  <Film className="w-4 h-4 text-gold shrink-0 mt-0.5" />
+                  <div className="text-xs font-body min-w-0 flex-1">
+                    <p className="text-gold">Видео выбрано</p>
+                    <p className="text-white truncate" title={selectedVideo.name}>{selectedVideo.name}</p>
+                    <p className="text-white/40">Размер: {formatBytes(selectedVideo.size)} · Формат: {formatType(selectedVideo)}</p>
+                  </div>
+                </div>
+              )}
+
               <div
                 className="border-2 border-dashed border-teal-light/30 rounded-lg p-4 text-center cursor-pointer hover:border-gold/50 transition-colors"
                 onClick={() => videoInputRef.current?.click()}
               >
                 <Upload className="w-6 h-6 text-white/30 mx-auto mb-2" />
                 <p className="text-white/50 text-xs font-body">
-                  {form.video_url ? 'Заменить видео' : 'Нажмите для загрузки видео'}
+                  {selectedVideo
+                    ? 'Выбрать другое видео'
+                    : (form.video_url ? 'Заменить видео' : 'Нажмите для загрузки видео')}
                 </p>
                 <input
                   ref={videoInputRef}
                   type="file"
                   accept="video/mp4,video/webm,video/quicktime"
                   className="hidden"
+                  onChange={onVideoChange}
                   data-testid="video-file-input"
                 />
               </div>
@@ -213,22 +291,46 @@ export default function VideoAdmin() {
             {/* Poster upload */}
             <div className="space-y-2">
               <Label className="text-white/70 font-body text-sm">Обложка / превью (JPG, PNG)</Label>
-              {form.thumbnail_url && (
-                <img src={fullUrl(form.thumbnail_url)} alt="preview" className="w-24 h-14 object-cover rounded" />
+
+              {/* Существующая обложка (edit mode, новая не выбрана) */}
+              {form.thumbnail_url && !selectedPoster && (
+                <div className="flex items-center gap-2 p-2 rounded bg-teal-dark/60 border border-teal-light/20" data-testid="poster-existing">
+                  <img src={fullUrl(form.thumbnail_url)} alt="preview" className="w-20 h-12 object-cover rounded shrink-0" />
+                  <div className="text-xs font-body min-w-0 flex-1">
+                    <p className="text-green-400/80">Обложка уже загружена</p>
+                    <p className="text-white/40 truncate">{form.thumbnail_url.split('/').pop()}</p>
+                  </div>
+                </div>
               )}
+
+              {/* Новая выбранная обложка */}
+              {selectedPoster && (
+                <div className="flex items-start gap-2 p-2 rounded bg-teal-dark/60 border border-gold/40" data-testid="poster-selected">
+                  <img src={selectedPoster.previewUrl} alt="preview" className="w-20 h-12 object-cover rounded shrink-0" />
+                  <div className="text-xs font-body min-w-0 flex-1">
+                    <p className="text-gold">Обложка выбрана</p>
+                    <p className="text-white truncate" title={selectedPoster.name}>{selectedPoster.name}</p>
+                    <p className="text-white/40">Размер: {formatBytes(selectedPoster.size)} · Формат: {formatType(selectedPoster)}</p>
+                  </div>
+                </div>
+              )}
+
               <div
                 className="border-2 border-dashed border-teal-light/30 rounded-lg p-3 text-center cursor-pointer hover:border-gold/50 transition-colors"
                 onClick={() => posterInputRef.current?.click()}
               >
                 <Image className="w-5 h-5 text-white/30 mx-auto mb-1" />
                 <p className="text-white/50 text-xs font-body">
-                  {form.thumbnail_url ? 'Заменить обложку' : 'Загрузить обложку'}
+                  {selectedPoster
+                    ? 'Выбрать другую обложку'
+                    : (form.thumbnail_url ? 'Заменить обложку' : 'Загрузить обложку')}
                 </p>
                 <input
                   ref={posterInputRef}
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
                   className="hidden"
+                  onChange={onPosterChange}
                   data-testid="poster-file-input"
                 />
               </div>
