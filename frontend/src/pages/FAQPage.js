@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';
-import api, { setSEO } from '../lib/api';
+import api, { setSEO, setBreadcrumbJsonLd } from '../lib/api';
 
 export default function FAQPage() {
   const [items, setItems] = useState([]);
@@ -16,7 +16,37 @@ export default function FAQPage() {
     ]).then(([faqRes, pageRes, seoRes]) => {
       setItems(faqRes.data || []);
       setPage(pageRes.data);
-      if (seoRes.data) setSEO(seoRes.data);
+      const seo = seoRes.data;
+      if (seo) setSEO({
+        title: seo.title,
+        description: seo.description,
+        keywords: seo.keywords,
+        canonicalPath: '/voprosy-i-otvety',
+        ogTitle: seo.og_title,
+        ogDescription: seo.og_description,
+      });
+      // FAQPage JSON-LD schema — даёт rich snippets в Google SERP
+      if (faqRes.data?.length) {
+        const script = document.querySelector('#json-ld') || (() => {
+          const s = document.createElement('script');
+          s.id = 'json-ld'; s.type = 'application/ld+json';
+          document.head.appendChild(s);
+          return s;
+        })();
+        script.textContent = JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": faqRes.data.map(it => ({
+            "@type": "Question",
+            "name": it.question,
+            "acceptedAnswer": { "@type": "Answer", "text": it.answer },
+          })),
+        });
+      }
+      setBreadcrumbJsonLd([
+        { name: 'Главная', path: '/' },
+        { name: 'Вопросы-Ответы', path: '/voprosy-i-otvety' },
+      ]);
     }).catch(() => {}).finally(() => setLoading(false));
   }, []);
 
@@ -36,7 +66,7 @@ export default function FAQPage() {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="font-heading text-2xl sm:text-3xl md:text-5xl font-bold text-white mb-4">
-            {blocks.page_title || 'Частые вопросы'}
+            {blocks.page_title || 'Частые вопросы о помощи экстрасенсов'}
           </h1>
           <p className="text-white/50 font-body text-sm md:text-base">
             {blocks.page_subtitle || 'Ответы на самые популярные вопросы о консультациях'}

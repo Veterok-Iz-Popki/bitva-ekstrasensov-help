@@ -1,9 +1,29 @@
 import { useState, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle, AlertTriangle, HelpCircle, Phone } from 'lucide-react';
-import api, { setSEO, setJsonLd } from '../lib/api';
+import api, { setSEO, setJsonLd, setBreadcrumbJsonLd } from '../lib/api';
 
-// Маппинг slug -> название темы (fallback)
+// SEO-оптимизированные H1 для topic-страниц
+const TOPIC_H1 = {
+  'porcha': 'Снятие порчи — помощь экстрасенса',
+  'proklyatie': 'Снятие проклятия — помощь экстрасенса',
+  'sglaz': 'Снятие сглаза — помощь экстрасенса',
+  'venets-bezbrachiya': 'Снятие венца безбрачия — помощь экстрасенса',
+  'privorot': 'Снятие приворота — помощь экстрасенса',
+  'zaklyatie': 'Снятие заклятия — помощь экстрасенса',
+};
+
+// Cross-linking: связанные темы (для блока «Похожие услуги»)
+const TOPIC_RELATED = {
+  'porcha':       [{slug:'sglaz', name:'Снятие сглаза'}, {slug:'proklyatie', name:'Снятие проклятия'}, {slug:'zaklyatie', name:'Снятие заклятия'}],
+  'proklyatie':   [{slug:'porcha', name:'Снятие порчи'}, {slug:'zaklyatie', name:'Снятие заклятия'}, {slug:'venets-bezbrachiya', name:'Венец безбрачия'}],
+  'sglaz':        [{slug:'porcha', name:'Снятие порчи'}, {slug:'proklyatie', name:'Снятие проклятия'}, {slug:'zaklyatie', name:'Снятие заклятия'}],
+  'venets-bezbrachiya': [{slug:'privorot', name:'Снятие приворота'}, {slug:'proklyatie', name:'Снятие проклятия'}],
+  'privorot':     [{slug:'venets-bezbrachiya', name:'Венец безбрачия'}, {slug:'porcha', name:'Снятие порчи'}, {slug:'zaklyatie', name:'Снятие заклятия'}],
+  'zaklyatie':    [{slug:'porcha', name:'Снятие порчи'}, {slug:'sglaz', name:'Снятие сглаза'}, {slug:'proklyatie', name:'Снятие проклятия'}],
+};
+
+// Маппинг slug -> название темы (fallback для breadcrumb / описаний)
 const TOPIC_NAMES = {
   'porcha': 'Порча',
   'proklyatie': 'Проклятие',
@@ -41,7 +61,14 @@ export default function TopicPage() {
       setPage(pageRes.data);
       const seo = seoRes.data;
       if (seo) {
-        setSEO({ title: seo.title, description: seo.description, keywords: seo.keywords });
+        setSEO({
+          title: seo.title,
+          description: seo.description,
+          keywords: seo.keywords,
+          canonicalPath: `/${slug}`,
+          ogTitle: seo.og_title,
+          ogDescription: seo.og_description,
+        });
       }
       setJsonLd({
         "@context": "https://schema.org",
@@ -50,6 +77,10 @@ export default function TopicPage() {
         "description": seo?.description || "",
         "url": window.location.href
       });
+      setBreadcrumbJsonLd([
+        { name: 'Главная', path: '/' },
+        { name: TOPIC_NAMES[slug] || 'Тема', path: `/${slug}` },
+      ]);
     }).catch(() => setNotFound(true)).finally(() => setLoading(false));
   }, [slug, location.pathname]);
 
@@ -74,6 +105,8 @@ export default function TopicPage() {
 
   const b = page?.blocks || {};
   const topicName = b.title || TOPIC_NAMES[slug] || 'Тема';
+  const h1Text = b.h1 || TOPIC_H1[slug] || topicName;
+  const relatedTopics = TOPIC_RELATED[slug] || [];
 
   // Парсим симптомы (каждый с новой строки)
   const symptoms = (b.symptoms || '').split('\n').filter(Boolean);
@@ -94,7 +127,7 @@ export default function TopicPage() {
 
         {/* H1 */}
         <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-6" data-testid="topic-title">
-          {topicName}
+          {h1Text}
         </h1>
 
         {/* Описание проблемы */}
@@ -192,6 +225,26 @@ export default function TopicPage() {
             </button>
           </Link>
         </section>
+
+        {/* Похожие услуги — internal cross-linking для SEO */}
+        {relatedTopics.length > 0 && (
+          <section className="mt-12" data-testid="topic-related">
+            <h2 className="font-heading text-xl md:text-2xl font-semibold text-gold/90 mb-5">Похожие услуги</h2>
+            <ul className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {relatedTopics.map((t) => (
+                <li key={t.slug}>
+                  <Link
+                    to={`/${t.slug}`}
+                    className="block teal-card p-4 hover:border-gold/50 transition-colors text-white/80 hover:text-gold font-body text-sm"
+                    data-testid={`topic-related-${t.slug}`}
+                  >
+                    {t.name} →
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
       </div>
     </div>
   );

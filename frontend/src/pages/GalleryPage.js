@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
-import api, { setSEO, setJsonLd } from '../lib/api';
+import api, { setSEO, setJsonLd, setBreadcrumbJsonLd } from '../lib/api';
 import PictureImg from '../components/PictureImg';
 
 export default function GalleryPage() {
@@ -16,13 +16,24 @@ export default function GalleryPage() {
     ]).then(([photosRes, seoRes]) => {
       setPhotos(photosRes.data || []);
       const seo = seoRes.data;
-      if (seo?.title) setSEO({ title: seo.title, description: seo.description, keywords: seo.keywords });
+      if (seo?.title) setSEO({
+        title: seo.title,
+        description: seo.description,
+        keywords: seo.keywords,
+        canonicalPath: '/foto-galereya',
+        ogTitle: seo.og_title,
+        ogDescription: seo.og_description,
+      });
       setJsonLd({
         "@context": "https://schema.org",
         "@type": "ImageGallery",
         "name": seo?.title || "Фотогалерея",
         "url": window.location.href,
       });
+      setBreadcrumbJsonLd([
+        { name: 'Главная', path: '/' },
+        { name: 'Фотогалерея', path: '/foto-galereya' },
+      ]);
     }).catch(() => {}).finally(() => setLoading(false));
   }, []);
 
@@ -72,7 +83,7 @@ export default function GalleryPage() {
         </nav>
 
         <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-10" data-testid="gallery-title">
-          Фотогалерея
+          Фотогалерея экстрасенсов
         </h1>
 
         {photos.length === 0 ? (

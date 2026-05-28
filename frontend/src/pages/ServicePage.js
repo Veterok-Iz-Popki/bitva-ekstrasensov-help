@@ -1,13 +1,29 @@
 import { useState, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle, Sparkles, HelpCircle, Phone, Star } from 'lucide-react';
-import api, { setSEO, setJsonLd } from '../lib/api';
+import api, { setSEO, setJsonLd, setBreadcrumbJsonLd } from '../lib/api';
 
 const SERVICE_NAMES = {
   'finansovaya-magiya': 'Финансовая магия',
   'lyubovnaya-magiya': 'Любовная магия',
   'magiya-zhizni': 'Магия жизни',
   'magicheskaya-zashchita': 'Магическая защита',
+};
+
+// SEO-оптимизированные H1
+const SERVICE_H1 = {
+  'finansovaya-magiya': 'Финансовая магия — помощь экстрасенса',
+  'lyubovnaya-magiya': 'Любовная магия — помощь экстрасенса',
+  'magiya-zhizni': 'Магия жизни — помощь экстрасенса',
+  'magicheskaya-zashchita': 'Магическая защита — помощь экстрасенса',
+};
+
+// Cross-linking
+const SERVICE_RELATED = {
+  'finansovaya-magiya':      [{slug:'magiya-zhizni', name:'Магия жизни'}, {slug:'magicheskaya-zashchita', name:'Магическая защита'}],
+  'lyubovnaya-magiya':       [{slug:'magiya-zhizni', name:'Магия жизни'}, {slug:'magicheskaya-zashchita', name:'Магическая защита'}],
+  'magiya-zhizni':           [{slug:'magicheskaya-zashchita', name:'Магическая защита'}, {slug:'finansovaya-magiya', name:'Финансовая магия'}],
+  'magicheskaya-zashchita':  [{slug:'magiya-zhizni', name:'Магия жизни'}, {slug:'lyubovnaya-magiya', name:'Любовная магия'}],
 };
 
 export default function ServicePage() {
@@ -31,7 +47,14 @@ export default function ServicePage() {
       setPage(pageRes.data);
       const seo = seoRes.data;
       if (seo && seo.title) {
-        setSEO({ title: seo.title, description: seo.description, keywords: seo.keywords });
+        setSEO({
+          title: seo.title,
+          description: seo.description,
+          keywords: seo.keywords,
+          canonicalPath: `/${slug}`,
+          ogTitle: seo.og_title,
+          ogDescription: seo.og_description,
+        });
       }
       setJsonLd({
         "@context": "https://schema.org",
@@ -40,6 +63,10 @@ export default function ServicePage() {
         "description": seo?.description || "",
         "url": window.location.href
       });
+      setBreadcrumbJsonLd([
+        { name: 'Главная', path: '/' },
+        { name: SERVICE_NAMES[slug] || 'Услуга', path: `/${slug}` },
+      ]);
     }).catch(() => setNotFound(true)).finally(() => setLoading(false));
   }, [slug, location.pathname]);
 
@@ -62,6 +89,8 @@ export default function ServicePage() {
 
   const b = page?.blocks || {};
   const title = b.title || SERVICE_NAMES[slug] || 'Услуга';
+  const h1Text = b.h1 || SERVICE_H1[slug] || title;
+  const relatedServices = SERVICE_RELATED[slug] || [];
 
   const parseList = (text) => (text || '').split('\n').filter(Boolean);
 
@@ -82,7 +111,7 @@ export default function ServicePage() {
 
         {/* H1 */}
         <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-6" data-testid="service-title">
-          {title}
+          {h1Text}
         </h1>
 
         {/* Описание услуги */}
@@ -198,6 +227,26 @@ export default function ServicePage() {
             </button>
           </Link>
         </section>
+
+        {/* Похожие услуги — internal cross-linking для SEO */}
+        {relatedServices.length > 0 && (
+          <section className="mt-12" data-testid="service-related">
+            <h2 className="font-heading text-xl md:text-2xl font-semibold text-gold/90 mb-5">Похожие услуги</h2>
+            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {relatedServices.map((s) => (
+                <li key={s.slug}>
+                  <Link
+                    to={`/${s.slug}`}
+                    className="block teal-card p-4 hover:border-gold/50 transition-colors text-white/80 hover:text-gold font-body text-sm"
+                    data-testid={`service-related-${s.slug}`}
+                  >
+                    {s.name} →
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
       </div>
     </div>
   );

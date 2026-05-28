@@ -104,4 +104,31 @@ export function setJsonLd(data) {
   script.textContent = JSON.stringify(data);
 }
 
+/**
+ * Добавляет JSON-LD BreadcrumbList schema. Принимает массив [{name, path}].
+ * path относительный (например, '/uchastniki/aleksandr-sheps').
+ * Использует production site_url (getSiteUrl) — поисковики получают канонические prod-URL.
+ */
+export function setBreadcrumbJsonLd(items) {
+  if (!Array.isArray(items) || items.length === 0) return;
+  const base = getSiteUrl();
+  let script = document.querySelector('#json-ld-breadcrumb');
+  if (!script) {
+    script = document.createElement('script');
+    script.id = 'json-ld-breadcrumb';
+    script.type = 'application/ld+json';
+    document.head.appendChild(script);
+  }
+  script.textContent = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": items.map((item, i) => ({
+      "@type": "ListItem",
+      "position": i + 1,
+      "name": item.name,
+      "item": `${base}${item.path}`,
+    })),
+  });
+}
+
 export default api;

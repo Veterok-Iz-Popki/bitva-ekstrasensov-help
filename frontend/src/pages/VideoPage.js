@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Play } from 'lucide-react';
-import api, { setSEO, setJsonLd } from '../lib/api';
+import api, { setSEO, setJsonLd, setBreadcrumbJsonLd } from '../lib/api';
 import PictureImg from '../components/PictureImg';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';
@@ -121,13 +121,24 @@ export default function VideoPage() {
     ]).then(([videosRes, seoRes]) => {
       setVideos(videosRes.data || []);
       const seo = seoRes.data;
-      if (seo?.title) setSEO({ title: seo.title, description: seo.description, keywords: seo.keywords });
+      if (seo?.title) setSEO({
+        title: seo.title,
+        description: seo.description,
+        keywords: seo.keywords,
+        canonicalPath: '/video',
+        ogTitle: seo.og_title,
+        ogDescription: seo.og_description,
+      });
       setJsonLd({
         "@context": "https://schema.org",
         "@type": "VideoGallery",
         "name": seo?.title || "Видео",
         "url": window.location.href,
       });
+      setBreadcrumbJsonLd([
+        { name: 'Главная', path: '/' },
+        { name: 'Видео', path: '/video' },
+      ]);
     }).catch(() => {}).finally(() => setLoading(false));
   }, []);
 
@@ -149,7 +160,7 @@ export default function VideoPage() {
         </nav>
 
         <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-10" data-testid="video-title">
-          Видео
+          Видео экстрасенсов
         </h1>
 
         {videos.length === 0 ? (

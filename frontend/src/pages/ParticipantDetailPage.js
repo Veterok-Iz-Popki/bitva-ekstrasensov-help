@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
-import api, { setSEO, setJsonLd } from '../lib/api';
+import api, { setSEO, setJsonLd, setBreadcrumbJsonLd, getSiteUrl } from '../lib/api';
 import PictureImg from '../components/PictureImg';
 
 function getFirstName(name) {
@@ -74,6 +74,7 @@ export default function ParticipantDetailPage() {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [allParticipants, setAllParticipants] = useState([]);
 
   useEffect(() => {
     setLoading(true);
@@ -81,14 +82,22 @@ export default function ParticipantDetailPage() {
     Promise.all([
       api.get(`/participants/${slug}`),
       api.get(`/participants/${slug}/reviews`),
-    ]).then(([partRes, revRes]) => {
+      api.get('/participants'),
+      api.get(`/seo/participant-${slug}`).catch(() => ({ data: null })),
+    ]).then(([partRes, revRes, allRes, seoRes]) => {
       setParticipant(partRes.data);
       setReviews(revRes.data || []);
+      setAllParticipants(allRes.data || []);
       const p = partRes.data;
+      const seo = seoRes.data;
       setSEO({
-        title: `Экстрасенс ${p.name} - Официальный сайт помощи | Битва Экстрасенсов`,
-        description: p.description,
-        keywords: `${p.name}, экстрасенс, консультация, битва экстрасенсов, помощь, прием`,
+        title: seo?.title || `Экстрасенс ${p.name} - Официальный сайт помощи | Битва Экстрасенсов`,
+        description: seo?.description || p.description,
+        keywords: seo?.keywords || `${p.name}, экстрасенс, консультация, битва экстрасенсов, помощь, прием`,
+        canonicalPath: `/uchastniki/${slug}`,
+        ogTitle: seo?.og_title || `${p.name} — приём экстрасенса`,
+        ogDescription: seo?.og_description || p.description,
+        ogImage: p.photo_url ? (p.photo_url.startsWith('http') ? p.photo_url : `${getSiteUrl()}${p.photo_url}`) : undefined,
       });
       setJsonLd({
         "@context": "https://schema.org",
@@ -97,7 +106,13 @@ export default function ParticipantDetailPage() {
         description: p.description,
         image: p.photo_url,
         jobTitle: p.title,
+        url: `${getSiteUrl()}/uchastniki/${slug}`,
       });
+      setBreadcrumbJsonLd([
+        { name: 'Главная', path: '/' },
+        { name: 'Экстрасенсы', path: '/#ekstrasensy' },
+        { name: p.name, path: `/uchastniki/${slug}` },
+      ]);
     }).catch(() => setNotFound(true)).finally(() => setLoading(false));
   }, [slug]);
 
@@ -283,6 +298,30 @@ export default function ParticipantDetailPage() {
           <div className="md:hidden mt-10" data-testid="reviews-mobile">
             <ReviewsBlock testIdPrefix="review-mobile" />
           </div>
+        )}
+
+        {/* Другие экстрасенсы — internal cross-linking для SEO */}
+        {allParticipants.filter(p => p.slug !== slug).length > 0 && (
+          <section className="mt-12" data-testid="other-participants">
+            <h2 className="font-heading text-xl md:text-2xl font-semibold text-gold/90 mb-5">Другие экстрасенсы</h2>
+            <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+              {allParticipants
+                .filter(p => p.slug !== slug)
+                .slice(0, 7)
+                .map((p) => (
+                  <li key={p.id}>
+                    <Link
+                      to={`/uchastniki/${p.slug}`}
+                      className="block teal-card p-3 hover:border-gold/50 transition-colors text-white/80 hover:text-gold font-body text-sm text-center"
+                      aria-label={`Перейти к экстрасенсу ${p.name}`}
+                      data-testid={`other-participant-${p.slug}`}
+                    >
+                      {p.name}
+                    </Link>
+                  </li>
+                ))}
+            </ul>
+          </section>
         )}
       </div>
     </div>

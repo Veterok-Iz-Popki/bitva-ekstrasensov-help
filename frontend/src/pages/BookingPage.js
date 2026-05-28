@@ -3,7 +3,7 @@ import { useSearchParams, Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import ApplicationForm from '../components/ApplicationForm';
-import api, { setSEO } from '../lib/api';
+import api, { setSEO, setBreadcrumbJsonLd } from '../lib/api';
 
 function toDative(fullName) {
   if (!fullName) return fullName;
@@ -42,8 +42,20 @@ export default function BookingPage() {
 
     Promise.all(fetches).then(([pageRes, seoRes, psychicRes]) => {
       setPage(pageRes.data);
-      if (seoRes.data) setSEO(seoRes.data);
+      const seo = seoRes.data;
+      if (seo) setSEO({
+        title: seo.title,
+        description: seo.description,
+        keywords: seo.keywords,
+        canonicalPath: '/zapis-na-priem',
+        ogTitle: seo.og_title,
+        ogDescription: seo.og_description,
+      });
       if (psychicRes?.data) setPsychic(psychicRes.data);
+      setBreadcrumbJsonLd([
+        { name: 'Главная', path: '/' },
+        { name: 'Запись на приём', path: '/zapis-na-priem' },
+      ]);
     }).catch(() => {}).finally(() => setLoading(false));
   }, [psychicSlug]);
 
