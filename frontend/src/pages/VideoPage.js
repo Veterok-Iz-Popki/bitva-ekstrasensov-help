@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Play } from 'lucide-react';
 import api, { setSEO, setJsonLd } from '../lib/api';
@@ -7,33 +7,62 @@ import PictureImg from '../components/PictureImg';
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';
 const fullUrl = (u) => u && u.startsWith('/') ? API_URL + u : u;
 
+// Mime-type из расширения для подсказки браузеру в <source>
+function videoTypeFromUrl(url) {
+  if (!url) return undefined;
+  const ext = url.split('?')[0].split('.').pop().toLowerCase();
+  if (ext === 'mp4' || ext === 'm4v') return 'video/mp4';
+  if (ext === 'webm') return 'video/webm';
+  if (ext === 'mov') return 'video/quicktime';
+  if (ext === 'ogv' || ext === 'ogg') return 'video/ogg';
+  return undefined;
+}
+
 function LazyVideo({ video, idx }) {
   const [active, setActive] = useState(false);
   const [buffering, setBuffering] = useState(false);
+  const videoRef = useRef(null);
   const posterSrc = fullUrl(video.thumbnail_url);
   const videoSrc = fullUrl(video.video_url);
+  const videoType = videoTypeFromUrl(video.video_url);
+
+  // Когда видео достигает HAVE_CURRENT_DATA (есть первый кадр) — пробуем play() вручную.
+  // На медленных сетях этого хватает для старта progressive playback — не ждём canplaythrough
+  // или полного буфера. Если autoplay со звуком блокирован, ловим promise и оставляем
+  // на пользователе нажать controls Play (он всё ещё видит постер).
+  const handleLoadedData = () => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (v.paused) {
+      v.play().catch(() => {});
+    }
+  };
 
   return (
     <article className="teal-card overflow-hidden group" data-testid={`video-card-${idx}`}>
       <div className="relative aspect-video bg-black/50">
         {active ? (
           <>
-            {/* src задаётся через атрибут на mount — браузер сразу делает один range-запрос
-                и начинает потоковое воспроизведение (без переинициализации loader'а). */}
             <video
               key={video.id}
-              src={videoSrc}
+              ref={videoRef}
               poster={posterSrc || undefined}
               controls
               autoPlay
               playsInline
               preload="auto"
-              onWaiting={() => setBuffering(true)}
+              onLoadStart={() => setBuffering(true)}
+              onLoadedData={handleLoadedData}
               onPlaying={() => setBuffering(false)}
               onCanPlay={() => setBuffering(false)}
+              onWaiting={() => setBuffering(true)}
               className="absolute inset-0 w-full h-full object-contain bg-black"
               data-testid={`video-player-${idx}`}
-            />
+            >
+              {/* <source> с type-hint позволяет браузеру решить о support без HEAD-запроса.
+                  Браузер начинает range fetch немедленно. */}
+              <source src={videoSrc} type={videoType} />
+            </video>
             {buffering && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none" data-testid={`video-loader-${idx}`}>
                 <div className="w-12 h-12 border-4 border-gold/30 border-t-gold rounded-full animate-spin" />
