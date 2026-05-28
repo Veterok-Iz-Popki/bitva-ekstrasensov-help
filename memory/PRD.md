@@ -141,6 +141,15 @@ SEO-оптимизированный сайт «Битва экстрасенс�
 ## Статус обновления биографий — DONE
 - Все 8 экстрасенсов: DONE
 
+## SEO — Thin Content Fix (DONE — 2026-02-28)
+- Заполнен блок `additional_title` + `additional_text` в `pages.blocks` для всех 10 страниц `service-*` и `topic-*`.
+- Каждый текст — уникальный (303–339 слов), 4 абзаца, естественное вхождение SEO-ключей без stuffing.
+- Скрипты: `/app/backend/scripts/seo_thin_content.sql` (база) и `seo_thin_content_extend.sql` (расширение).
+- Тексты редактируются через админку: `/admin/pages` → выбор страницы → поля «Доп. заголовок» и «Доп. текст».
+- Никакого хардкода в React (`ServicePage.js`, `TopicPage.js` уже рендерили `b.additional_text` через `dangerouslySet`-free split по `\n`).
+- `dump.sql` и `data.sql` обновлены.
+
+
 ## Учетные данные
 - Админ: `/admin`, `nikoa2020@gmail.com` / `aspire5542gl1952tq`
 
