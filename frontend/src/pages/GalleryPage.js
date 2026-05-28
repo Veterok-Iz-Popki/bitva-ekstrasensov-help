@@ -45,7 +45,13 @@ export default function GalleryPage() {
       if (e.key === 'ArrowRight') goNext();
     };
     window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
+    // Блокируем scroll body когда модалка открыта
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', handler);
+      document.body.style.overflow = prevOverflow;
+    };
   }, [lightboxIdx, goPrev, goNext]);
 
   if (loading) {
@@ -99,16 +105,17 @@ export default function GalleryPage() {
         )}
       </div>
 
-      {/* Lightbox */}
+      {/* Lightbox — z-index выше header (9999) и emergent badge (9999), чтобы X-кнопка была кликабельна */}
       {lightboxIdx >= 0 && photos[lightboxIdx] && (
         <div
-          className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center"
+          className="fixed inset-0 z-[10000] bg-black/95 flex items-center justify-center"
           onClick={closeLightbox}
           data-testid="lightbox-overlay"
         >
           <button
             onClick={(e) => { e.stopPropagation(); closeLightbox(); }}
-            className="absolute top-4 right-4 text-white/70 hover:text-white z-10 p-2"
+            className="absolute top-4 right-4 text-white/70 hover:text-white p-2"
+            aria-label="Закрыть"
             data-testid="lightbox-close"
           >
             <X className="w-7 h-7" />
