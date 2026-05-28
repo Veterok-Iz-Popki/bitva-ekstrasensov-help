@@ -40,7 +40,7 @@ CREATE TABLE `admin_users` (
 LOCK TABLES `admin_users` WRITE;
 /*!40000 ALTER TABLE `admin_users` DISABLE KEYS */;
 INSERT INTO `admin_users` VALUES
-('097fd181-0ddf-4527-a561-76ffffd12312','nikoa2020@gmail.com','$2b$10$YVBdt30Lg6w02wR04SN/BezBQKwkR0y1xu5uzEpIH.fKxp1oms8k2','2026-03-06 17:33:19');
+('097fd181-0ddf-4527-a561-76ffffd12312','nikoa2020@gmail.com','$2b$10$xOFJNdnd5Z8qFXfqyhipX.HVgQxkspbY6CQj.onT3PM2XjDnZ4lzy','2026-03-06 17:33:19');
 /*!40000 ALTER TABLE `admin_users` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -176,6 +176,9 @@ CREATE TABLE `gallery_photos` (
 
 LOCK TABLES `gallery_photos` WRITE;
 /*!40000 ALTER TABLE `gallery_photos` DISABLE KEYS */;
+INSERT INTO `gallery_photos` VALUES
+('77e563cd-3db5-4fc2-b05f-4bfa08f0b305','/api/uploads/c1372869-442f-4944-a824-1a0087ad4499.jpg','asdasd','asdasd','',0,1,'2026-05-28 09:16:01'),
+('8c29798a-1675-4d7e-942b-a0d6c1936cc1','/api/uploads/4e8f0d24-9802-45f7-8813-cc0fe335888f.jpg','dasd','asdasd','',1,1,'2026-05-28 09:36:09');
 /*!40000 ALTER TABLE `gallery_photos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -195,6 +198,7 @@ CREATE TABLE `gallery_videos` (
   `order` int(11) DEFAULT 0,
   `is_published` tinyint(1) DEFAULT 1,
   `created_at` datetime DEFAULT current_timestamp(),
+  `processing_status` varchar(20) DEFAULT 'idle',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -205,6 +209,8 @@ CREATE TABLE `gallery_videos` (
 
 LOCK TABLES `gallery_videos` WRITE;
 /*!40000 ALTER TABLE `gallery_videos` DISABLE KEYS */;
+INSERT INTO `gallery_videos` VALUES
+('ce6e8987-4ac8-4022-9d10-aadfd37c4de4','/api/uploads/b425ddcc-1382-4665-870c-99a3044a3e7e_opt.mp4','fdfsd','sdfsdf','/api/uploads/2ed46b25-1854-4b79-9f14-da5a3b8228d9.png',0,1,'2026-05-28 09:53:58','done');
 /*!40000 ALTER TABLE `gallery_videos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -626,4 +632,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-27 12:57:50
+-- Dump completed on 2026-05-28 10:29:30

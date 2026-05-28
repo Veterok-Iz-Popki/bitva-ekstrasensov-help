@@ -112,6 +112,7 @@ CREATE TABLE IF NOT EXISTS gallery_videos (
   thumbnail_url TEXT DEFAULT '',
   `order` INT DEFAULT 0,
   is_published BOOLEAN DEFAULT TRUE,
+  processing_status VARCHAR(20) DEFAULT 'idle',
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 

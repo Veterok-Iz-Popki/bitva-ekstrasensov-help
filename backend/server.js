@@ -6,6 +6,7 @@ const bcrypt = require('bcryptjs');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const { spawn } = require('child_process');
 const { v4: uuidv4 } = require('uuid');
 require('dotenv').config({ path: __dirname + '/.env' });
 
@@ -563,21 +564,109 @@ api.get('/admin/gallery/videos', requireAdmin, async (req, res) => {
   return res.json(rows);
 });
 
+// ===== Background video optimization with ffmpeg =====
+//
+// Convert any uploaded MP4/WebM to web-optimized H.264 @ 720p with faststart (moov atom at the
+// front so playback starts immediately, without downloading the whole file first).
+//
+// Spec (per task):
+//   • codec H.264 (libx264) + AAC audio
+//   • max resolution 1280×720 (preserves aspect ratio)
+//   • video bitrate ~2000 kbps (1500-2500 range)
+//   • audio bitrate 128 kbps
+//   • max 30 fps
+//   • -movflags +faststart
+//
+// Status lifecycle in DB column `gallery_videos.processing_status`:
+//   'idle'        — нечего обрабатывать (или старая запись до этого фичи)
+//   'processing'  — ffmpeg в работе
+//   'done'        — успешно, video_url обновлён на _opt.mp4
+//   'error'       — ffmpeg упал, video_url остался на raw-файле (плеер всё равно сработает)
+function optimizeVideoInBackground(videoId, originalRelUrl) {
+  if (!originalRelUrl || !originalRelUrl.startsWith('/api/uploads/')) return;
+  const filename = path.basename(originalRelUrl);
+  const srcPath = path.join(UPLOADS_DIR, filename);
+  if (!fs.existsSync(srcPath)) return;
+
+  const base = filename.replace(/\.[^.]+$/, '');
+  const optName = `${base}_opt.mp4`;
+  const optPath = path.join(UPLOADS_DIR, optName);
+  const optRelUrl = `/api/uploads/${optName}`;
+
+  // Защита от повторной обработки уже оптимизированного файла
+  if (filename.endsWith('_opt.mp4')) return;
+
+  db.query("UPDATE gallery_videos SET processing_status = 'processing' WHERE id = ?", [videoId]).catch(() => {});
+
+  // Стратегия: CRF (Constant Rate Factor) + bitrate cap.
+  //   • CRF=24 — хороший баланс качество/размер для web. Не раздувает оригинал
+  //     с низким битрейтом (если оригинал и так маленький, output останется маленьким).
+  //   • maxrate/bufsize — ограничивают пиковые всплески (важно для гладкого streaming).
+  //   • Главный выигрыш не в размере, а в `-movflags +faststart` — moov atom переезжает
+  //     в начало файла, и плеер начинает воспроизведение с первого Range-запроса.
+  const args = [
+    '-y',
+    '-i', srcPath,
+    '-vf', "scale='min(1280,iw)':'min(720,ih)':force_original_aspect_ratio=decrease,scale=trunc(iw/2)*2:trunc(ih/2)*2,fps=fps='min(30,source_fps)'",
+    '-c:v', 'libx264',
+    '-preset', 'veryfast',
+    '-crf', '24',
+    '-maxrate', '2500k',
+    '-bufsize', '5000k',
+    '-pix_fmt', 'yuv420p',
+    '-c:a', 'aac',
+    '-b:a', '128k',
+    '-ar', '44100',
+    '-movflags', '+faststart',
+    optPath,
+  ];
+
+  console.log(`[ffmpeg] start optimization video=${videoId} input=${filename}`);
+  const child = spawn('ffmpeg', args, { stdio: ['ignore', 'ignore', 'pipe'] });
+
+  let stderr = '';
+  child.stderr.on('data', (chunk) => { stderr += chunk.toString().slice(-1000); });
+
+  child.on('close', async (code) => {
+    if (code === 0 && fs.existsSync(optPath)) {
+      try {
+        await db.query("UPDATE gallery_videos SET video_url = ?, processing_status = 'done' WHERE id = ?", [optRelUrl, videoId]);
+        // Удаляем исходник чтобы не дублировать данные (опционально)
+        try { fs.unlinkSync(srcPath); } catch {}
+        console.log(`[ffmpeg] done video=${videoId} -> ${optName}`);
+      } catch (e) {
+        console.error('[ffmpeg] DB update failed:', e.message);
+      }
+    } else {
+      console.error(`[ffmpeg] failed video=${videoId} code=${code} stderr=${stderr.slice(-400)}`);
+      db.query("UPDATE gallery_videos SET processing_status = 'error' WHERE id = ?", [videoId]).catch(() => {});
+      try { fs.unlinkSync(optPath); } catch {}
+    }
+  });
+}
+
 api.post('/admin/gallery/videos', requireAdmin, async (req, res) => {
   const d = req.body;
   const id = uuidv4();
   const now = dbNow();
-  await db.query('INSERT INTO gallery_videos (id, video_url, title, description, thumbnail_url, `order`, is_published, created_at) VALUES (?,?,?,?,?,?,?,?)',
-    [id, d.video_url || '', d.title || '', d.description || '', d.thumbnail_url || '', d.order || 0, d.is_published !== false, now]);
+  await db.query('INSERT INTO gallery_videos (id, video_url, title, description, thumbnail_url, `order`, is_published, processing_status, created_at) VALUES (?,?,?,?,?,?,?,?,?)',
+    [id, d.video_url || '', d.title || '', d.description || '', d.thumbnail_url || '', d.order || 0, d.is_published !== false, 'idle', now]);
+  // Запускаем оптимизацию в фоне — не блокируем HTTP-запрос
+  if (d.video_url) optimizeVideoInBackground(id, d.video_url);
   const [rows] = await db.query('SELECT * FROM gallery_videos WHERE id = ?', [id]);
   return res.json(rows[0]);
 });
 
 api.put('/admin/gallery/videos/:id', requireAdmin, async (req, res) => {
   const d = req.body;
+  // Проверим, изменился ли video_url — если да, запустим оптимизацию для нового файла
+  const [[current]] = await db.query('SELECT video_url FROM gallery_videos WHERE id = ?', [req.params.id]);
+  const videoChanged = current && d.video_url && current.video_url !== d.video_url;
+
   const [result] = await db.query('UPDATE gallery_videos SET video_url=?, title=?, description=?, thumbnail_url=?, `order`=?, is_published=? WHERE id=?',
     [d.video_url || '', d.title || '', d.description || '', d.thumbnail_url || '', d.order || 0, d.is_published !== false, req.params.id]);
   if (result.affectedRows === 0) return res.status(404).json({ detail: 'Видео не найдено' });
+  if (videoChanged) optimizeVideoInBackground(req.params.id, d.video_url);
   const [rows] = await db.query('SELECT * FROM gallery_videos WHERE id = ?', [req.params.id]);
   return res.json(rows[0]);
 });
