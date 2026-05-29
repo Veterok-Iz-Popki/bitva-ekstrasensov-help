@@ -21,21 +21,27 @@ function videoTypeFromUrl(url) {
 function LazyVideo({ video, idx }) {
   const [active, setActive] = useState(false);
   const [buffering, setBuffering] = useState(false);
+  const [error, setError] = useState(false);
   const videoRef = useRef(null);
   const posterSrc = fullUrl(video.thumbnail_url);
   const videoSrc = fullUrl(video.video_url);
   const videoType = videoTypeFromUrl(video.video_url);
 
-  // Когда видео достигает HAVE_CURRENT_DATA (есть первый кадр) — пробуем play() вручную.
-  // На медленных сетях этого хватает для старта progressive playback — не ждём canplaythrough
-  // или полного буфера. Если autoplay со звуком блокирован, ловим promise и оставляем
-  // на пользователе нажать controls Play (он всё ещё видит постер).
-  const handleLoadedData = () => {
+  // Progressive playback strategy:
+  // 1) preload="metadata" — браузер тянет только moov atom + первые ~ десятки KB.
+  //    Для MP4 с faststart этого достаточно, чтобы знать длительность/размеры.
+  // 2) На loadedmetadata пробуем play() сразу — без ожидания canplaythrough/полного буфера.
+  //    Браузер сам подгрузит первые сегменты через Range request (HTTP 206).
+  // 3) На loadeddata (HAVE_CURRENT_DATA — первый кадр есть) — резервный play(), если первый не сработал.
+  // 4) Скрываем loader при canplay/playing, показываем при waiting/stalled.
+  const tryPlay = () => {
     const v = videoRef.current;
-    if (!v) return;
-    if (v.paused) {
-      v.play().catch(() => {});
-    }
+    if (!v || !v.paused) return;
+    v.play().catch(() => {
+      // autoplay может быть заблокирован браузером — пользователь увидит стандартные controls
+      // и сможет нажать Play вручную; плеер при этом уже буферизован
+      setBuffering(false);
+    });
   };
 
   return (
@@ -50,22 +56,31 @@ function LazyVideo({ video, idx }) {
               controls
               autoPlay
               playsInline
-              preload="auto"
-              onLoadStart={() => setBuffering(true)}
-              onLoadedData={handleLoadedData}
-              onPlaying={() => setBuffering(false)}
+              preload="metadata"
+              onLoadStart={() => { setBuffering(true); setError(false); }}
+              onLoadedMetadata={tryPlay}
+              onLoadedData={tryPlay}
               onCanPlay={() => setBuffering(false)}
+              onPlaying={() => setBuffering(false)}
               onWaiting={() => setBuffering(true)}
+              onStalled={() => setBuffering(true)}
+              onError={() => { setBuffering(false); setError(true); }}
               className="absolute inset-0 w-full h-full object-contain bg-black"
               data-testid={`video-player-${idx}`}
             >
               {/* <source> с type-hint позволяет браузеру решить о support без HEAD-запроса.
-                  Браузер начинает range fetch немедленно. */}
+                  Браузер начинает range fetch немедленно при автоплее / play(). */}
               <source src={videoSrc} type={videoType} />
             </video>
-            {buffering && (
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none" data-testid={`video-loader-${idx}`}>
+            {buffering && !error && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none gap-3" data-testid={`video-loader-${idx}`}>
                 <div className="w-12 h-12 border-4 border-gold/30 border-t-gold rounded-full animate-spin" />
+                <span className="text-white/70 font-body text-xs">Загрузка видео…</span>
+              </div>
+            )}
+            {error && (
+              <div className="absolute inset-0 flex items-center justify-center p-4" data-testid={`video-error-${idx}`}>
+                <span className="text-white/70 font-body text-sm text-center">Не удалось загрузить видео. Попробуйте обновить страницу.</span>
               </div>
             )}
           </>
