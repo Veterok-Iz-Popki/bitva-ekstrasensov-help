@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Play } from 'lucide-react';
-import api, { setSEO, setJsonLd, setBreadcrumbJsonLd } from '../lib/api';
+import api, { setSEO, setJsonLd, setBreadcrumbJsonLd, getSiteUrl } from '../lib/api';
 import PictureImg from '../components/PictureImg';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';
@@ -119,7 +119,8 @@ export default function VideoPage() {
       api.get('/gallery/videos'),
       api.get('/seo/video'),
     ]).then(([videosRes, seoRes]) => {
-      setVideos(videosRes.data || []);
+      const list = videosRes.data || [];
+      setVideos(list);
       const seo = seoRes.data;
       if (seo?.title) setSEO({
         title: seo.title,
@@ -129,11 +130,47 @@ export default function VideoPage() {
         ogTitle: seo.og_title,
         ogDescription: seo.og_description,
       });
+      // Schema: CollectionPage + ItemList с вложенными VideoObject (валидная Schema.org разметка)
+      const SITE = getSiteUrl();
+      const toAbs = (u) => {
+        if (!u) return undefined;
+        if (/^https?:\/\//i.test(u)) return u;
+        return `${SITE}${u.startsWith('/') ? '' : '/'}${u}`;
+      };
+      const pageUrl = `${SITE}/video`;
+      const itemListElement = list.map((v, i) => {
+        const videoObject = {
+          "@type": "VideoObject",
+          "name": v.title || "Видео экстрасенсов",
+          "description": v.description || v.title || "Видео экстрасенсов «Битва экстрасенсов»",
+          "thumbnailUrl": toAbs(v.thumbnail_url) || toAbs(v.video_url),
+          "contentUrl": toAbs(v.video_url),
+          "uploadDate": (() => {
+            const raw = v.created_at || v.upload_date;
+            if (!raw) return undefined;
+            // Преобразуем MySQL datetime "2026-05-29 09:35:00" в ISO 8601 для Schema.org
+            const d = new Date(typeof raw === 'string' && !raw.endsWith('Z') ? raw.replace(' ', 'T') + 'Z' : raw);
+            return isNaN(d.getTime()) ? undefined : d.toISOString();
+          })(),
+        };
+        // Удаляем undefined-поля, чтобы JSON-LD был чистым
+        Object.keys(videoObject).forEach((k) => videoObject[k] === undefined && delete videoObject[k]);
+        return {
+          "@type": "ListItem",
+          "position": i + 1,
+          "item": videoObject,
+        };
+      });
       setJsonLd({
         "@context": "https://schema.org",
-        "@type": "VideoGallery",
+        "@type": "CollectionPage",
         "name": seo?.title || "Видео",
-        "url": window.location.href,
+        "url": pageUrl,
+        "mainEntity": {
+          "@type": "ItemList",
+          "numberOfItems": list.length,
+          "itemListElement": itemListElement,
+        },
       });
       setBreadcrumbJsonLd([
         { name: 'Главная', path: '/' },

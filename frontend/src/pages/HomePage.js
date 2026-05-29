@@ -66,6 +66,10 @@ export default function HomePage() {
         "description": seo?.description || "",
         "url": getSiteUrl()
       });
+      // Zombie-breadcrumb fix: HomePage не имеет breadcrumb, но предыдущая страница
+      // могла оставить <script id="json-ld-breadcrumb"> в DOM. Удаляем явно.
+      const stale = document.querySelector('#json-ld-breadcrumb');
+      if (stale) stale.remove();
     }).catch(() => {});
   }, []);
 
