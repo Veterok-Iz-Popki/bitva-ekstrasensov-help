@@ -3,7 +3,7 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { Switch } from '../../components/ui/switch';
-import { Save, Mail, Image as ImageIcon, Upload, Loader2, Trash2 } from 'lucide-react';
+import { Save, Mail, Image as ImageIcon, Upload, Loader2, Trash2, Search, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '../../lib/api';
 
@@ -21,6 +21,7 @@ export default function SettingsAdmin() {
     logo_alt: 'Битва Экстрасенсов',
     logo_height_desktop: 56,
     logo_height_mobile: 48,
+    seo_indexing_enabled: true,
   });
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -41,6 +42,7 @@ export default function SettingsAdmin() {
         logo_alt: d.logo_alt || 'Битва Экстрасенсов',
         logo_height_desktop: d.logo_height_desktop || 56,
         logo_height_mobile: d.logo_height_mobile || 48,
+        seo_indexing_enabled: d.seo_indexing_enabled === undefined ? true : !!d.seo_indexing_enabled,
       });
     }).catch(() => {});
   }, []);
@@ -273,6 +275,51 @@ export default function SettingsAdmin() {
               className="bg-teal-dark/80 border-teal-light/30 text-white h-10"
               placeholder="© 2024 Название сайта"
             />
+          </div>
+        </div>
+
+        {/* SEO Indexing section */}
+        <div className="p-6 border border-teal-light/20 bg-teal-dark/70 rounded-lg" data-testid="seo-indexing-section">
+          <h2 className="font-heading text-lg font-semibold text-gold mb-4 flex items-center gap-2">
+            <Search className="w-5 h-5" />
+            Индексация поисковыми системами
+          </h2>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-3 bg-teal-darker/50 rounded">
+              <div className="pr-4">
+                <p className="text-white font-body text-sm flex items-center gap-2">
+                  Индексация сайта{' '}
+                  <span
+                    className={`text-xs px-2 py-0.5 rounded font-semibold ${form.seo_indexing_enabled ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}
+                    data-testid="seo-indexing-status"
+                  >
+                    {form.seo_indexing_enabled ? '🟢 Включена' : '🔴 Отключена'}
+                  </span>
+                </p>
+                <p className="text-white/50 font-body text-xs mt-1">
+                  Управляет: <code className="text-gold/70">robots.txt</code>, <code className="text-gold/70">meta robots</code>, HTTP header <code className="text-gold/70">X-Robots-Tag</code>.
+                </p>
+              </div>
+              <Switch
+                checked={form.seo_indexing_enabled}
+                onCheckedChange={(checked) => setForm({ ...form, seo_indexing_enabled: checked })}
+                data-testid="seo-indexing-toggle"
+              />
+            </div>
+            {!form.seo_indexing_enabled && (
+              <div
+                className="flex items-start gap-3 p-3 bg-red-500/10 border border-red-500/30 rounded"
+                data-testid="seo-indexing-warning"
+              >
+                <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-red-300 font-body text-sm font-semibold">Поисковые системы перестанут индексировать сайт</p>
+                  <p className="text-red-300/70 font-body text-xs mt-1">
+                    Google, Яндекс и Bing увидят <code>noindex, nofollow</code> и в течение нескольких дней удалят страницы из выдачи. Не забудьте включить обратно после работ.
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

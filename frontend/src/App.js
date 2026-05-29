@@ -2,6 +2,7 @@ import "@/App.css";
 import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ScrollToTop from "@/components/ScrollToTop";
+import SeoIndexingController from "@/components/SeoIndexingController";
 import { Toaster } from "@/components/ui/sonner";
 import Layout from "@/components/Layout";
 import HomePage from "@/pages/HomePage";
@@ -44,6 +45,7 @@ function App() {
   return (
     <BrowserRouter>
       <ScrollToTop />
+      <SeoIndexingController />
       <Toaster
         position="top-right"
         toastOptions={{

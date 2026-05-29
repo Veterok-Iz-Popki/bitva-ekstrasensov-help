@@ -38,6 +38,22 @@ app.use(compression({
 }));
 app.use(express.json({ limit: '10mb' }));
 
+// ===== X-Robots-Tag middleware =====
+// На ВСЕХ публичных ответах ставим noindex/nofollow, если seo_indexing_enabled = 0.
+// Исключаем /admin/*, /api/admin/* и /api/auth/* (внутренние endpoints).
+// Регистрируем ДО app.use('/api', api), чтобы middleware прошёл и для /api/* запросов.
+// getSeoIndexingEnabled / invalidateSeoCache определены ниже (hoisting не нужен — middleware
+// async и фактически читает их в момент request, а не при регистрации).
+app.use(async (req, res, next) => {
+  try {
+    const p = req.path || '';
+    if (p.startsWith('/admin') || p.startsWith('/api/admin') || p.startsWith('/api/auth')) return next();
+    const enabled = await getSeoIndexingEnabled();
+    if (!enabled) res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+  } catch (_) {}
+  next();
+});
+
 // Rate limiting (in-memory)
 const rateLimits = {};
 function checkRateLimit(ip, maxReqs = 5, windowSec = 60) {
@@ -265,7 +281,7 @@ api.get('/settings', async (req, res) => {
   // Публичный production URL — отдаём из env, чтобы фронт строил canonical / og:url / JSON-LD
   // независимо от того, на каком домене (preview / production) загружена страница.
   const site_url = process.env.PUBLIC_SITE_URL || '';
-  if (!rows.length) return res.json({ email: '', phone: '', working_hours: '', copyright_text: '', site_url });
+  if (!rows.length) return res.json({ email: '', phone: '', working_hours: '', copyright_text: '', site_url, seo_indexing_enabled: 1 });
   return res.json({ ...rows[0], site_url });
 });
 
@@ -737,15 +753,17 @@ api.get('/admin/settings', requireAdmin, async (req, res) => {
 
 api.put('/admin/settings', requireAdmin, async (req, res) => {
   const d = req.body;
+  const seoIndexing = (d.seo_indexing_enabled === false || d.seo_indexing_enabled === 0) ? 0 : 1;
   const [existing] = await db.query("SELECT id FROM site_settings WHERE id = 'site_settings'");
   if (existing.length) {
-    await db.query(`UPDATE site_settings SET email=?, phone=?, address=?, notification_email=?, working_hours=?, copyright_text=?, email_notifications_enabled=?, logo_url=?, logo_alt=?, logo_height_desktop=?, logo_height_mobile=? WHERE id='site_settings'`,
-      [d.email || '', d.phone || '', d.address || '', d.notification_email || '', d.working_hours || '', d.copyright_text || '', d.email_notifications_enabled !== false, d.logo_url || '', d.logo_alt || 'Битва Экстрасенсов', d.logo_height_desktop || 56, d.logo_height_mobile || 48]);
+    await db.query(`UPDATE site_settings SET email=?, phone=?, address=?, notification_email=?, working_hours=?, copyright_text=?, email_notifications_enabled=?, logo_url=?, logo_alt=?, logo_height_desktop=?, logo_height_mobile=?, seo_indexing_enabled=? WHERE id='site_settings'`,
+      [d.email || '', d.phone || '', d.address || '', d.notification_email || '', d.working_hours || '', d.copyright_text || '', d.email_notifications_enabled !== false, d.logo_url || '', d.logo_alt || 'Битва Экстрасенсов', d.logo_height_desktop || 56, d.logo_height_mobile || 48, seoIndexing]);
   } else {
-    await db.query(`INSERT INTO site_settings (id, email, phone, address, notification_email, working_hours, copyright_text, email_notifications_enabled, logo_url, logo_alt, logo_height_desktop, logo_height_mobile) VALUES ('site_settings',?,?,?,?,?,?,?,?,?,?,?)`,
-      [d.email || '', d.phone || '', d.address || '', d.notification_email || '', d.working_hours || '', d.copyright_text || '', d.email_notifications_enabled !== false, d.logo_url || '', d.logo_alt || 'Битва Экстрасенсов', d.logo_height_desktop || 56, d.logo_height_mobile || 48]);
+    await db.query(`INSERT INTO site_settings (id, email, phone, address, notification_email, working_hours, copyright_text, email_notifications_enabled, logo_url, logo_alt, logo_height_desktop, logo_height_mobile, seo_indexing_enabled) VALUES ('site_settings',?,?,?,?,?,?,?,?,?,?,?,?)`,
+      [d.email || '', d.phone || '', d.address || '', d.notification_email || '', d.working_hours || '', d.copyright_text || '', d.email_notifications_enabled !== false, d.logo_url || '', d.logo_alt || 'Битва Экстрасенсов', d.logo_height_desktop || 56, d.logo_height_mobile || 48, seoIndexing]);
   }
   const [rows] = await db.query("SELECT * FROM site_settings WHERE id = 'site_settings'");
+  invalidateSeoCache();
   return res.json(rows[0]);
 });
 
@@ -863,9 +881,32 @@ app.use('/api', api);
 
 const PUBLIC_SITE_URL = (process.env.PUBLIC_SITE_URL || 'https://bitva-ekstrasensov-help.com').replace(/\/$/, '');
 
-app.get('/robots.txt', (req, res) => {
+// ===== SEO INDEXING TOGGLE =====
+// Читаем seo_indexing_enabled из БД с in-memory кешем на 30 секунд,
+// чтобы не делать SQL-запрос на каждый запрос (robots.txt / X-Robots-Tag middleware).
+// При сохранении админкой кеш будет очищен через инвалидацию (см. PUT /admin/settings).
+let _seoCache = { value: 1, fetchedAt: 0 };
+async function getSeoIndexingEnabled() {
+  const now = Date.now();
+  if (now - _seoCache.fetchedAt < 30000) return _seoCache.value;
+  try {
+    const [rows] = await db.query("SELECT seo_indexing_enabled FROM site_settings WHERE id = 'site_settings'");
+    _seoCache = { value: rows.length ? (rows[0].seo_indexing_enabled ? 1 : 0) : 1, fetchedAt: now };
+  } catch (_) {
+    _seoCache = { value: 1, fetchedAt: now };
+  }
+  return _seoCache.value;
+}
+function invalidateSeoCache() { _seoCache.fetchedAt = 0; }
+
+app.get('/robots.txt', async (req, res) => {
   res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-  res.setHeader('Cache-Control', 'public, max-age=3600');
+  res.setHeader('Cache-Control', 'public, max-age=60');
+  const enabled = await getSeoIndexingEnabled();
+  if (!enabled) {
+    // Индексация выключена через админку — полный disallow для всех ботов.
+    return res.send('User-agent: *\nDisallow: /\n');
+  }
   res.send(
     `User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /admin/\nDisallow: /api/admin\nDisallow: /api/admin/\nDisallow: /api/auth\nDisallow: /api/auth/\n\nSitemap: ${PUBLIC_SITE_URL}/sitemap.xml\n`
   );
