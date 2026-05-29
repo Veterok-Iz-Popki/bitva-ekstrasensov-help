@@ -29,14 +29,6 @@ export default function VideoAdmin() {
   const load = () => { api.get('/admin/gallery/videos').then(r => setItems(r.data || [])).catch(() => {}); };
   useEffect(() => { load(); }, []);
 
-  // Polling статуса оптимизации — если есть видео в обработке, обновляемся каждые 3с
-  useEffect(() => {
-    const hasProcessing = items.some(i => i.processing_status === 'processing');
-    if (!hasProcessing) return;
-    const t = setInterval(load, 3000);
-    return () => clearInterval(t);
-  }, [items]);
-
   // Cleanup blob URLs при размонтировании / смене обложки
   useEffect(() => {
     return () => {
@@ -199,7 +191,6 @@ export default function VideoAdmin() {
             <TableRow className="border-teal-light/20 hover:bg-transparent">
               <TableHead className="text-white/40 font-body w-20">Превью</TableHead>
               <TableHead className="text-white/40 font-body">Название</TableHead>
-              <TableHead className="text-white/40 font-body w-32">Обработка</TableHead>
               <TableHead className="text-white/40 font-body w-20">Порядок</TableHead>
               <TableHead className="text-white/40 font-body w-24">Статус</TableHead>
               <TableHead className="text-white/40 font-body text-right w-32">Действия</TableHead>
@@ -218,26 +209,6 @@ export default function VideoAdmin() {
                   )}
                 </TableCell>
                 <TableCell className="font-body text-white text-sm">{item.title || '—'}</TableCell>
-                <TableCell>
-                  {item.processing_status === 'processing' && (
-                    <span className="inline-flex items-center gap-1 text-xs font-body text-gold/90" data-testid={`video-status-${item.id}`}>
-                      <span className="w-2 h-2 rounded-full bg-gold animate-pulse" /> Обрабатывается
-                    </span>
-                  )}
-                  {item.processing_status === 'done' && (
-                    <span className="inline-flex items-center gap-1 text-xs font-body text-green-400/80" data-testid={`video-status-${item.id}`}>
-                      <span className="w-2 h-2 rounded-full bg-green-400" /> Оптимизировано
-                    </span>
-                  )}
-                  {item.processing_status === 'error' && (
-                    <span className="inline-flex items-center gap-1 text-xs font-body text-red-400/80" data-testid={`video-status-${item.id}`}>
-                      <span className="w-2 h-2 rounded-full bg-red-400" /> Ошибка обработки
-                    </span>
-                  )}
-                  {(!item.processing_status || item.processing_status === 'idle') && (
-                    <span className="text-xs font-body text-white/30" data-testid={`video-status-${item.id}`}>—</span>
-                  )}
-                </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-1">
                     <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => moveItem(item, -1)}><ArrowUp className="w-3 h-3 text-white/50" /></Button>
