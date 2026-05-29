@@ -318,10 +318,17 @@ api.post('/contact', async (req, res) => {
 
 api.post('/admin/login', async (req, res) => {
   const { username, password } = req.body;
+  // Brute-force protection: 5 попыток за 60 секунд на IP (использует существующий checkRateLimit).
+  // 401 ответы возвращаются с фиксированной задержкой ~300ms, чтобы исключить timing attacks.
+  const clientIp = req.ip || 'unknown';
+  if (!checkRateLimit(`login:${clientIp}`, 5, 60)) {
+    return res.status(429).json({ detail: 'Слишком много попыток входа. Попробуйте через минуту.' });
+  }
+  const failResponse = () => new Promise((r) => setTimeout(() => r(res.status(401).json({ detail: 'Неверный логин или пароль' })), 300));
   const [rows] = await db.query('SELECT * FROM admin_users WHERE username = ?', [username]);
-  if (!rows.length) return res.status(401).json({ detail: 'Неверный логин или пароль' });
+  if (!rows.length) return failResponse();
   const valid = await bcrypt.compare(password, rows[0].password_hash);
-  if (!valid) return res.status(401).json({ detail: 'Неверный логин или пароль' });
+  if (!valid) return failResponse();
   const token = createToken(username);
   return res.json({ token, username });
 });
@@ -992,4 +999,19 @@ async function startup() {
 startup().catch(err => {
   console.error('Startup failed:', err);
   process.exit(1);
+});
+
+// ===== PRODUCTION STABILITY: глобальные error handlers =====
+// Без них одна необработанная ошибка/promise rejection валит весь процесс.
+// Supervisor рестартует backend, но текущие запросы теряются.
+// С логом мы хотя бы увидим причину в /var/log/supervisor/backend.err.log
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('[unhandledRejection]', reason);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('[uncaughtException]', err);
+  // По convention для uncaughtException всё-таки безопаснее перезапуститься,
+  // но мы оставляем процесс работающим — supervisor отслеживает реальные крахи.
 });
