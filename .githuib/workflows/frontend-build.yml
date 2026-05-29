@@ -1,0 +1,60 @@
+name: Frontend CI
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      REACT_APP_BACKEND_URL: ${{ secrets.REACT_APP_BACKEND_URL }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: yarn install
+
+      - name: Build frontend
+        working-directory: frontend
+        run: yarn build
+
+      - name: Show git status
+        run: |
+          echo "Git status after build:"
+          git status
+
+      - name: Configure git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Commit and push changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ -d "backend/build" ]; then
+            if [ -n "$(git status --porcelain backend/build)" ]; then
+              git add backend/build
+              git commit -m "chore: update backend build [skip ci]"
+              git push
+            else
+              echo "No changes in backend/build to commit."
+            fi
+          else
+            echo "backend/build directory does not exist; nothing to commit."
+          fi
