@@ -1,14 +1,15 @@
 {
   "files": {
-    "main.css": "/pod-backups/psychic-battle-2/build/static/css/main.5b63dc86.css",
-    "main.js": "/pod-backups/psychic-battle-2/build/static/js/main.8da5c0fd.js",
+    "main.css": "/pod-backups/psychic-battle-2/build/static/css/main.d62323c2.css",
+    "main.js": "/pod-backups/psychic-battle-2/build/static/js/main.247f7268.js",
     "static/js/80.a655bc18.chunk.js": "/pod-backups/psychic-battle-2/build/static/js/80.a655bc18.chunk.js",
     "static/js/990.bbc5c0d8.chunk.js": "/pod-backups/psychic-battle-2/build/static/js/990.bbc5c0d8.chunk.js",
     "static/js/319.51782c2e.chunk.js": "/pod-backups/psychic-battle-2/build/static/js/319.51782c2e.chunk.js",
     "static/js/321.3e4bc961.chunk.js": "/pod-backups/psychic-battle-2/build/static/js/321.3e4bc961.chunk.js",
     "static/js/191.8ddad755.chunk.js": "/pod-backups/psychic-battle-2/build/static/js/191.8ddad755.chunk.js",
     "static/js/618.d4e2bb77.chunk.js": "/pod-backups/psychic-battle-2/build/static/js/618.d4e2bb77.chunk.js",
-    "static/js/52.c759a426.chunk.js": "/pod-backups/psychic-battle-2/build/static/js/52.c759a426.chunk.js",
+    "static/js/52.1e29d5b0.chunk.js": "/pod-backups/psychic-battle-2/build/static/js/52.1e29d5b0.chunk.js",
+    "static/js/3.b0bdea65.chunk.js": "/pod-backups/psychic-battle-2/build/static/js/3.b0bdea65.chunk.js",
     "static/js/701.2702faf8.chunk.js": "/pod-backups/psychic-battle-2/build/static/js/701.2702faf8.chunk.js",
     "static/js/585.9789f8be.chunk.js": "/pod-backups/psychic-battle-2/build/static/js/585.9789f8be.chunk.js",
     "static/js/528.b0ee53f8.chunk.js": "/pod-backups/psychic-battle-2/build/static/js/528.b0ee53f8.chunk.js",
@@ -30,15 +31,16 @@
     "static/js/220.a15d88a0.chunk.js": "/pod-backups/psychic-battle-2/build/static/js/220.a15d88a0.chunk.js",
     "static/js/548.a3fdfd01.chunk.js": "/pod-backups/psychic-battle-2/build/static/js/548.a3fdfd01.chunk.js",
     "index.html": "/pod-backups/psychic-battle-2/build/index.html",
-    "main.5b63dc86.css.map": "/pod-backups/psychic-battle-2/build/static/css/main.5b63dc86.css.map",
-    "main.8da5c0fd.js.map": "/pod-backups/psychic-battle-2/build/static/js/main.8da5c0fd.js.map",
+    "main.d62323c2.css.map": "/pod-backups/psychic-battle-2/build/static/css/main.d62323c2.css.map",
+    "main.247f7268.js.map": "/pod-backups/psychic-battle-2/build/static/js/main.247f7268.js.map",
     "80.a655bc18.chunk.js.map": "/pod-backups/psychic-battle-2/build/static/js/80.a655bc18.chunk.js.map",
     "990.bbc5c0d8.chunk.js.map": "/pod-backups/psychic-battle-2/build/static/js/990.bbc5c0d8.chunk.js.map",
     "319.51782c2e.chunk.js.map": "/pod-backups/psychic-battle-2/build/static/js/319.51782c2e.chunk.js.map",
     "321.3e4bc961.chunk.js.map": "/pod-backups/psychic-battle-2/build/static/js/321.3e4bc961.chunk.js.map",
     "191.8ddad755.chunk.js.map": "/pod-backups/psychic-battle-2/build/static/js/191.8ddad755.chunk.js.map",
     "618.d4e2bb77.chunk.js.map": "/pod-backups/psychic-battle-2/build/static/js/618.d4e2bb77.chunk.js.map",
-    "52.c759a426.chunk.js.map": "/pod-backups/psychic-battle-2/build/static/js/52.c759a426.chunk.js.map",
+    "52.1e29d5b0.chunk.js.map": "/pod-backups/psychic-battle-2/build/static/js/52.1e29d5b0.chunk.js.map",
+    "3.b0bdea65.chunk.js.map": "/pod-backups/psychic-battle-2/build/static/js/3.b0bdea65.chunk.js.map",
     "701.2702faf8.chunk.js.map": "/pod-backups/psychic-battle-2/build/static/js/701.2702faf8.chunk.js.map",
     "585.9789f8be.chunk.js.map": "/pod-backups/psychic-battle-2/build/static/js/585.9789f8be.chunk.js.map",
     "528.b0ee53f8.chunk.js.map": "/pod-backups/psychic-battle-2/build/static/js/528.b0ee53f8.chunk.js.map",
@@ -61,7 +63,7 @@
     "548.a3fdfd01.chunk.js.map": "/pod-backups/psychic-battle-2/build/static/js/548.a3fdfd01.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.5b63dc86.css",
-    "static/js/main.8da5c0fd.js"
+    "static/css/main.d62323c2.css",
+    "static/js/main.247f7268.js"
   ]
 }
