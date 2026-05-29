@@ -9,21 +9,21 @@ export default function NotFoundPage() {
       description: 'Страница не найдена или была удалена',
     });
 
-    // noindex, nofollow — поисковики не будут индексировать 404
-    const ensure = (selector, create) => {
-      let el = document.querySelector(selector);
+    // noindex, nofollow — поисковики не будут индексировать 404.
+    // Используем data-attribute "404" чтобы не конфликтовать с глобальным SeoIndexingController,
+    // который ставит свой meta с data-seo-toggle="global". При cleanup убираем ТОЛЬКО свой meta.
+    const ensureOwn = (name) => {
+      let el = document.querySelector(`meta[name="${name}"][data-seo-toggle="404"]`);
       if (!el) {
-        el = create();
+        el = document.createElement('meta');
+        el.setAttribute('name', name);
+        el.setAttribute('data-seo-toggle', '404');
         document.head.appendChild(el);
       }
+      el.setAttribute('content', 'noindex, nofollow');
       return el;
     };
-    const robotsMeta = ensure('meta[name="robots"]', () => {
-      const m = document.createElement('meta');
-      m.setAttribute('name', 'robots');
-      return m;
-    });
-    robotsMeta.setAttribute('content', 'noindex, nofollow');
+    ensureOwn('robots');
 
     // Чистим JSON-LD от предыдущей страницы — на 404 структурированных данных не должно быть
     const stale = document.querySelector('#json-ld');
@@ -32,9 +32,8 @@ export default function NotFoundPage() {
     if (staleBc) staleBc.remove();
 
     return () => {
-      // При уходе со страницы убираем noindex, чтобы остальные страницы остались индексируемыми
-      const m = document.querySelector('meta[name="robots"]');
-      if (m) m.remove();
+      // Убираем ТОЛЬКО свой meta (с data-seo-toggle="404"), не трогая глобальный.
+      document.querySelectorAll('meta[data-seo-toggle="404"]').forEach((el) => el.remove());
     };
   }, []);
 
