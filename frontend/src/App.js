@@ -14,6 +14,7 @@ const TopicPage = lazy(() => import("@/pages/TopicPage"));
 const ServicePage = lazy(() => import("@/pages/ServicePage"));
 const GalleryPage = lazy(() => import("@/pages/GalleryPage"));
 const VideoPage = lazy(() => import("@/pages/VideoPage"));
+const NotFoundPage = lazy(() => import("@/pages/NotFoundPage"));
 
 // === Admin pages — lazy (only loaded when admin opens /admin/*) ===
 const LoginPage = lazy(() => import("@/pages/admin/LoginPage"));
@@ -94,6 +95,8 @@ function App() {
                   <Route path="/magicheskaya-zashchita" element={<ServicePage />} />
                   <Route path="/foto-galereya" element={<GalleryPage />} />
                   <Route path="/video" element={<VideoPage />} />
+                  {/* Catch-all 404 — noindex, nofollow внутри компонента */}
+                  <Route path="*" element={<NotFoundPage />} />
                 </Routes>
               </Suspense>
             </Layout>
