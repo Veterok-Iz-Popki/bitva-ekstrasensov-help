@@ -623,9 +623,13 @@ CREATE TABLE `site_settings` (
 LOCK TABLES `site_settings` WRITE;
 /*!40000 ALTER TABLE `site_settings` DISABLE KEYS */;
 INSERT INTO `site_settings` VALUES
-('site_settings','info@example.com','+7 (800) 123-45-67','Москва, Россия','krzysztofjankowski510@gmail.com','Пн-Вс: 9:00 — 21:00','2024 Битва экстрасенсов. Все права защищены.',1,'','Битва Экстрасенсов',56,48,1);
+('site_settings','info@example.com','+7 (800) 123-45-67','Москва, Россия','krzysztofjankowski510@gmail.com','Пн-Вс: 9:00 — 21:00','2024 Битва экстрасенсов. Все права защищены.',1,'','Битва Экстрасенсов',56,48,0);
 /*!40000 ALTER TABLE `site_settings` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Dumping routines for database 'psychic_battle'
+--
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -636,4 +640,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-29 12:07:26
+-- Dump completed on 2026-05-29 13:01:17
