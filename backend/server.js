@@ -849,6 +849,92 @@ api.get('/uploads/:filename', (req, res) => {
 // Mount API
 app.use('/api', api);
 
+// ===== ROBOTS.TXT & SITEMAP.XML =====
+// Эти роуты должны быть ДО express.static и SPA fallback, чтобы при production-деплое
+// (backend обслуживает всё) поисковые краулеры всегда получали актуальные XML/text,
+// а не SPA index.html. На preview/dev — статические копии лежат в /frontend/public/.
+
+const PUBLIC_SITE_URL = (process.env.PUBLIC_SITE_URL || 'https://bitva-ekstrasensov-help.com').replace(/\/$/, '');
+
+app.get('/robots.txt', (req, res) => {
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+  res.setHeader('Cache-Control', 'public, max-age=3600');
+  res.send(
+    `User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /admin/\nDisallow: /api/admin\nDisallow: /api/admin/\nDisallow: /api/auth\nDisallow: /api/auth/\n\nSitemap: ${PUBLIC_SITE_URL}/sitemap.xml\n`
+  );
+});
+
+app.get('/sitemap.xml', async (req, res) => {
+  try {
+    // Static public routes
+    const staticUrls = [
+      { loc: '/', changefreq: 'daily', priority: '1.0' },
+      { loc: '/zapis-na-priem', changefreq: 'monthly', priority: '0.8' },
+      { loc: '/voprosy-i-otvety', changefreq: 'monthly', priority: '0.7' },
+      { loc: '/foto-galereya', changefreq: 'weekly', priority: '0.6' },
+      { loc: '/video', changefreq: 'weekly', priority: '0.6' },
+      // Services
+      { loc: '/finansovaya-magiya', changefreq: 'monthly', priority: '0.8' },
+      { loc: '/lyubovnaya-magiya', changefreq: 'monthly', priority: '0.8' },
+      { loc: '/magiya-zhizni', changefreq: 'monthly', priority: '0.8' },
+      { loc: '/magicheskaya-zashchita', changefreq: 'monthly', priority: '0.8' },
+      // Topics
+      { loc: '/porcha', changefreq: 'monthly', priority: '0.8' },
+      { loc: '/proklyatie', changefreq: 'monthly', priority: '0.8' },
+      { loc: '/sglaz', changefreq: 'monthly', priority: '0.8' },
+      { loc: '/venets-bezbrachiya', changefreq: 'monthly', priority: '0.8' },
+      { loc: '/privorot', changefreq: 'monthly', priority: '0.8' },
+      { loc: '/zaklyatie', changefreq: 'monthly', priority: '0.8' },
+    ];
+
+    // Dynamic: participants
+    let participantUrls = [];
+    try {
+      const [parts] = await db.query('SELECT slug, COALESCE(updated_at, created_at) AS lastmod FROM participants ORDER BY id');
+      participantUrls = (parts || []).map((p) => ({
+        loc: `/uchastniki/${p.slug}`,
+        changefreq: 'weekly',
+        priority: '0.9',
+        lastmod: p.lastmod ? new Date(p.lastmod).toISOString().slice(0, 10) : null,
+      }));
+    } catch (_) {
+      // Если updated_at нет — fallback на простой SELECT slug
+      try {
+        const [parts] = await db.query('SELECT slug FROM participants ORDER BY id');
+        participantUrls = (parts || []).map((p) => ({
+          loc: `/uchastniki/${p.slug}`,
+          changefreq: 'weekly',
+          priority: '0.9',
+          lastmod: null,
+        }));
+      } catch (__) {}
+    }
+
+    const today = new Date().toISOString().slice(0, 10);
+    const all = [...staticUrls, ...participantUrls].map((u) => ({
+      ...u,
+      lastmod: u.lastmod || today,
+    }));
+
+    const xml =
+      '<?xml version="1.0" encoding="UTF-8"?>\n' +
+      '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
+      all
+        .map(
+          (u) =>
+            `  <url>\n    <loc>${PUBLIC_SITE_URL}${u.loc}</loc>\n    <lastmod>${u.lastmod}</lastmod>\n    <changefreq>${u.changefreq}</changefreq>\n    <priority>${u.priority}</priority>\n  </url>`
+        )
+        .join('\n') +
+      '\n</urlset>\n';
+
+    res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+    res.setHeader('Cache-Control', 'public, max-age=3600');
+    res.send(xml);
+  } catch (e) {
+    res.status(500).send('Failed to build sitemap');
+  }
+});
+
 // Serve frontend build
 const BUILD_DIR = path.join(__dirname, 'build');
 if (fs.existsSync(BUILD_DIR)) {
