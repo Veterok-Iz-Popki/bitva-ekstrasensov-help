@@ -27,9 +27,10 @@ const NAV_ITEMS = [
   { path: '/voprosy-i-otvety', label: 'Вопросы-Ответы' },
 ];
 
-// Дефолтные значения на случай если настройки не загрузились
+// Дефолтные значения на случай если настройки не загрузились.
+// URL — на локальный uploads, чтобы PictureImg мог подтянуть AVIF/WebP варианты.
 const DEFAULT_LOGO = {
-  url: 'https://customer-assets.emergentagent.com/job_f7eeb759-9e5b-4f73-9fda-0f824d4e9d83/artifacts/usmcyqqy_bitva%20%281%29.png',
+  url: '/api/uploads/logo-bitva.png',
   alt: 'Битва Экстрасенсов',
   heightDesktop: 56,
   heightMobile: 48,

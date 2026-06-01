@@ -5,11 +5,11 @@ function getSeedPages(now) {
       blocks: {
         hero_h1: "Помощь сильнейших экстрасенсов, ясновидящих, целителей, магов",
         hero_subtitle: "Сайт помощи экстрасенсов",
-        hero_logo_bitva_url: "https://customer-assets.emergentagent.com/job_f7eeb759-9e5b-4f73-9fda-0f824d4e9d83/artifacts/m73lgvkc_bitva.png",
+        hero_logo_bitva_url: "/api/uploads/logo-bitva.png",
         hero_logo_bitva_alt: "Битва экстрасенсов",
         hero_logo_bitva_height_desktop: 64,
         hero_logo_bitva_height_mobile: 48,
-        hero_logo_tnt_url: "https://customer-assets.emergentagent.com/job_f7eeb759-9e5b-4f73-9fda-0f824d4e9d83/artifacts/yyhafsf8_tnt.png",
+        hero_logo_tnt_url: "/api/uploads/logo-tnt.png",
         hero_logo_tnt_alt: "ТНТ",
         hero_logo_tnt_height_desktop: 64,
         hero_logo_tnt_height_mobile: 48,

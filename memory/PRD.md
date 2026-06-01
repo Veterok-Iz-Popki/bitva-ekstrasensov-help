@@ -258,6 +258,43 @@ Stub-объект `window.posthog` остаётся синхронным — в�
 
 ### Lighthouse Mobile (3 прогона усреднение)
 | Метрика | ДО | ПОСЛЕ |
+
+## AVIF поддержка для всех изображений главной (2026-02-??) — DONE
+
+### Решение
+- Сгенерированы AVIF для 8 фото участников (`/app/backend/uploads/*-new.avif`)
+- 3 PNG-логотипа (header/footer + ТНТ) перенесены с CDN на локальные uploads с AVIF/WebP/PNG-cascade
+- `PictureImg.js` расширен: добавляет `<source type="image/avif">` перед WebP для наших uploads
+- Логотипы в БД (`pages.blocks.hero_logo_bitva_url`, `hero_logo_tnt_url`, `site_settings.logo_url`) мигрированы с CDN URL на `/api/uploads/logo-*.png`
+- `seed_pages.js` и dump-файлы обновлены
+
+### Файлы изменены
+- `/app/frontend/src/components/PictureImg.js` (+AVIF source)
+- `/app/frontend/src/components/Layout.js` (DEFAULT_LOGO → локальный)
+- `/app/backend/seed_pages.js` (CDN URL → локальные)
+- `/app/backend/dump.sql`, `data.sql`, `schema.sql` (актуализированы)
+- `/app/backend/uploads/`: +11 AVIF файлов (8 участников + 2 логотипа + 1 копия) + 2 PNG/WebP логотипа
+
+### Lighthouse Mobile (production, 3 прогона усреднение)
+| Метрика | До AVIF | После AVIF |
+|---|---|---|
+| Performance | ~78 | **~73** |
+| LCP | ~3.6 s | **2.9 s** ⬆ |
+| FCP | 1.7 s | 1.4 s |
+| TBT | ~540 ms | ~990 ms (variance) |
+| CLS | 0.035 | 0.000-0.036 |
+| Total page weight | n/a | 329 KB |
+| `modern-image-formats` | 0.50 | **1.00** ✅ |
+| `uses-optimized-images` | 0.50 | **1.00** ✅ |
+| `uses-responsive-images` | 0.50 | **1.00** ✅ |
+
+### Реальная экономия трафика на главной
+- ДО: 469.6 KB изображений (Live network measurement)
+- ПОСЛЕ: 383.5 KB
+- **Экономия: -86 KB на главной (с горячим кэшем для site-bg)**
+- Cold-cache: -163 KB (приближено к оценке -173 KB)
+
+
 |---|---|---|
 | Performance | ~68 | **~78 (71-82)** ⬆ +10 |
 | **TBT** | ~1100 ms | **~540 ms** ⬆⬆ -560 ms |
