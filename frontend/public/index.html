@@ -75,9 +75,9 @@
           Critical CSS повторяет минимально необходимые Tailwind правила для hero.
         -->
         <style>
-          html { background: #072428; }
-          body { margin: 0; background: #072428; color: #fff; font-family: 'Fira Sans', system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
-          #root[data-pre] { min-height: 100vh; padding: 6rem 1rem 0; box-sizing: border-box; }
+          /* Применяется ТОЛЬКО к skeleton-обёртке (#root[data-pre]).
+             Не трогает html/body — фоновое изображение и глобальные стили остаются как есть. */
+          #root[data-pre] { display: block; min-height: 100vh; padding: 6rem 1rem 0; box-sizing: border-box; color: #fff; font-family: 'Fira Sans', system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
           #root[data-pre] .__lcp-hero { max-width: 56rem; margin: 0 auto; text-align: center; }
           #root[data-pre] .__lcp-h1 { font-family: 'Playfair Display', Georgia, serif; font-weight: 700; color: #fff; font-size: 1.875rem; line-height: 1.15; margin: 0 0 1.5rem; }
           @media (min-width: 640px) { #root[data-pre] .__lcp-h1 { font-size: 2.25rem; } }
