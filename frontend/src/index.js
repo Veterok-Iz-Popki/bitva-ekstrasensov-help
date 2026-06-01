@@ -3,11 +3,7 @@ import ReactDOM from "react-dom/client";
 import "@/index.css";
 import App from "@/App";
 
-const rootEl = document.getElementById("root");
-// LCP optimization: убираем data-pre атрибут после того как React готов рендерить,
-// чтобы critical CSS для статического skeleton перестал применяться к настоящему контенту.
-if (rootEl) rootEl.removeAttribute("data-pre");
-const root = ReactDOM.createRoot(rootEl);
+const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
     <App />
