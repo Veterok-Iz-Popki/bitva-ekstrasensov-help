@@ -185,14 +185,53 @@
                     }),
                     (e.__SV = 1));
             })(document, window.posthog || []);
-            posthog.init("phc_xAvL2Iq4tFmANRE7kzbKwaSqp1HJjN7x48s3vr0CMjs", {
-                api_host: "https://us.i.posthog.com",
-                person_profiles: "identified_only", // or 'always' to create profiles for anonymous users as well,
-                session_recording: {
-                    recordCrossOriginIframes: true,
-                    capturePerformance: false,
-                },
-            });
+            // Откладываем тяжёлую инициализацию PostHog (загрузка array.js ~62KB,
+            // posthog-recorder.js ~48KB, surveys.js, web-vitals.js, dead-clicks-autocapture.js)
+            // до момента после window.load + idle, чтобы не блокировать main thread
+            // в окне измерения FCP→TTI. Stub выше (`window.posthog`) ставит ранние
+            // `capture()` вызовы в очередь — они проиграются после загрузки SDK.
+            (function () {
+                var didInit = false;
+                var initPostHog = function () {
+                    if (didInit) return;
+                    didInit = true;
+                    posthog.init("phc_xAvL2Iq4tFmANRE7kzbKwaSqp1HJjN7x48s3vr0CMjs", {
+                        api_host: "https://us.i.posthog.com",
+                        person_profiles: "identified_only",
+                        session_recording: {
+                            recordCrossOriginIframes: true,
+                            capturePerformance: false,
+                        },
+                    });
+                };
+                var schedule = function () {
+                    if ('requestIdleCallback' in window) {
+                        requestIdleCallback(initPostHog, { timeout: 5000 });
+                    } else {
+                        setTimeout(initPostHog, 4000);
+                    }
+                };
+                // Ждём window.load (все ресурсы догружены) + ещё 2s, чтобы PostHog
+                // не попал в окно измерения TBT (FCP→TTI).
+                if (document.readyState === 'complete') {
+                    setTimeout(schedule, 2000);
+                } else {
+                    window.addEventListener('load', function () {
+                        setTimeout(schedule, 2000);
+                    });
+                }
+                // Безопасный fallback: при первом user interaction PostHog инициализируется немедленно,
+                // чтобы события user-flow гарантированно отправлялись.
+                var earlyInit = function () {
+                    initPostHog();
+                    ['click','touchstart','keydown'].forEach(function (ev) {
+                        window.removeEventListener(ev, earlyInit, { passive: true, capture: true });
+                    });
+                };
+                ['click','touchstart','keydown'].forEach(function (ev) {
+                    window.addEventListener(ev, earlyInit, { passive: true, capture: true, once: true });
+                });
+            })();
         </script>
     </body>
 </html>

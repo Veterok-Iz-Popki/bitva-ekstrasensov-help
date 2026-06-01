@@ -234,3 +234,33 @@ Lighthouse Accessibility упала до 89 из-за audit `heading-order = 0`:
 | Accessibility | 100 | 100 ✅ |
 | Best Practices | 100 | 100 ✅ |
 
+
+
+## PostHog Deferred Init (TBT/Performance boost) — DONE
+
+### Проблема
+PostHog SDK (~140 KB JS: array.js + posthog-recorder.js + surveys.js + web-vitals.js + dead-clicks-autocapture.js) загружался синхронно при парсинге HTML, блокируя main thread в окне FCP→TTI. TBT держался на уровне 840–1480 ms.
+
+### Решение
+В `/app/frontend/public/index.html` — `posthog.init()` обёрнут в:
+1. `window.load` event + `setTimeout(2000)` — задержка до полного завершения загрузки страницы + 2 секунды
+2. `requestIdleCallback(timeout:5000)` или `setTimeout(4000)` fallback — для запуска в idle-кадре
+3. **Safe early-init**: при первом `click/touchstart/keydown` PostHog инициализируется немедленно — события user-flow не теряются
+
+Stub-объект `window.posthog` остаётся синхронным — все ранние `capture()` идут в очередь и проиграются после загрузки SDK.
+
+### Подтверждение defer работает (Playwright timing)
+- FCP: 276 ms | window.load: 374 ms
+- **Первый PostHog request: 2375 ms** ← на ~2 секунды позже load ✓
+
+### Файлы изменены
+- `/app/frontend/public/index.html` (только обёртка `posthog.init()`)
+
+### Lighthouse Mobile (3 прогона усреднение)
+| Метрика | ДО | ПОСЛЕ |
+|---|---|---|
+| Performance | ~68 | **~78 (71-82)** ⬆ +10 |
+| **TBT** | ~1100 ms | **~540 ms** ⬆⬆ -560 ms |
+| Accessibility | 100 | 100 ✅ |
+| Best Practices | 100 | 100 ✅ |
+
