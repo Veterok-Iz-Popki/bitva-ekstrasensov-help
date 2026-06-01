@@ -67,7 +67,30 @@
     </head>
     <body>
         <noscript>You need to enable JavaScript to run this app.</noscript>
-        <div id="root"></div>
+        <!--
+          LCP optimization: inline static H1 skeleton + critical CSS внутри #root.
+          React при mount удалит этот контент и отрендерит свой. Браузер засчитает LCP
+          по этому статическому H1 — это снимает блокировку от ожидания загрузки и
+          парсинга bundle.js (~395KB на slow 4G). Текст идентичен fallback в HomePage.js.
+          Critical CSS повторяет минимально необходимые Tailwind правила для hero.
+        -->
+        <style>
+          html { background: #072428; }
+          body { margin: 0; background: #072428; color: #fff; font-family: 'Fira Sans', system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
+          #root[data-pre] { min-height: 100vh; padding: 6rem 1rem 0; box-sizing: border-box; }
+          #root[data-pre] .__lcp-hero { max-width: 56rem; margin: 0 auto; text-align: center; }
+          #root[data-pre] .__lcp-h1 { font-family: 'Playfair Display', Georgia, serif; font-weight: 700; color: #fff; font-size: 1.875rem; line-height: 1.15; margin: 0 0 1.5rem; }
+          @media (min-width: 640px) { #root[data-pre] .__lcp-h1 { font-size: 2.25rem; } }
+          @media (min-width: 768px) { #root[data-pre] { padding-top: 8rem; } #root[data-pre] .__lcp-h1 { font-size: 3rem; } }
+          @media (min-width: 1024px) { #root[data-pre] .__lcp-h1 { font-size: 3.75rem; } }
+          #root[data-pre] .__lcp-h2 { font-family: 'Playfair Display', Georgia, serif; font-weight: 500; color: #d4af37; font-size: 1.25rem; margin: 0; }
+        </style>
+        <div id="root" data-pre>
+          <div class="__lcp-hero">
+            <h1 class="__lcp-h1">Битва экстрасенсов — официальный сайт помощи сильнейших экстрасенсов, ясновидящих, магов и целителей России</h1>
+            <h2 class="__lcp-h2">Официальный портал магической помощи от участников проекта «Битва экстрасенсов»</h2>
+          </div>
+        </div>
         <!--
       This HTML file is a template.
       If you open it directly in the browser, you will see an empty page.
