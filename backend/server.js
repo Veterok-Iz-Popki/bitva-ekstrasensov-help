@@ -906,6 +906,9 @@ if (fs.existsSync(BUILD_DIR)) {
   app.use(express.static(BUILD_DIR, {
     maxAge: '1y',
     immutable: true,
+    // index: false — отключаем автоматическое отдавание index.html для `/`,
+    // потому что мы хотим инжектить preload-теги в HTML через свой роут ниже.
+    index: false,
     setHeaders: (res, filePath) => {
       // index.html, sw.js, manifest.json не фингерпринтованы — должны проверяться при каждом запросе,
       // иначе пользователь застрянет на старой версии после деплоя.
@@ -915,8 +918,44 @@ if (fs.existsSync(BUILD_DIR)) {
       }
     },
   }));
+
+  // Подготавливаем index.html с инъекцией preload для background-картинок.
+  // Webpack хеширует имена файлов (site-bg.HASH.avif/webp/jpg), поэтому читаем их
+  // из asset-manifest.json и подставляем актуальные URL в <head>.
+  // Это даёт максимально ранний сигнал браузеру на загрузку фона → улучшает LCP.
+  let cachedIndexHtml = null;
+  function buildEnrichedIndexHtml() {
+    try {
+      const indexPath = path.join(BUILD_DIR, 'index.html');
+      let html = fs.readFileSync(indexPath, 'utf-8');
+      const manifestPath = path.join(BUILD_DIR, 'asset-manifest.json');
+      if (fs.existsSync(manifestPath)) {
+        const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+        const files = manifest.files || {};
+        const avif = files['static/media/site-bg.avif'];
+        const webp = files['static/media/site-bg.webp'];
+        const preloads = [];
+        if (avif) preloads.push(`<link rel="preload" as="image" type="image/avif" href="${avif}" fetchpriority="high">`);
+        if (webp) preloads.push(`<link rel="preload" as="image" type="image/webp" href="${webp}">`);
+        if (preloads.length) {
+          html = html.replace('</head>', preloads.join('') + '</head>');
+        }
+      }
+      cachedIndexHtml = html;
+      console.log('[index.html] preload-enriched HTML cached');
+    } catch (err) {
+      console.warn('[index.html] preload enrichment failed:', err.message);
+      cachedIndexHtml = null;
+    }
+  }
+  buildEnrichedIndexHtml();
+
   app.get('/{*splat}', (req, res) => {
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    if (cachedIndexHtml) {
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      return res.send(cachedIndexHtml);
+    }
     res.sendFile(path.join(BUILD_DIR, 'index.html'));
   });
 }

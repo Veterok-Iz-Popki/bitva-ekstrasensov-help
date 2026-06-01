@@ -264,7 +264,7 @@ function Footer() {
 
           {/* Navigation */}
           <div>
-            <h4 className="font-heading text-sm font-semibold text-gold mb-4">Навигация</h4>
+            <h3 className="font-heading text-sm font-semibold text-gold mb-4">Навигация</h3>
             <nav className="flex flex-col gap-2">
               {NAV_ITEMS.map((item) => (
                 <Link key={item.path} to={item.path} className="text-sm text-white/50 hover:text-gold transition-colors font-body">
@@ -279,7 +279,7 @@ function Footer() {
 
           {/* Disclaimer */}
           <div>
-            <h4 className="font-heading text-sm font-semibold text-gold mb-4">Информация</h4>
+            <h3 className="font-heading text-sm font-semibold text-gold mb-4">Информация</h3>
             <p className="text-xs text-white/35 font-body leading-relaxed">
               Сайт носит информационный характер и не является медицинским учреждением. 
               Результаты могут отличаться в зависимости от индивидуальных особенностей. 

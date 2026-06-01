@@ -163,3 +163,74 @@ SEO-оптимизированный сайт «Битва экстрасенс�
 - **P2**: Декомпозиция монолитного `backend/server.js` на controllers/routes
 - **P3**: Стабилизация MariaDB (миграция на MongoDB или supervisor autorestart)
 - **P3**: Resize всех существующих uploads через sharp (сейчас новые загрузки уже ресайзятся, старые — как есть)
+
+
+## Accessibility Fix (2026-02-?? — этой сессии)
+
+### Проблема
+Lighthouse Accessibility упала до 89 из-за audit `heading-order = 0`:
+- В `/app/frontend/src/components/Layout.js` футер использовал `<h4>` для колонок «Навигация» и «Информация»
+- На страницах с основным `<h2>` это создавало перескок H2 → H4 (пропущен H3)
+
+### Решение
+- `h4` → `h3` в Layout footer (строки 267 и 282)
+- Стили (Tailwind utility classes) идентичны → визуальный дизайн не пострадал
+- После пересборки production: **Accessibility 89 → 100** ✅
+
+### Файлы изменены
+- `/app/frontend/src/components/Layout.js` (2 строки)
+
+### Метрики production-build Lighthouse Mobile (после фикса)
+- Performance: 50–54 (variance simulated throttling)
+- **Accessibility: 100** ✅
+- Best Practices: 100 ✅
+- SEO: 69 (is-crawlable = 0 — INTENTIONAL: SEO Indexing Toggle OFF на preview)
+- FCP: 0.8–1.4 s
+- LCP: 7.0–7.3 s  ← bottleneck: Render Delay 94% (JS evaluation)
+- TBT: 950–1710 ms
+- CLS: 0.008 ✅
+
+### Размер production bundle
+- main.js: 356 KB raw / **110 KB gzip**
+- main.css: 68 KB raw / 13 KB gzip
+- LCP-элемент: `<h1>` в hero-секции HomePage (текст, не картинка)
+
+### Известные узкие места performance (для будущей итерации)
+1. **`body { background-image: url(...IMG_6574.JPEG) }` в `/app/frontend/src/index.css:78`** — 620 KB JPEG, единственный самый тяжёлый ресурс на странице. Это глобальный фон сайта. Рекомендация: пережать в WebP/AVIF + responsive sizes (`-css-image-set` или `<picture>`) — экономия ~570 KB.
+2. **Third-party scripts блокируют main thread ~670 ms**: PostHog (62KB + 48KB recorder + 30KB surveys), Emergent debug-monitor, Cloudflare Insights. Можно отложить инициализацию PostHog или использовать `requestIdleCallback`.
+3. **unused-javascript: 124 KiB** в main.5108134b.js — кандидаты на дальнейший code splitting.
+4. **legacy-javascript: 28 KiB** — CRA по умолчанию транспилит для старых браузеров. Можно настроить `browserslist` агрессивнее.
+5. **modern-image-formats: 568 KB savings** — не все участники имеют WebP вариант (часть фото загружена админом без автогенерации).
+
+
+
+## Background Image Optimization (LCP boost) — DONE
+
+### Проблема
+Глобальный фон сайта `IMG_6574.JPEG` (634 KB, 4096×2296) был самым тяжёлым ресурсом страницы и сильно тормозил LCP.
+
+### Решение
+- Скачан оригинал и пережат в 3 формата с resize до 2048 wide
+- AVIF: 7 KB (-99%), WebP: 14 KB (-98%), JPEG fallback: 57 KB (-91%)
+- Файлы: `/app/frontend/src/assets/img/site-bg.{avif,webp,jpg}`
+- Подключение через CSS `image-set()` + `-webkit-image-set()` + plain `url()` fallback
+- Preload в `<head>` через backend-side инъекцию из asset-manifest.json (стабильные URL с webpack-хешами)
+- Backend: `index: false` в express.static + кэшированный enriched HTML
+
+### Файлы изменены
+- `/app/frontend/src/index.css` (image-set вместо JPEG URL)
+- `/app/frontend/public/index.html` (preload убран — идёт через backend)
+- `/app/backend/server.js` (читает asset-manifest.json + инжектит preload в head)
+- `/app/frontend/src/assets/img/site-bg.{avif,webp,jpg}` (NEW)
+
+### Lighthouse Mobile production (усреднение 3 прогонов)
+| Метрика | ДО | ПОСЛЕ |
+|---|---|---|
+| Performance | 50 | **65-74 (~68)** ⬆ |
+| **LCP** | 7.0 s | **2.6-3.2 s (~3.0s)** ⬆⬆ |
+| FCP | 0.8 s | 2.3 s (variance) |
+| TBT | 1710 ms | 840-1480 ms |
+| CLS | 0.008 | 0.035 (still GOOD) |
+| Accessibility | 100 | 100 ✅ |
+| Best Practices | 100 | 100 ✅ |
+

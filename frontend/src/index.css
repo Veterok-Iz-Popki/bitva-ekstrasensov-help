@@ -75,7 +75,19 @@
         @apply text-foreground;
         font-family: 'Fira Sans', sans-serif;
         background-color: #0a2530;
-        background-image: url('https://customer-assets.emergentagent.com/job_ekstrasensov-sajt/artifacts/o1q1ruoc_IMG_6574.JPEG');
+        /* JPEG fallback for browsers that don't support image-set/AVIF/WebP */
+        background-image: url('./assets/img/site-bg.jpg');
+        /* Modern browsers: try AVIF first, then WebP, then JPEG */
+        background-image: image-set(
+            url('./assets/img/site-bg.avif') type('image/avif'),
+            url('./assets/img/site-bg.webp') type('image/webp'),
+            url('./assets/img/site-bg.jpg') type('image/jpeg')
+        );
+        background-image: -webkit-image-set(
+            url('./assets/img/site-bg.avif') type('image/avif'),
+            url('./assets/img/site-bg.webp') type('image/webp'),
+            url('./assets/img/site-bg.jpg') type('image/jpeg')
+        );
         background-position: center center;
         background-size: cover;
         background-repeat: no-repeat;
