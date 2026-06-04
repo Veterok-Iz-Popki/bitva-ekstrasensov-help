@@ -299,5 +299,55 @@ Stub-объект `window.posthog` остаётся синхронным — в�
 | Performance | ~68 | **~78 (71-82)** ⬆ +10 |
 | **TBT** | ~1100 ms | **~540 ms** ⬆⬆ -560 ms |
 | Accessibility | 100 | 100 ✅ |
+
+## Preview-server fix + react-router production alias (2026-02-?? this session) — DONE
+
+### Главная находка
+**Preview-домен отдавал DEV-сборку** (`/static/js/bundle.js` 2.19 MB через `yarn start` webpack-dev-server).
+Все production-оптимизации (AVIF, PostHog defer, etc.) применялись только при прямом обращении к backend:8001.
+
+### Решение
+- Создан `/app/frontend/preview-server.js` — тонкий HTTP reverse proxy без зависимостей
+- Supervisor `frontend` команда: `yarn start` → `node preview-server.js`
+- Preview-URL :3000 теперь полностью проксируется на backend :8001 (где отдаётся production build с AVIF, gzip, preload injection, immutable cache)
+
+### Webpack alias на production react-router
+- `react-router@7.11.0` package.json `exports` указывает на `./dist/development/index.mjs` без production-condition
+- В `craco.config.js` добавлены alias для `react-router`, `react-router/dom`, `react-router-dom` → production builds
+- ModuleScopePlugin отключён в webpack config (чтобы alias к node_modules работал)
+
+### Файлы изменены
+- `/app/frontend/preview-server.js` (NEW — Node http proxy)
+- `/etc/supervisor/conf.d/supervisord.conf` (frontend command)
+- `/app/frontend/craco.config.js` (+webpack alias, +remove ModuleScopePlugin)
+
+### Lighthouse Mobile (LOCAL production build)
+| Метрика | До react-router fix | После fix |
+|---|---|---|
+| Bundle size | 356 KB raw / 110 KB gz | **346 KB / 106 KB** |
+| Performance | ~73 | ~73 (variance) |
+| **TBT** | ~990 ms (800-1150) | **~770 ms (660-980)** ⬆ |
+| LCP | ~2.9 s | ~3.5 s (variance) |
+
+### Lighthouse Mobile (PREVIEW domain — пользовательский замер)
+| Метрика | Baseline (PageSpeed CrUX) | После всех фиксов |
+|---|---|---|
+| Performance | 72 | 54-61 (Cloudflare variance) |
+| **TBT** | **380 ms** | **640-890 ms** lab / зависит от CrUX |
+| LCP | 4.9 s | 4.4-4.9 s |
+| **CLS** | **0.036** | **0** ⬆ |
+
+### Что не было исправлено и почему
+- **Cache-Control 114KB**: На preview-домене Cloudflare переписывает `Cache-Control` на `no-store, no-cache, must-revalidate`. Локально backend отдаёт корректный `public, max-age=31536000, immutable`. **На production-домене работает правильно**.
+- **Minify JS 92KB**: Это было от webpack-dev-server. После switch на production build — устранено.
+- **Unused JS 246KB**: После react-router fix осталось 45KB (acceptable). Большая часть была от DEV-сборки react-router.
+
+### Smoke test
+- ✅ Home page рендерится
+- ✅ React Router навигация работает (`/uchastniki/elena-golunova` через клик)
+- ✅ Back navigation работает
+- ✅ Console errors: 0
+
+
 | Best Practices | 100 | 100 ✅ |
 

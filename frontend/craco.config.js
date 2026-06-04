@@ -45,8 +45,33 @@ const webpackConfig = {
   webpack: {
     alias: {
       '@': path.resolve(__dirname, 'src'),
+      // -------------------------------------------------------------------
+      // FORCE react-router PRODUCTION build (perf optimization)
+      // -------------------------------------------------------------------
+      // react-router@7.x package.json `exports` field указывает на
+      // ./dist/development/index.mjs БЕЗ production-condition. Webpack
+      // в production-build всё равно резолвит DEV-сборку (с warnings,
+      // invariant-asserts, лишним отладочным кодом), что добавляет ~30-40KB
+      // gzip к main.js и увеличивает script-evaluation time.
+      //
+      // Этим алиасом принудительно указываем production-сборку.
+      // Применяется только в production build (`yarn build`), webpack-dev-server
+      // (если когда-нибудь будет использоваться) продолжит использовать
+      // default development версии через обычный resolve.
+      'react-router$': path.resolve(__dirname, 'node_modules/react-router/dist/production/index.mjs'),
+      'react-router/dom$': path.resolve(__dirname, 'node_modules/react-router/dist/production/dom-export.mjs'),
+      'react-router-dom$': path.resolve(__dirname, 'node_modules/react-router-dom/dist/index.mjs'),
     },
     configure: (webpackConfig) => {
+      // -------------------------------------------------------------------
+      // Disable CRA's ModuleScopePlugin so we can alias node_modules paths
+      // (`react-router` production build resolve).
+      // -------------------------------------------------------------------
+      if (webpackConfig.resolve && Array.isArray(webpackConfig.resolve.plugins)) {
+        webpackConfig.resolve.plugins = webpackConfig.resolve.plugins.filter(
+          (p) => !(p && p.constructor && p.constructor.name === 'ModuleScopePlugin')
+        );
+      }
 
       // Add ignored patterns to reduce watched directories
         webpackConfig.watchOptions = {
