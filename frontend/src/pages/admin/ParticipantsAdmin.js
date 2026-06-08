@@ -92,11 +92,13 @@ export default function ParticipantsAdmin() {
       const res = await api.post('/admin/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      
-      // Build full URL
-      const baseUrl = process.env.REACT_APP_BACKEND_URL;
-      const photoUrl = `${baseUrl}${res.data.url}`;
-      setForm({ ...form, photo_url: photoUrl });
+
+      // Сохраняем ОТНОСИТЕЛЬНЫЙ путь (/api/uploads/...), а не URL с baseUrl
+      // текущего backend-домена (preview). Иначе при загрузке через preview
+      // в БД попадает абсолютный preview URL → попадает в Person JSON-LD
+      // (image) и og:image на production-домене, ломая SEO-консистентность.
+      // Браузер сам резолвит относительный путь к текущему origin.
+      setForm({ ...form, photo_url: res.data.url });
       toast.success('Фото загружено');
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Ошибка загрузки');

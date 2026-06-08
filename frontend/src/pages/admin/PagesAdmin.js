@@ -164,8 +164,10 @@ function ImageField({ fieldKey, value, onChange, label }) {
       const res = await api.post('/admin/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      const baseUrl = process.env.REACT_APP_BACKEND_URL;
-      onChange(`${baseUrl}${res.data.url}`);
+      // Сохраняем ОТНОСИТЕЛЬНЫЙ путь (/api/uploads/...) вместо абсолютного
+      // URL с preview-доменом. Это URL попадает в pages.blocks JSON и далее
+      // в hero_logo_*, og:image и Schema.org — обязательно production-домен.
+      onChange(res.data.url);
       toast.success('Изображение загружено');
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Ошибка загрузки');

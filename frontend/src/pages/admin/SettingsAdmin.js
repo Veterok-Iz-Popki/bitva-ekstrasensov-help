@@ -81,8 +81,14 @@ export default function SettingsAdmin() {
       const res = await api.post('/admin/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      const baseUrl = process.env.REACT_APP_BACKEND_URL;
-      setForm({ ...form, logo_url: `${baseUrl}${res.data.url}` });
+      // Сохраняем ОТНОСИТЕЛЬНЫЙ путь (/api/uploads/...), а не абсолютный URL,
+      // привязанный к текущему backend-домену. Это критично для SEO:
+      // абсолютный URL с preview-домена попал бы в Organization JSON-LD,
+      // og:image и <img src="..."> на production, ломая консистентность доменов.
+      // Backend `api` инстанс уже добавляет REACT_APP_BACKEND_URL к относительным
+      // путям при запросах, а <img src="/api/uploads/..."> на любом домене
+      // разрешится в текущий origin → работает и в preview, и в production.
+      setForm({ ...form, logo_url: res.data.url });
       toast.success('Логотип загружен');
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Ошибка загрузки');
