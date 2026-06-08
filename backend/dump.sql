@@ -26,7 +26,7 @@ CREATE TABLE `admin_users` (
 LOCK TABLES `admin_users` WRITE;
 /*!40000 ALTER TABLE `admin_users` DISABLE KEYS */;
 INSERT INTO `admin_users` VALUES
-('097fd181-0ddf-4527-a561-76ffffd12312','nikoa2020@gmail.com','$2b$10$ef6eUMZNzb9oXnaKCXX6d.wqEqM7nAD.qR40rUwOHCzbVISDdReQq','2026-03-06 17:33:19');
+('097fd181-0ddf-4527-a561-76ffffd12312','nikoa2020@gmail.com','$2b$10$emkoSWkuoJKq.t3y4M15o.OMUEbqI0HlWHCg0IRK6QpRY3Vkjx49e','2026-03-06 17:33:19');
 /*!40000 ALTER TABLE `admin_users` ENABLE KEYS */;
 UNLOCK TABLES;
 DROP TABLE IF EXISTS `applications`;
