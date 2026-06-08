@@ -2,21 +2,51 @@
  * Универсальный компонент <picture> с приоритетом форматов:
  *   AVIF → WebP → JPG/PNG fallback
  *
- * Если URL указывает на /api/uploads/<id>.(jpg|jpeg|png), автоматически
- * добавляет <source srcSet=".avif" type="image/avif">
- *      и <source srcSet=".webp" type="image/webp">.
+ * Стратегия выбора форматов:
+ *  - WebP: backend (upload pipeline через sharp) гарантированно создаёт `.webp`
+ *    для всех загружаемых JPG/PNG, поэтому WebP source включается для всех
+ *    `/api/uploads/<id>.(jpg|jpeg|png)` URL.
+ *  - AVIF: создаётся вручную только для специально подготовленного набора —
+ *    фото участников (`*-new`) и логотипов (`logo-bitva`, `logo-tnt`).
+ *    Для CMS-uploads (UUID-style имена в галерее, видео, страницах) AVIF
+ *    отсутствует — добавление `<source type="image/avif">` приводило бы к 404.
+ *  - `<img src>` — всегда оригинальный JPG/PNG (рабочий fallback).
  *
- * Для прочих URL (внешние ссылки, .svg, .webp как src) рендерит обычный <img>.
+ * Если нужно явно указать наличие AVIF для не входящих в whitelist URL —
+ * передайте проп `hasAvif={true}` или конкретный `avifSrc="..."`.
+ *
+ * Для внешних URL, SVG, .webp/.avif как src — рендерится обычный <img>.
  */
-export default function PictureImg({ src, alt = '', className, style, loading = 'lazy', width, height, fetchPriority, ...rest }) {
+
+// Известные паттерны uploads, для которых вручную сгенерированы AVIF-версии.
+// При добавлении новой пакетной AVIF-конвертации — расширить регулярку.
+const KNOWN_AVIF_PATTERNS = /(?:-new|^logo-bitva|^logo-tnt)$/;
+
+export default function PictureImg({
+  src,
+  alt = '',
+  className,
+  style,
+  loading = 'lazy',
+  width,
+  height,
+  fetchPriority,
+  hasAvif,
+  avifSrc: explicitAvifSrc,
+  webpSrc: explicitWebpSrc,
+  ...rest
+}) {
   if (!src) return null;
 
-  // Только для наших uploads имеется .webp/.avif пара.
-  // Внешние URL и относительные пути не трогаем (там вариантов может не существовать).
   const isOurUpload = typeof src === 'string' && /\/api\/uploads\/[^/?#]+\.(jpg|jpeg|png)(\?.*)?$/i.test(src);
-  const m = isOurUpload ? src.match(/^(.*)\.(jpg|jpeg|png)(\?.*)?$/i) : null;
-  const webpSrc = m ? `${m[1]}.webp${m[3] || ''}` : null;
-  const avifSrc = m ? `${m[1]}.avif${m[3] || ''}` : null;
+  const m = isOurUpload ? src.match(/^(.*\/)([^/]+)\.(jpg|jpeg|png)(\?.*)?$/i) : null;
+  const baseName = m ? m[2] : null;
+  const webpSrc = explicitWebpSrc || (m ? `${m[1]}${m[2]}.webp${m[4] || ''}` : null);
+  // AVIF включаем только если:
+  //   1) явно передан avifSrc или hasAvif=true (компонент-владелец гарантирует наличие)
+  //   2) baseName матчит белый список известных AVIF-паттернов
+  const allowAvif = explicitAvifSrc || hasAvif || (baseName && KNOWN_AVIF_PATTERNS.test(baseName));
+  const avifSrc = allowAvif ? (explicitAvifSrc || `${m[1]}${m[2]}.avif${m[4] || ''}`) : null;
 
   const imgProps = {
     src,
@@ -29,8 +59,6 @@ export default function PictureImg({ src, alt = '', className, style, loading = 
     height,
     ...rest,
   };
-  // React 19+ поддерживает fetchPriority как proper prop. Для совместимости
-  // также добавляем lowercase HTML-атрибут (это валидный HTML5 атрибут).
   if (fetchPriority) {
     imgProps.fetchPriority = fetchPriority;
   }
