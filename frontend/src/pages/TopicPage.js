@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle, AlertTriangle, HelpCircle, Phone } from 'lucide-react';
-import api, { setSEO, setJsonLd, setBreadcrumbJsonLd } from '../lib/api';
+import api, { setSEO, setJsonLd, setBreadcrumbJsonLd, getSiteUrl } from '../lib/api';
 
 // SEO-оптимизированные H1 для topic-страниц
 const TOPIC_H1 = {
@@ -75,7 +75,7 @@ export default function TopicPage() {
         "@type": "WebPage",
         "name": seo?.title || TOPIC_NAMES[slug],
         "description": seo?.description || "",
-        "url": window.location.href
+        "url": `${getSiteUrl()}/${slug}`
       });
       setBreadcrumbJsonLd([
         { name: 'Главная', path: '/' },

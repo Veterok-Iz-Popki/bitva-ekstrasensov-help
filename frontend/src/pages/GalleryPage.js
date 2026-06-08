@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
-import api, { setSEO, setJsonLd, setBreadcrumbJsonLd } from '../lib/api';
+import api, { setSEO, setJsonLd, setBreadcrumbJsonLd, getSiteUrl } from '../lib/api';
 import PictureImg from '../components/PictureImg';
 
 export default function GalleryPage() {
@@ -28,7 +28,7 @@ export default function GalleryPage() {
         "@context": "https://schema.org",
         "@type": "ImageGallery",
         "name": seo?.title || "Фотогалерея",
-        "url": window.location.href,
+        "url": `${getSiteUrl()}/foto-galereya`,
       });
       setBreadcrumbJsonLd([
         { name: 'Главная', path: '/' },

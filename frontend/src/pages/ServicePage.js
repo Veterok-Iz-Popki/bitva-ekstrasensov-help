@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle, Sparkles, HelpCircle, Phone, Star } from 'lucide-react';
-import api, { setSEO, setJsonLd, setBreadcrumbJsonLd } from '../lib/api';
+import api, { setSEO, setJsonLd, setBreadcrumbJsonLd, getSiteUrl } from '../lib/api';
 
 const SERVICE_NAMES = {
   'finansovaya-magiya': 'Финансовая магия',
@@ -61,7 +61,7 @@ export default function ServicePage() {
         "@type": "Service",
         "name": seo?.title || SERVICE_NAMES[slug],
         "description": seo?.description || "",
-        "url": window.location.href
+        "url": `${getSiteUrl()}/${slug}`
       });
       setBreadcrumbJsonLd([
         { name: 'Главная', path: '/' },
