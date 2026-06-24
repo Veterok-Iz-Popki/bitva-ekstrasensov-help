@@ -673,11 +673,11 @@ api.put('/admin/settings', requireAdmin, async (req, res) => {
   const seoIndexing = (d.seo_indexing_enabled === false || d.seo_indexing_enabled === 0) ? 0 : 1;
   const [existing] = await db.query("SELECT id FROM site_settings WHERE id = 'site_settings'");
   if (existing.length) {
-    await db.query(`UPDATE site_settings SET email=?, phone=?, address=?, notification_email=?, working_hours=?, copyright_text=?, email_notifications_enabled=?, logo_url=?, logo_alt=?, logo_height_desktop=?, logo_height_mobile=?, seo_indexing_enabled=? WHERE id='site_settings'`,
-      [d.email || '', d.phone || '', d.address || '', d.notification_email || '', d.working_hours || '', d.copyright_text || '', d.email_notifications_enabled !== false, d.logo_url || '', d.logo_alt || 'Битва Экстрасенсов', d.logo_height_desktop || 56, d.logo_height_mobile || 48, seoIndexing]);
+    await db.query(`UPDATE site_settings SET email=?, phone=?, popup_phone=?, address=?, notification_email=?, working_hours=?, copyright_text=?, email_notifications_enabled=?, logo_url=?, logo_alt=?, logo_height_desktop=?, logo_height_mobile=?, seo_indexing_enabled=? WHERE id='site_settings'`,
+      [d.email || '', d.phone || '', d.popup_phone || '', d.address || '', d.notification_email || '', d.working_hours || '', d.copyright_text || '', d.email_notifications_enabled !== false, d.logo_url || '', d.logo_alt || 'Битва Экстрасенсов', d.logo_height_desktop || 56, d.logo_height_mobile || 48, seoIndexing]);
   } else {
-    await db.query(`INSERT INTO site_settings (id, email, phone, address, notification_email, working_hours, copyright_text, email_notifications_enabled, logo_url, logo_alt, logo_height_desktop, logo_height_mobile, seo_indexing_enabled) VALUES ('site_settings',?,?,?,?,?,?,?,?,?,?,?,?)`,
-      [d.email || '', d.phone || '', d.address || '', d.notification_email || '', d.working_hours || '', d.copyright_text || '', d.email_notifications_enabled !== false, d.logo_url || '', d.logo_alt || 'Битва Экстрасенсов', d.logo_height_desktop || 56, d.logo_height_mobile || 48, seoIndexing]);
+    await db.query(`INSERT INTO site_settings (id, email, phone, popup_phone, address, notification_email, working_hours, copyright_text, email_notifications_enabled, logo_url, logo_alt, logo_height_desktop, logo_height_mobile, seo_indexing_enabled) VALUES ('site_settings',?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+      [d.email || '', d.phone || '', d.popup_phone || '', d.address || '', d.notification_email || '', d.working_hours || '', d.copyright_text || '', d.email_notifications_enabled !== false, d.logo_url || '', d.logo_alt || 'Битва Экстрасенсов', d.logo_height_desktop || 56, d.logo_height_mobile || 48, seoIndexing]);
   }
   const [rows] = await db.query("SELECT * FROM site_settings WHERE id = 'site_settings'");
   invalidateSeoCache();

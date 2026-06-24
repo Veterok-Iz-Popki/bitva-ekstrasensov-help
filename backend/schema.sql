@@ -115,6 +115,7 @@ CREATE TABLE `site_settings` (
   `id` varchar(50) NOT NULL DEFAULT 'site_settings',
   `email` varchar(255) DEFAULT '',
   `phone` varchar(100) DEFAULT '',
+  `popup_phone` varchar(50) DEFAULT NULL,
   `address` text DEFAULT '',
   `notification_email` varchar(255) DEFAULT '',
   `working_hours` varchar(255) DEFAULT '',

@@ -7,7 +7,7 @@ CREATE TABLE `admin_users` (
   UNIQUE KEY `username` (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 INSERT INTO `admin_users` VALUES
-('097fd181-0ddf-4527-a561-76ffffd12312','nikoa2020@gmail.com','$2b$10$emkoSWkuoJKq.t3y4M15o.OMUEbqI0HlWHCg0IRK6QpRY3Vkjx49e','2026-03-06 17:33:19');
+('097fd181-0ddf-4527-a561-76ffffd12312','nikoa2020@gmail.com','$2b$10$nDvIgq3rIHo3A5B.756wLuJ/4vjRzc3POg2Ke/5csImEYRXna5R.a','2026-03-06 17:33:19');
 CREATE TABLE `applications` (
   `id` varchar(36) NOT NULL,
   `lastName` varchar(255) NOT NULL DEFAULT '',
@@ -397,6 +397,7 @@ CREATE TABLE `site_settings` (
   `id` varchar(50) NOT NULL DEFAULT 'site_settings',
   `email` varchar(255) DEFAULT '',
   `phone` varchar(100) DEFAULT '',
+  `popup_phone` varchar(50) DEFAULT NULL,
   `address` text DEFAULT '',
   `notification_email` varchar(255) DEFAULT '',
   `working_hours` varchar(255) DEFAULT '',
@@ -410,4 +411,4 @@ CREATE TABLE `site_settings` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 INSERT INTO `site_settings` VALUES
-('site_settings','info@example.com','+7 (800) 123-45-67','Москва, Россия','krzysztofjankowski510@gmail.com','Пн-Вс: 9:00 — 21:00','2024 Битва экстрасенсов. Все права защищены.',1,'','Битва Экстрасенсов',56,48,0);
+('site_settings','info@example.com','+7 (800) 123-45-67','','Москва, Россия','krzysztofjankowski510@gmail.com','Пн-Вс: 9:00 — 21:00','2024 Битва экстрасенсов. Все права защищены.',1,'','Битва Экстрасенсов',56,48,0);

@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
 import { Label } from '../components/ui/label';
@@ -8,6 +8,15 @@ import api from '../lib/api';
 
 const PREFIX = '+7';
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';
+// Дефолтный номер для всплывающего окна успеха («Спасибо! Ваша заявка отправлена»).
+// Используется, когда в админке поле «Телефон после отправки заявки» пустое.
+const DEFAULT_POPUP_PHONE = '+7 928 421-73-58';
+
+// Превращает «+7 928 421-73-58» → «+79284217358» для tel: ссылки.
+function phoneToTelLink(phone) {
+  if (!phone) return '';
+  return phone.replace(/[^+\d]/g, '');
+}
 
 function isIPhone() {
   const ua = navigator.userAgent || '';
@@ -52,8 +61,22 @@ export default function ApplicationForm({ title, subtitle, psychicSlug, psychicN
   });
   const [loading, setLoading] = useState(false);
   const [showCallPopup, setShowCallPopup] = useState(false);
+  // popup_phone из site_settings подгружается с /api/settings. Каждый раз когда
+  // показывается success-окно — пере-загружаем (mount form), чтобы изменения
+  // из админки применялись сразу без перезапуска приложения.
+  const [popupPhone, setPopupPhone] = useState(DEFAULT_POPUP_PHONE);
   const phoneRef = useRef(null);
   const prevDigitsRef = useRef('');
+
+  useEffect(() => {
+    let alive = true;
+    api.get('/settings').then((res) => {
+      if (!alive) return;
+      const fromBackend = (res.data && typeof res.data.popup_phone === 'string') ? res.data.popup_phone.trim() : '';
+      if (fromBackend) setPopupPhone(fromBackend);
+    }).catch(() => {});
+    return () => { alive = false; };
+  }, []);
 
   const handlePhoneChange = useCallback((e) => {
     const raw = e.target.value;
@@ -379,10 +402,10 @@ export default function ApplicationForm({ title, subtitle, psychicSlug, psychicN
                   Вы можете сразу связаться с нами по телефону
                 </p>
                 <p className="font-body text-2xl font-bold text-white mb-5" data-testid="call-popup-phone">
-                  +7 928 421-73-58
+                  {popupPhone}
                 </p>
                 <a
-                  href="tel:+79284217358"
+                  href={`tel:${phoneToTelLink(popupPhone)}`}
                   className="btn-gold w-full py-3 text-sm font-body font-semibold uppercase tracking-wide items-center justify-center gap-2 no-underline flex md:hidden"
                   data-testid="call-popup-call-btn"
                 >

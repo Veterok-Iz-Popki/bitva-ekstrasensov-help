@@ -11,6 +11,7 @@ export default function SettingsAdmin() {
   const [form, setForm] = useState({
     email: '',
     phone: '',
+    popup_phone: '',
     address: '',
     notification_email: '',
     working_hours: '',
@@ -33,6 +34,7 @@ export default function SettingsAdmin() {
       setForm({
         email: d.email || '',
         phone: d.phone || '',
+        popup_phone: d.popup_phone || '',
         address: d.address || '',
         notification_email: d.notification_email || '',
         working_hours: d.working_hours || '',
@@ -217,6 +219,19 @@ export default function SettingsAdmin() {
                 className="bg-teal-dark/80 border-teal-light/30 text-white h-10"
                 placeholder="+7 (999) 123-45-67"
               />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-white/70 font-body text-sm">Телефон после отправки заявки</Label>
+              <Input
+                value={form.popup_phone}
+                onChange={(e) => setForm({ ...form, popup_phone: e.target.value })}
+                className="bg-teal-dark/80 border-teal-light/30 text-white h-10"
+                placeholder="+7 928 421-73-58"
+                data-testid="settings-popup-phone"
+              />
+              <p className="text-white/50 font-body text-xs">
+                Отображается во всплывающем окне «Спасибо! Ваша заявка отправлена». Если поле пустое — используется номер по умолчанию.
+              </p>
             </div>
             <div className="space-y-2">
               <Label className="text-white/70 font-body text-sm">Адрес</Label>
