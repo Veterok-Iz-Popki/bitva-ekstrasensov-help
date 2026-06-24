@@ -84,20 +84,50 @@ function Header() {
     };
   }, [settings]);
 
-  // Handle hash scroll after navigation
+  // Handle hash scroll after navigation.
+  //
+  // Проблема была в том, что `el.scrollIntoView({ behavior: 'smooth' })` + CSS
+  // `scroll-margin-top` нестабильно работает на iOS Safari (известный bug):
+  // якорная секция оказывается то выше, то ниже viewport'а, особенно когда
+  // ниже неё lazy-загружаются изображения и сдвигают layout во время скролла.
+  //
+  // Решение — единый, явный smooth scroll через `window.scrollTo` с пересчётом
+  // целевого Y через `getBoundingClientRect()` и динамическим offset'ом,
+  // равным фактической высоте фиксированного header'а на текущем breakpoint'е
+  // (на desktop header `md:fixed`, на mobile — статичный).
   useEffect(() => {
-    if (location.hash) {
-      const hash = location.hash.substring(1);
-      const tryScroll = (attempts) => {
-        const el = document.getElementById(hash);
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth' });
-        } else if (attempts > 0) {
-          setTimeout(() => tryScroll(attempts - 1), 200);
-        }
-      };
-      setTimeout(() => tryScroll(5), 300);
-    }
+    if (!location.hash) return;
+    const hash = location.hash.substring(1);
+
+    const computeOffset = () => {
+      const h = headerRef.current;
+      if (!h) return 16;
+      const rect = h.getBoundingClientRect();
+      const style = window.getComputedStyle(h);
+      const isFixed = style.position === 'fixed' || style.position === 'sticky';
+      // Если header фиксирован — отступ = его высота + небольшой воздух.
+      // Если статичный (mobile) — небольшой воздух 16px (он уже прокручен выше).
+      return (isFixed ? rect.height : 0) + 16;
+    };
+
+    const scrollToAnchor = (attempts) => {
+      const el = document.getElementById(hash);
+      if (!el) {
+        if (attempts > 0) setTimeout(() => scrollToAnchor(attempts - 1), 150);
+        return;
+      }
+      // Ждём следующий frame, чтобы layout полностью settled после route change.
+      requestAnimationFrame(() => {
+        const rect = el.getBoundingClientRect();
+        const offset = computeOffset();
+        const y = rect.top + window.scrollY - offset;
+        window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+      });
+    };
+
+    // 300ms — даём React'у домонтировать секцию (если переход с другой страницы).
+    const t = setTimeout(() => scrollToAnchor(8), 300);
+    return () => clearTimeout(t);
   }, [location]);
 
   const handleNavClick = (e, item) => {
@@ -105,8 +135,19 @@ function Header() {
       e.preventDefault();
       const hash = item.path.substring(2);
       if (location.pathname === '/') {
+        // Тот же URL — useEffect выше не сработает (location не меняется).
+        // Запускаем тот же scroll вручную.
         const el = document.getElementById(hash);
-        if (el) el.scrollIntoView({ behavior: 'smooth' });
+        if (el) {
+          const h = headerRef.current;
+          const style = h ? window.getComputedStyle(h) : null;
+          const isFixed = style && (style.position === 'fixed' || style.position === 'sticky');
+          const offset = (isFixed && h ? h.getBoundingClientRect().height : 0) + 16;
+          requestAnimationFrame(() => {
+            const y = el.getBoundingClientRect().top + window.scrollY - offset;
+            window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+          });
+        }
       } else {
         navigate(`/#${hash}`);
       }
