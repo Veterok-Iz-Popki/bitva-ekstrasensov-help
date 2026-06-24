@@ -301,12 +301,12 @@ api.post('/applications', async (req, res) => {
 
   const fullName = `${data.lastName} ${data.firstName} ${data.patronymic}`.trim();
   const now = dbNow();
-  const id = uuidv4();
 
-  await db.query(
-    'INSERT INTO applications (id, lastName, firstName, patronymic, name, phone, age, city, problem, psychic_slug, psychic_name, status, notes, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
-    [id, data.lastName, data.firstName, data.patronymic, fullName, data.phone, data.age || '', data.city || '', data.problem, data.psychic_slug || '', data.psychic_name || '', 'new', '', now]
-  );
+  // ⚠ Сохранение заявок в БД отключено по требованию.
+  // Email/мессенджер-уведомления продолжают работать через sendNotificationEmail().
+  // Раздел «Заявки» в админке остаётся доступным для просмотра старых записей,
+  // но новые заявки в нём появляться НЕ будут.
+  // Если потребуется вернуть сохранение — восстановить INSERT INTO applications с полями выше.
 
   sendNotificationEmail({ ...data, name: fullName, psychic_slug: data.psychic_slug, psychic_name: data.psychic_name, created_at: now }).catch(() => {});
   return res.json({ status: 'success', message: 'Заявка успешно отправлена' });
