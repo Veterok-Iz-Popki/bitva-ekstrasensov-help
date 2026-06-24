@@ -195,19 +195,37 @@ const api = express.Router();
 
 api.get('/', (req, res) => res.json({ message: 'Битва экстрасенсов API' }));
 
-// vCard contact — inline (iPhone Safari opens "Add Contact")
-api.get('/contact.vcf', (req, res) => {
+// vCard contact — inline (iPhone Safari opens "Add Contact").
+// Номер берётся из site_settings.popup_phone (тот же источник, что и popup после
+// отправки заявки). Если в БД пусто — fallback на дефолтный номер.
+const DEFAULT_VCARD_PHONE = '+7 928 421-73-58';
+function phoneToVcfDigits(phone) {
+  if (!phone) return '';
+  return phone.replace(/[^+\d]/g, '');
+}
+api.get('/contact.vcf', async (req, res) => {
+  let phoneFromDb = '';
+  try {
+    const [rows] = await db.query("SELECT popup_phone FROM site_settings WHERE id='site_settings' LIMIT 1");
+    if (rows.length && typeof rows[0].popup_phone === 'string') phoneFromDb = rows[0].popup_phone.trim();
+  } catch (e) {
+    // если БД недоступна — отдаём fallback ниже
+  }
+  const phoneRaw = phoneFromDb || DEFAULT_VCARD_PHONE;
+  const phoneDigits = phoneToVcfDigits(phoneRaw);
   const vcf = [
     'BEGIN:VCARD',
     'VERSION:3.0',
     'N;CHARSET=UTF-8:;Битва Экстрасенсов;;;',
     'FN;CHARSET=UTF-8:Битва Экстрасенсов',
-    'TEL;TYPE=CELL:+79284217358',
+    `TEL;TYPE=CELL:${phoneDigits}`,
     'END:VCARD',
   ].join('\r\n');
   res.set({
     'Content-Type': 'text/vcard; charset=utf-8',
     'Content-Disposition': 'inline; filename="contact.vcf"',
+    // Не кэшировать на CDN/браузере, чтобы изменения из админки применялись сразу.
+    'Cache-Control': 'no-store, no-cache, must-revalidate',
   });
   res.send(vcf);
 });
