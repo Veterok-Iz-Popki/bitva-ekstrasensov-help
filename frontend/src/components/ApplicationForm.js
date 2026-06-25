@@ -70,7 +70,7 @@ export default function ApplicationForm({ title, subtitle, psychicSlug, psychicN
 
   useEffect(() => {
     let alive = true;
-    api.get('/settings').then((res) => {
+    api.get('/settings', { params: { _: Date.now() } }).then((res) => {
       if (!alive) return;
       const fromBackend = (res.data && typeof res.data.popup_phone === 'string') ? res.data.popup_phone.trim() : '';
       if (fromBackend) setPopupPhone(fromBackend);
@@ -226,7 +226,8 @@ export default function ApplicationForm({ title, subtitle, psychicSlug, psychicN
       setShowCallPopup(true);
       // Дополнительно перезапрашиваем popup_phone прямо перед показом окна,
       // чтобы свежие изменения из админки применялись без обновления страницы.
-      api.get('/settings').then((res) => {
+      // Cache-buster обходит edge-кэш CDN (Cloudflare).
+      api.get('/settings', { params: { _: Date.now() } }).then((res) => {
         const fromBackend = (res.data && typeof res.data.popup_phone === 'string') ? res.data.popup_phone.trim() : '';
         setPopupPhone(fromBackend || DEFAULT_POPUP_PHONE);
       }).catch(() => {});

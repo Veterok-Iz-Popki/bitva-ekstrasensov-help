@@ -1,0 +1,39 @@
+{
+  "summary": "Re-test cache-buster фикса popup_phone после iteration_17. Backend 6/6 PASS. Frontend: cache-buster `params:{ _: Date.now() }` в /api/settings РАБОТАЕТ — re-fetch обходит edge-кэш CDN, popup показывает НОВОЕ значение popup_phone после моментального изменения в админке БЕЗ перезагрузки страницы. Подтверждены: персистентность после reload, fallback на DEFAULT_POPUP_PHONE при пустом значении, vCard /api/contact.vcf, дизайн popup (close, heading, layout). Найден один минорный UX-нит: popup мгновенно открывается с mount-значением и через ~200-500ms перерисовывается на свежее (визуальный 'flash' старого номера). Это не блокирует требование 'popup показывает НОВОЕ значение'.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "ApplicationForm popup ('Спасибо! Ваша заявка отправлена')",
+        "issues": [
+          "Минорный UX: при моментальном сценарии (admin PUT popup_phone=Y, сразу submit формы) popup открывается с mount-кэшированным значением (старым), и через ~200-500ms обновляется на новое. Виден короткий 'flash' старого номера. Не функциональный баг, но если нужен 100% 'моментально без вспышки' — можно перенести `setShowCallPopup(true)` ВНУТРЬ then() блока re-fetch в handleSubmit (или показывать loader до резолва). Решение опциональное."
+        ]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_popup_phone.py",
+    "/app/test_reports/pytest/iteration_18_popup_phone.xml"
+  ],
+  "action_items": [
+    "Опционально: устранить визуальный 'flash' старого номера в popup. Вариант: await api.get('/settings', {params:{_:Date.now()}}) ПЕРЕД setShowCallPopup(true). Текущая логика функционально корректна — popup в итоге показывает новое значение.",
+    "По коду iteration_17 уже всё применено. Сам фикс cache-buster подтверждён работающим."
+  ],
+  "critical_code_review_comments": [
+    "ApplicationForm.js:226-233 — setShowCallPopup(true) вызывается ПЕРЕД await re-fetch. Re-fetch промис не await'ится, поэтому popup открывается мгновенно с предыдущим состоянием popupPhone (mount value), затем перерисовывается. Если нужно 'без вспышки старого': await api.get(...) и потом setPopupPhone + setShowCallPopup в одном тике. Минор.",
+    "server.js:296-303 — GET /api/settings всё ещё без Cache-Control. Cache-buster в URL решает проблему на FE, но curl без `?_=ts` может попадать в edge-cache. Это допустимо, т.к. публичные потребители (FE) теперь все обходят кэш. Если в будущем будут другие потребители — добавить `res.set('Cache-Control','no-store')`."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "Admin: nikoa2020@gmail.com / aspire5542gl1952tq",
+  "seed_data_creation": "Тестовые popup_phone значения ('+7 922 333-44-55', '+7 933 777-88-99', '') устанавливались и восстанавливались. Финальное значение в БД: '+7 911 555-77-88'.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Cache-buster подтверждён. Backend pytest: pytest /app/backend/tests/test_popup_phone.py -v (6/6 pass). Если main agent захочет убрать визуальный flash — изменить порядок в ApplicationForm.js:226-233 (re-fetch перед setShowCallPopup). Рейт-лимит /api/applications: 5/60s per IP — между submit'ами ждать ≥60s.",
+  "rca of the issue": "Bug 'edge-cache stale popup_phone' из iteration_17 устранён cache-buster'ом `?_=<timestamp>` в обоих api.get('/settings') (mount и handleSubmit re-fetch). Воспроизведение и проверка: admin PUT popup_phone='+7 933 777-88-99' → submit формы → popup в течение <1s показывает новое значение '+7 933 777-88-99'. Без cache-buster (iteration_17) показывал старое в течение ~3s edge-cache window. Доказательство в скриншоте /app/test_reports/popup_settled.png."
+}
