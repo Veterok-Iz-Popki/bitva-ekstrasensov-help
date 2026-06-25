@@ -86,47 +86,68 @@ function Header() {
 
   // Handle hash scroll after navigation.
   //
-  // Проблема была в том, что `el.scrollIntoView({ behavior: 'smooth' })` + CSS
-  // `scroll-margin-top` нестабильно работает на iOS Safari (известный bug):
-  // якорная секция оказывается то выше, то ниже viewport'а, особенно когда
-  // ниже неё lazy-загружаются изображения и сдвигают layout во время скролла.
+  // Проблема: на мобильных устройствах после первого smooth-scroll к якорю
+  // часто срабатывает layout-shift (lazy-загрузка изображений в
+  // ReviewsCarousel/Suspense, динамическая высота шрифтов, отложенные iframes),
+  // и пользователь оказывается выше/ниже целевой секции. CSS
+  // `scroll-margin-top` на iOS Safari тоже работает нестабильно.
   //
-  // Решение — единый, явный smooth scroll через `window.scrollTo` с пересчётом
-  // целевого Y через `getBoundingClientRect()` и динамическим offset'ом,
-  // равным фактической высоте фиксированного header'а на текущем breakpoint'е
-  // (на desktop header `md:fixed`, на mobile — статичный).
-  useEffect(() => {
-    if (!location.hash) return;
-    const hash = location.hash.substring(1);
+  // Решение — единая функция scrollToAnchor с MULTI-PASS коррекцией:
+  // после первичного smooth-scroll выполняем 4 проверки через 250/500/900/1400ms
+  // и корректируем позицию, если секция сдвинулась более чем на 4px.
+  // Последняя коррекция — мгновенная (behavior:'auto'), чтобы гарантированно
+  // зафиксировать пользователя на нужном якоре.
+  const scrollToAnchor = (hash) => {
+    const el = document.getElementById(hash);
+    if (!el) return false;
 
     const computeOffset = () => {
       const h = headerRef.current;
       if (!h) return 16;
-      const rect = h.getBoundingClientRect();
       const style = window.getComputedStyle(h);
       const isFixed = style.position === 'fixed' || style.position === 'sticky';
-      // Если header фиксирован — отступ = его высота + небольшой воздух.
-      // Если статичный (mobile) — небольшой воздух 16px (он уже прокручен выше).
-      return (isFixed ? rect.height : 0) + 16;
+      return (isFixed ? h.getBoundingClientRect().height : 0) + 16;
     };
 
-    const scrollToAnchor = (attempts) => {
-      const el = document.getElementById(hash);
-      if (!el) {
-        if (attempts > 0) setTimeout(() => scrollToAnchor(attempts - 1), 150);
-        return;
-      }
-      // Ждём следующий frame, чтобы layout полностью settled после route change.
-      requestAnimationFrame(() => {
-        const rect = el.getBoundingClientRect();
-        const offset = computeOffset();
-        const y = rect.top + window.scrollY - offset;
-        window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
-      });
+    const computeTargetY = () => {
+      const offset = computeOffset();
+      return Math.max(0, el.getBoundingClientRect().top + window.scrollY - offset);
     };
 
+    // 1) Первичный smooth scroll
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: computeTargetY(), behavior: 'smooth' });
+    });
+
+    // 2) Multi-pass коррекция — ловим layout-shift от lazy-загрузки
+    const delays = [350, 700, 1100, 1600];
+    delays.forEach((delay, idx) => {
+      setTimeout(() => {
+        const stillEl = document.getElementById(hash);
+        if (!stillEl) return;
+        const targetY = computeTargetY();
+        const drift = Math.abs(window.scrollY - targetY);
+        if (drift > 4) {
+          // Последний проход — мгновенный, без smooth, чтобы юзер точно
+          // оказался на якоре, даже если изображения ещё догружаются.
+          const behavior = idx === delays.length - 1 ? 'auto' : 'smooth';
+          window.scrollTo({ top: targetY, behavior });
+        }
+      }, delay);
+    });
+    return true;
+  };
+
+  useEffect(() => {
+    if (!location.hash) return;
+    const hash = location.hash.substring(1);
     // 300ms — даём React'у домонтировать секцию (если переход с другой страницы).
-    const t = setTimeout(() => scrollToAnchor(8), 300);
+    let attempts = 8;
+    const tryScroll = () => {
+      if (scrollToAnchor(hash)) return;
+      if (attempts-- > 0) setTimeout(tryScroll, 150);
+    };
+    const t = setTimeout(tryScroll, 300);
     return () => clearTimeout(t);
   }, [location]);
 
@@ -136,18 +157,8 @@ function Header() {
       const hash = item.path.substring(2);
       if (location.pathname === '/') {
         // Тот же URL — useEffect выше не сработает (location не меняется).
-        // Запускаем тот же scroll вручную.
-        const el = document.getElementById(hash);
-        if (el) {
-          const h = headerRef.current;
-          const style = h ? window.getComputedStyle(h) : null;
-          const isFixed = style && (style.position === 'fixed' || style.position === 'sticky');
-          const offset = (isFixed && h ? h.getBoundingClientRect().height : 0) + 16;
-          requestAnimationFrame(() => {
-            const y = el.getBoundingClientRect().top + window.scrollY - offset;
-            window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
-          });
-        }
+        // Запускаем тот же scroll вручную через общую функцию.
+        scrollToAnchor(hash);
       } else {
         navigate(`/#${hash}`);
       }

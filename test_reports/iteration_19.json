@@ -1,0 +1,25 @@
+{
+  "summary": "Tested anchor-scroll multi-pass correction in Layout.js (scrollToAnchor) across mobile/tablet/desktop viewports for /#otzyvy, /#uslugi, /#ekstrasensy. All 12 scenarios PASSED. After 2.5s post-click wait, the target section's top is within tolerance (mobile/tablet/desktop), no console errors observed.",
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": ["/app/test_reports/iteration_19.json"],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Layout.js is approaching 370 lines and combines Header+Footer+Layout+settings caching+scroll logic. Consider splitting Header/Footer into separate files once it grows further.",
+    "scrollToAnchor uses 4 timeouts (350/700/1100/1600ms) without cleanup on unmount — if user navigates away mid-scroll the setTimeouts still execute window.scrollTo. Low-impact edge case but worth tracking refs and clearing them in cleanup.",
+    "computeOffset() reads computedStyle on every pass (forces layout) — acceptable for 4 calls but consider caching headerHeight via the existing --mobile-header-height CSS var read once."
+  ],
+  "updated_files": [],
+  "success_rate": { "backend": "n/a (frontend-only)", "frontend": "100% (12/12 anchor scenarios)" },
+  "test_credentials": "n/a",
+  "seed_data_creation": "none",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Tested with public REACT_APP_BACKEND_URL. Verified anchor positions: MOBILE 390x844 (header static, sectionTop ~8-16px), DESKTOP 1920x800 (header fixed h=82px, sectionTop ~97.8px = headerH+16 offset), TABLET 768x1024 (same as desktop). Tested same-page clicks AND cross-page navigation from /foto-galereya. Multi-pass correction (4 timeouts up to 1600ms) effectively neutralizes layout-shift from lazy images. No console/page errors. Smooth-scroll in Chromium is instant so multi-pass cannot be stress-tested for slow networks here.",
+  "rca of the issue": "Original issue (mobile anchors misaligned due to lazy-load layout-shift) is fixed by the new scrollToAnchor multi-pass logic: primary smooth scroll + 4 corrective scrolls at 350/700/1100/1600ms with last one using behavior:'auto' to hard-snap. Verified empirically — final positions are within tolerance across all 3 viewports for all 3 anchors plus cross-page navigation."
+}
