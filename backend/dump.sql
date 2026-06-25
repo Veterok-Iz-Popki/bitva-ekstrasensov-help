@@ -404,4 +404,4 @@ CREATE TABLE `site_settings` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 INSERT INTO `site_settings` VALUES
-('site_settings','info@example.com','+7 (800) 123-45-67','','Москва, Россия','krzysztofjankowski510@gmail.com','Пн-Вс: 9:00 — 21:00','2024 Битва экстрасенсов. Все права защищены.',1,'','Битва Экстрасенсов',56,48,0);
+('site_settings','info@example.com','+7 (800) 123-45-67','+7 911 555-66-66','Москва, Россия','krzysztofjankowski510@gmail.com','Пн-Вс: 9:00 — 21:00','2024 Битва экстрасенсов. Все права защищены.',1,'','Битва Экстрасенсов',56,48,0);
