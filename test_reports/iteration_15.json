@@ -1,0 +1,48 @@
+{
+  "summary": "Post-recovery verification after restore-db.sh: site fully restored. Home (/) returns HTTP 200 with hydrated SPA, all 4 public APIs healthy (pages/topic-porcha, participants=8, reviews=40 randomized per design, settings), SPA routes /uchastniki/<slug>, /otzyvy, /admin/login all serve 200, admin login with provided credentials succeeds and lands on /admin dashboard (200 отзывов, 8 участников, 6 заявок), anchor menu link 'Отзывы' scrolls home page. No /pod-backups/ artifacts in served index.html.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "passed_tests": [
+    "GET / → 200, served HTML contains #root, no /pod-backups/ stale paths",
+    "GET /api/pages/topic-porcha → 200 (6.5KB payload)",
+    "GET /api/participants → 200, exactly 8 participants (elena-golunova, angelina-izosimova, viktoriya-raidos, nadezhda-shevchenko, aleksandr-sheps, oleg-sheps, zuliya-radzhabova, vlad-cherevatyy)",
+    "GET /api/reviews → 200, returns 40 reviews (by design 5 random per psychic × 8); DB total 200 (admin dashboard confirms)",
+    "GET /api/settings → 200 with email, phone, popup_phone, address, notification_email fields",
+    "SPA route /uchastniki/elena-golunova returns 200 and renders participant name",
+    "SPA route /otzyvy returns 200 and renders reviews page",
+    "SPA route /admin/login returns 200 with login form (data-testid admin-username/admin-password)",
+    "Home page renders 'Битва экстрасенсов' title, menu (Главная, Экстрасенсы, Отзывы, Услуги, Фотогалерея, Видео, Вопросы-Ответы) and content sections",
+    "Anchor link 'Отзывы' from nav scrolls home page (scrollY 0 → 2627)",
+    "Admin login with nikoa2020@gmail.com / aspire5542gl1952tq redirects to /admin and shows CMS dashboard (Заявки, Участники, Отзывы, Настройки)"
+  ],
+  "test_report_links": [
+    "/app/backend/tests/test_restore_verification.py",
+    "/app/test_reports/pytest/restore_verification.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "NOTE (not a bug): /api/reviews returns 40 items by design (5 random per psychic) — the review_request mentioned '~200 шт' which is the DB total, not API response. Admin dashboard confirms 200 in DB. No action needed."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_restore_verification.py"
+  ],
+  "success_rate": {
+    "backend": "100% (9/9 pytest)",
+    "frontend": "100% (7/7 playwright checks across home, participant page, reviews page, anchor scroll, admin login)"
+  },
+  "test_credentials": {
+    "admin_login": "nikoa2020@gmail.com",
+    "admin_password": "aspire5542gl1952tq"
+  },
+  "seed_data_creation": "None — read-only verification",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Site is fully recovered after restore-db.sh. Backend (Express on :8001) serves both API (/api/*) and SPA build from /app/backend/build/. MariaDB running, psychic_battle DB populated (200 reviews, 8 participants, 6 applications, 1 message). Admin login inputs have data-testid='admin-username' and 'admin-password'. Use first/second input.fill() patterns rather than type=email selectors since inputs use type=text/password with placeholders only."
+}
