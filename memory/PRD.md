@@ -447,4 +447,29 @@ Stub-объект `window.posthog` остаётся синхронным — в�
 - DESKTOP (1920×800): sectionTop ~97.8px (header 82px + offset 16) ✅
 - TABLET (768×1024): аналогично desktop ✅
 - Cross-page navigation /foto-galereya → /#otzyvy ✅
+
+---
+
+## 2026-02-25 — Горизонтальный overflow на iOS Safari
+
+### Причина проблемы
+На iOS Safari у html/body отсутствовал `position: relative` + `width: 100%`, а `#root` использовал `max-width: 100vw` — iOS Safari считает `100vw` шире visual viewport (включает scrollbar gutter), что позволяет дёргать страницу влево/вправо свайпом. Отсутствие `overscroll-behavior-x: none` дополнительно усугубляло rubber-band drag.
+
+### Что изменено
+- `/app/frontend/src/index.css` (lines 63-100): html, body, #root получили
+  - `position: relative` (анкер для overflow-x на iOS)
+  - `width: 100%` + `max-width: 100%` (вместо 100vw)
+  - `overflow-x: hidden` с fallback `overflow-x: clip` (более строгая семантика)
+  - `overscroll-behavior-x: none` на body (предотвращает iOS rubber-band drag)
+- `/app/frontend/src/components/Layout.js` (line 184): убрал `left-0 right-0` с глобального, сделал `md:left-0 md:right-0` (только для desktop, когда header `md:fixed`). На mobile header `max-md:relative`, не требует offset'ов.
+
+### Verified by testing_agent (iteration_20) — 21/21 PASS
+- 3 mobile viewports (320, 390, 414) × 7 routes (/, /uchastniki/elena-golunova, /otzyvy, /foto-galereya, /video, /voprosy-i-otvety, /zapis-na-priem) = 21 комбинаций ✅
+- `document.documentElement.scrollWidth === window.innerWidth` на всех scroll-позициях ✅
+- `window.scrollTo(100, y)` → scrollX остаётся 0 (горизонтальная прокрутка невозможна) ✅
+- `body.overscrollBehaviorX === 'none'` ✅
+- Desktop (1920) и Tablet (768) — header корректно `md:fixed`, layout не сломан ✅
+- Console errors: 0 ✅
+- Дизайн (шрифты, цвета, отступы) сохранён ✅
+
 - Console errors: 0
