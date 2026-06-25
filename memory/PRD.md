@@ -379,4 +379,28 @@ Stub-объект `window.posthog` остаётся синхронным — в�
 ## Backlog (приоритеты)
 - **P1** SEO `og:image` fallback в `lib/api.js -> setSEO()` — улучшит превью в соцсетях
 - **P1** SEO Hub-страницы по типажу специалистов (`/magi`, `/vedmy`, `/yasnovidyashchie` и т.д.) с листингом участников
+
+---
+
+## 2026-02-25 — Полное отключение сохранения заявок + чистка БД и dump.sql
+
+### Контекст
+Пользователь обнаружил, что в админ-панели /admin/applications всё ещё показываются 2 старые тестовые заявки и счётчик «Всего: 2 | Новых: 2». Причина: код POST /api/applications уже не делал INSERT, но 6 тестовых записей оставались в БД и в dump.sql (восстанавливались после рестарта пода).
+
+### Что сделано
+- `DELETE FROM applications` — таблица очищена (6 → 0 записей)
+- Удалён `INSERT INTO applications VALUES (...)` с 6 старыми записями из `/app/backend/dump.sql`
+- Удалён `INSERT INTO applications VALUES (...)` с 6 старыми записями из `/app/backend/data.sql`
+- Код POST /api/applications в server.js остался без изменений (уже не делал INSERT, только email)
+
+### Verified by testing_agent (iteration_16.json)
+- Backend: **11/11 pytest passed**, 1 skip (rate-limit edge для /api/contact)
+- POST /api/applications → 200 success, в БД 0 записей даже после 3 подряд отправок
+- GET /api/admin/applications → `[]`, GET /api/admin/dashboard → total=0, new=0, today=0
+- Админка UI: "Всего: 0 | Новых: 0", "Нет заявок"
+- Валидация 400 для отсутствующих полей работает (5 кейсов)
+- Email-нотификация продолжает работать (graceful no-op если нет RESEND_API_KEY)
+- /api/contact (contact_messages) **не затронут** — продолжает работать как раньше
+- dump.sql/data.sql: 0 совпадений `INSERT INTO applications`
+
 - **P2** Декомпозиция монолитного `backend/server.js` (>1000 строк) на routes/controllers
