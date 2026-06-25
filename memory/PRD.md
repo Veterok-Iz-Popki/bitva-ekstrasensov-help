@@ -404,3 +404,24 @@ Stub-объект `window.posthog` остаётся синхронным — в�
 - dump.sql/data.sql: 0 совпадений `INSERT INTO applications`
 
 - **P2** Декомпозиция монолитного `backend/server.js` (>1000 строк) на routes/controllers
+
+
+---
+
+## 2026-02-25 — popup_phone: моментальное применение из админки
+
+### Контекст
+Пользователь попросил подтвердить настройку «Телефон после отправки заявки». Поле было реализовано ранее (handoff), но требовалось убедиться в моментальном применении изменений без перезагрузки страницы.
+
+### Что сделано
+- `/app/frontend/src/components/ApplicationForm.js`:
+  - На mount (`useEffect`) добавлен cache-buster `params: { _: Date.now() }` к `api.get('/settings')`
+  - В `handleSubmit` добавлен `await api.get('/settings', { params: { _: Date.now() } })` ПЕРЕД `setShowCallPopup(true)`, чтобы:
+    - Свежие изменения из админки применялись моментально (обход Cloudflare edge-cache ~3s)
+    - Не было визуального 'flash' старого номера в popup
+
+### Verified by testing_agent (iteration_17 → iteration_18)
+- iter_17: backend 6/6 PASS, frontend нашёл проблему edge-cache (~3s stale)
+- iter_18: **backend 6/6 + frontend 100%** после фикса cache-buster
+- Подтверждены: моментальное применение, fallback на DEFAULT при пустом значении, персистентность после reload, vCard, единый номер для всех форм (в шапке кнопка ведёт на `/zapis-na-priem`)
+- После iter_18 — добавлен `await` перед `setShowCallPopup(true)` для устранения визуального flash

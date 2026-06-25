@@ -223,14 +223,15 @@ export default function ApplicationForm({ title, subtitle, psychicSlug, psychicN
         problem: '',
         honeypot: ''
       });
-      setShowCallPopup(true);
-      // Дополнительно перезапрашиваем popup_phone прямо перед показом окна,
-      // чтобы свежие изменения из админки применялись без обновления страницы.
-      // Cache-buster обходит edge-кэш CDN (Cloudflare).
-      api.get('/settings', { params: { _: Date.now() } }).then((res) => {
+      // Перезапрашиваем popup_phone ПЕРЕД открытием окна, чтобы свежие
+      // изменения из админки применялись без перезагрузки и без 'вспышки'
+      // старого номера. Cache-buster обходит edge-кэш CDN (Cloudflare).
+      try {
+        const res = await api.get('/settings', { params: { _: Date.now() } });
         const fromBackend = (res.data && typeof res.data.popup_phone === 'string') ? res.data.popup_phone.trim() : '';
         setPopupPhone(fromBackend || DEFAULT_POPUP_PHONE);
-      }).catch(() => {});
+      } catch (_) { /* fallback: ранее загруженное popupPhone остаётся */ }
+      setShowCallPopup(true);
     } catch (err) {
       if (err.response?.status === 429) {
         toast.error('Слишком много запросов. Попробуйте позже.');
