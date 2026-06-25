@@ -351,3 +351,32 @@ Stub-объект `window.posthog` остаётся синхронным — в�
 
 | Best Practices | 100 | 100 ✅ |
 
+
+
+---
+
+## 2026-02-25 — Авто-восстановление фронтенда в restore-db.sh
+
+### Контекст
+После рестартов пода MariaDB падала и фронт-билд (`/app/backend/build/index.html`) либо отсутствовал, либо содержал испорченные пути `/pod-backups/`. Пользователю приходилось каждый раз писать «почини сайт». Случилось >15 раз.
+
+### Что сделано
+- В `/app/scripts/restore-db.sh` добавлены шаги 6/7 и 7/7:
+  - Проверка наличия `/app/backend/build/index.html`
+  - Проверка на повреждение (`grep /pod-backups/`)
+  - Авто-пересборка через `cd /app/frontend && yarn build` при необходимости
+  - Финальный health check: API + Frontend HTTP 200
+- Скрипт теперь самодостаточен — один запуск восстанавливает БД + (при необходимости) пересобирает фронт + рестартует backend.
+
+### Verified by testing_agent (iteration_15.json)
+- ✅ GET / → 200, no `/pod-backups/` artifacts
+- ✅ Все публичные API: pages, participants (8), reviews (40 = 5 random × 8), settings
+- ✅ SPA routes: /uchastniki/<slug>, /otzyvy, /admin/login
+- ✅ Admin login работает с креденшелами из test_credentials.md
+- ✅ Якорные ссылки в меню скроллят корректно
+- Backend pytest: 9/9, Frontend playwright: 7/7
+
+## Backlog (приоритеты)
+- **P1** SEO `og:image` fallback в `lib/api.js -> setSEO()` — улучшит превью в соцсетях
+- **P1** SEO Hub-страницы по типажу специалистов (`/magi`, `/vedmy`, `/yasnovidyashchie` и т.д.) с листингом участников
+- **P2** Декомпозиция монолитного `backend/server.js` (>1000 строк) на routes/controllers
