@@ -1,12 +1,5 @@
 INSERT INTO `admin_users` VALUES
 ('097fd181-0ddf-4527-a561-76ffffd12312','nikoa2020@gmail.com','$2b$10$nDvIgq3rIHo3A5B.756wLuJ/4vjRzc3POg2Ke/5csImEYRXna5R.a','2026-03-06 17:33:19');
-INSERT INTO `applications` VALUES
-('395a284a-da81-4d03-9964-cdbec23f75f1','dasds','asdasd','asdasd','dasds asdasd asdasd','+7 (446) 546-46-54','323','dasd','asdasd','','','new','','2026-05-14 09:13:16'),
-('4080b602-db21-4f54-94c1-444ab8aae247','Hdhh','Shshs','Shshs','Hdhh Shshs Shshs','+7 (494) 646-46-46','Sjsj','Sjsjs','Shshshsh','elena-golunova','Елена Голунова','new','','2026-03-18 16:51:47'),
-('8e47a17e-847e-4c8f-870a-4123ae925fff','аыфвфыв','фывфыв','фывф','аыфвфыв фывфыв фывф','+7 (545) 646-54-65','ываыв','выаы','ываыва','','','new','','2026-03-16 11:20:04'),
-('b19efd98-b771-4dce-8a36-c16447684c72','dasd','asdasd','asd','dasd asdasd asd','+7 (213) 213-12-32','adas','dasdas','dasdad','elena-golunova','Елена Голунова','new','','2026-05-14 09:15:14'),
-('b653afc6-b413-48cf-94e8-667ac5f8d695','Тестов','Иван','Сергеевич','Тестов Иван Сергеевич','+7 999 123 45 67','35','Москва','Тестовая заявка для проверки production email','aleksandr-sheps','Александр Шепс','new','','2026-05-27 12:57:27'),
-('c72dbb9d-962e-4568-ad04-cd14a6e775aa','Аоаао','Влвлв','Влвлв','Аоаао Влвлв Влвлв','+7 (794) 949-61-61','Вово','Влво','Ыововово','elena-golunova','Елена Голунова','new','','2026-03-18 16:53:04');
 INSERT INTO `contact_messages` VALUES
 ('3ff6357d-7941-4043-95b7-d89fce530961','Тест Контакт','+7 999 888 77 66','Тестовое сообщение для проверки contact email','new','2026-05-27 12:57:39');
 INSERT INTO `faq` VALUES
