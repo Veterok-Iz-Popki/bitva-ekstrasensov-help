@@ -425,3 +425,26 @@ Stub-объект `window.posthog` остаётся синхронным — в�
 - iter_18: **backend 6/6 + frontend 100%** после фикса cache-buster
 - Подтверждены: моментальное применение, fallback на DEFAULT при пустом значении, персистентность после reload, vCard, единый номер для всех форм (в шапке кнопка ведёт на `/zapis-na-priem`)
 - После iter_18 — добавлен `await` перед `setShowCallPopup(true)` для устранения визуального flash
+
+
+---
+
+## 2026-02-25 — Якорный скролл: multi-pass коррекция layout-shift
+
+### Причина проблемы
+На мобильных устройствах `<Suspense>` для `ReviewsCarousel` и lazy-загрузка изображений приводят к layout-shift ПОСЛЕ старта smooth-scroll. Якорный Y вычислялся корректно в момент клика, но к завершению анимации скролла секция уже сдвигалась вверх/вниз — пользователь оказывался не у заголовка.
+
+### Что изменено
+- `/app/frontend/src/components/Layout.js`:
+  - Единая функция `scrollToAnchor(hash)` — DRY для useEffect (hash navigation) и handleNavClick (same-page клик)
+  - Multi-pass коррекция: первичный smooth scroll + 4 проверки через 350/700/1100/1600ms
+  - Каждая проверка измеряет drift; если >4px — корректирует через `window.scrollTo`
+  - Последняя коррекция — `behavior:'auto'` (мгновенная), чтобы зафиксировать пользователя на якоре даже если изображения ещё догружаются
+  - Динамический offset из реальной высоты header'а (md:fixed → отступ = высота + 16, mobile static → 16)
+
+### Verified by testing_agent (iteration_19) — 100% (12/12)
+- MOBILE (390×844): `/#otzyvy`, `/#uslugi`, `/#ekstrasensy` — sectionTop в пределах 8-16px ✅
+- DESKTOP (1920×800): sectionTop ~97.8px (header 82px + offset 16) ✅
+- TABLET (768×1024): аналогично desktop ✅
+- Cross-page navigation /foto-galereya → /#otzyvy ✅
+- Console errors: 0
