@@ -1,0 +1,45 @@
+{
+  "summary": "End-to-end проверка поля popup_phone (site_settings) — админка → /api/settings → ApplicationForm popup → vCard. Backend полностью проходит (6/6). UI отображает '+7 911 555-77-88' в popup 'Спасибо! Ваша заявка отправлена', fallback на DEFAULT '+7 928 421-73-58' при пустом popup_phone работает. localStorage НЕ используется (значение приходит из /api/settings). Найден один edge-кейс: ~3 секунды edge-кэширования /api/settings, что нарушает заявленный 'моментальный' re-fetch при отправке формы сразу после сохранения в админке.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {
+        "flow": "ApplicationForm re-fetch popup_phone перед открытием popup",
+        "issue": "Edge/CDN (Cloudflare) кэширует ответ GET /api/settings ~3 секунды, несмотря на 'Cache-Control: no-store, no-cache, must-revalidate'. Fetch с {cache:'no-store'} тоже возвращает stale, но `?_=<timestamp>` обходит кэш. Это значит: если админ сохраняет popup_phone и сразу (<3 с) на публичной странице отправляется форма — re-fetch в handleSubmit вернёт старое значение и в popup появится старый телефон. Через ~3 с всё штатно. Заявленный 'моментальный' re-fetch фактически работает с задержкой до 3 секунд.",
+        "affected_selectors": ["[data-testid=\"call-popup-phone\"]"]
+      },
+      {
+        "flow": "Header → кнопка 'Заказать звонок' (callback модалка)",
+        "issue": "Клик по кнопке в шапке не показал ни одного видимого номера телефона (page.innerText не содержит /\\+7 \\d{3} \\d{3}-\\d{2}-\\d{2}/ после клика). Я не открыл и не отправил форму, поэтому popup с телефоном мог просто не быть достигнут — но при беглом тесте проверить 'тот же номер для всех форм сайта' через UI не удалось. Нужно либо подтвердить data-testid модалки, либо реальный submit с другим IP (рейт-лимит /api/applications 5/60s блокирует повторные сабмиты в одной сессии).",
+        "affected_selectors": ["[data-testid=\"call-popup\"]"]
+      }
+    ],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_popup_phone.py",
+    "/app/test_reports/pytest/iteration_17_popup_phone.xml"
+  ],
+  "action_items": [
+    "Главный фикс: добавить cache-buster в api.get('/settings') в ApplicationForm.js — на mount (строки 71-79) и в re-fetch перед popup (строки 229-232). Достаточно `api.get('/settings', { params: { _: Date.now() } })` или `api.get('/settings?_=' + Date.now())`. Это уберёт edge-cache (~3s) и сделает обновления реально моментальными. Альтернатива на бэке: запретить ETag для /api/settings (`res.set('ETag', '')` или `app.disable('etag')` локально) — но edge всё равно может кэшировать.",
+    "По желанию: при сохранении в админке (PUT /api/admin/settings) уже вызывается invalidateSeoCache(), но локального FE-кэша нет — добавить cache-buster в SettingsAdmin тоже не повредит.",
+    "Подтвердить, что модалка 'Заказать звонок' в шапке использует тот же компонент ApplicationForm/popupPhone (на UI беглый тест не нашёл popup с телефоном после клика)."
+  ],
+  "critical_code_review_comments": [
+    "ApplicationForm.js:67-79 и 226-232 — re-fetch /api/settings корректен по логике, но не учитывает edge-кэш (Cloudflare). Нужен cache-buster.",
+    "server.js:296-303 — GET /api/settings НЕ устанавливает Cache-Control. Cloudflare решает сам, и при `cf-cache-status: DYNAMIC` всё равно кэширует ~3 секунды. Добавить `res.set('Cache-Control', 'no-store, max-age=0')` и `res.removeHeader('ETag')` поможет, но не гарантирует 100% обход edge.",
+    "server.js:206-231 vCard уже имеет 'Cache-Control: no-store, no-cache, must-revalidate' — корректно (но edge может всё равно кэшировать; для iPhone критично, рекомендую тот же cache-buster трюк в FE-ссылке)."
+  ],
+  "updated_files": ["/app/backend/tests/test_popup_phone.py"],
+  "success_rate": {"backend": "100%", "frontend": "80%"},
+  "test_credentials": "Admin: nikoa2020@gmail.com / aspire5542gl1952tq (из /app/memory/test_credentials.md)",
+  "seed_data_creation": "Использовалось текущее значение popup_phone из БД ('+7 911 555-77-88'). После тестов восстановлено это же значение.",
+  "retest_needed": true,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Backend tests: pytest /app/backend/tests/test_popup_phone.py -v. Frontend re-test после фикса cache-buster: повторить сценарий — admin меняет popup_phone через /api/admin/settings (PUT), затем без перезагрузки страницы /zapis-na-priem форма submit → popup должен показать НОВЫЙ номер сразу. Сейчас этот сценарий проходит только если ждать >3 секунд между admin PUT и form submit (edge-кэш истекает).",
+  "rca of the issue": "RCA edge-кэша /api/settings:\n1. Воспроизведение: открыть /zapis-na-priem (mount fetch получает popup_phone=X), сразу PUT /api/admin/settings popup_phone=Y, в течение ~3 секунд сделать `fetch('/api/settings')` или `fetch('/api/settings', {cache:'no-store'})` из page context — вернёт X. После 3+ секунд (или `fetch('/api/settings?_='+Date.now())`) — вернёт Y.\n2. Доказательство: curl напрямую (минуя браузер/CDN) возвращает свежее значение мгновенно. Бэкенд работает корректно — кэш на уровне edge/CDN (cf-cache-status: DYNAMIC, но фактически отдаёт stale).\n3. Митигация (минимум кода): в /app/frontend/src/components/ApplicationForm.js заменить `api.get('/settings')` на `api.get('/settings', { params: { _: Date.now() } })` в двух местах (useEffect mount и в handleSubmit re-fetch). Cache-buster в URL делает запрос уникальным для CDN, отдаёт ответ из origin."
+}

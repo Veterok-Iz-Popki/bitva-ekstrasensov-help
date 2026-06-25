@@ -224,6 +224,12 @@ export default function ApplicationForm({ title, subtitle, psychicSlug, psychicN
         honeypot: ''
       });
       setShowCallPopup(true);
+      // Дополнительно перезапрашиваем popup_phone прямо перед показом окна,
+      // чтобы свежие изменения из админки применялись без обновления страницы.
+      api.get('/settings').then((res) => {
+        const fromBackend = (res.data && typeof res.data.popup_phone === 'string') ? res.data.popup_phone.trim() : '';
+        setPopupPhone(fromBackend || DEFAULT_POPUP_PHONE);
+      }).catch(() => {});
     } catch (err) {
       if (err.response?.status === 429) {
         toast.error('Слишком много запросов. Попробуйте позже.');
