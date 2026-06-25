@@ -181,7 +181,7 @@ function Header() {
     <header
       ref={headerRef}
       data-testid="main-header"
-      className={`left-0 right-0 transition-all duration-300 md:fixed md:top-0 md:z-[9999] max-md:relative max-md:z-auto ${
+      className={`w-full transition-all duration-300 md:fixed md:top-0 md:left-0 md:right-0 md:z-[9999] max-md:relative max-md:z-auto ${
         scrolled ? 'teal-glass shadow-lg' : 'md:bg-transparent'
       } max-md:bg-teal-darker/95`}
     >

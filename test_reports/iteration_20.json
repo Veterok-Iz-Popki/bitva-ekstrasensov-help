@@ -1,0 +1,24 @@
+{
+  "summary": "Verified iOS Safari horizontal-overflow fix in /app/frontend/src/index.css and /app/frontend/src/components/Layout.js. Ran Playwright checks across 3 mobile viewports (320x568, 390x844, 414x896) and 7 routes (/, /uchastniki/elena-golunova, /otzyvy, /foto-galereya, /video, /voprosy-i-otvety, /zapis-na-priem) = 21 runs. On every run document.documentElement.scrollWidth === window.innerWidth at top/middle/bottom scroll positions, window.scrollTo(100, y) leaves scrollX===0 (no horizontal scroll possible), no elements overflow left/right of viewport. body.overscroll-behavior-x is computed as 'none', html/body overflow-x is 'hidden'. Desktop 1920 and Tablet 768 unaffected — header keeps position:fixed (md:fixed) and layout is intact. Zero console errors observed.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "index.css: applying overflow-x:hidden + position:relative + width:100% on html/#root/body and overscroll-behavior-x:none on body is the correct, canonical iOS-Safari fix; the overflow-x:clip fallback ordering is right (hidden first, clip second).",
+    "Layout.js line 184: 'md:left-0 md:right-0' correctly scoped to desktop only; on mobile header is max-md:relative so no offset issues — verified header position computes to 'relative' on mobile and 'fixed' on >=768px.",
+    "No regression: design (fonts, colors, spacing) unchanged. H1 'Битва экстрасенсов' wraps within viewport on all tested mobile widths (no clipping, no right-edge overflow)."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "n/a (frontend-only test)", "frontend": "100% (21/21 viewport+route combos passed, 0 console errors)"},
+  "test_credentials": "n/a",
+  "seed_data_creation": "none",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Horizontal-overflow regression covered by inline Playwright check (scrollWidth===innerWidth + scrollTo(100,0) → scrollX===0 + element bounding-rect scan). Reusable across 3 iPhone widths and 7 routes. Chromium cannot reproduce the original iOS-Safari rubber-band drag, but the technical preconditions for it (overflow + missing overscroll-behavior) are now absent. If user still reports it on a real iOS device, ask for the exact iOS version and inspect for a specific element added later that breaks containment.",
+  "rca of the issue": "Original cause: on iOS Safari, html/body lacked position:relative + width:100% and used max-width:100vw; 100vw on iOS includes the scrollbar gutter and is occasionally wider than the visual viewport, causing the page to be draggable horizontally and H1 to clip right. Mitigation (verified): width:100% + max-width:100% + position:relative on html/#root/body; overflow-x:hidden with overflow-x:clip fallback; overscroll-behavior-x:none on body; header md:fixed only (mobile uses max-md:relative) so no off-screen header offsets. All technical overflow indicators are now zero on tested viewports."
+}
