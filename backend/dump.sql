@@ -7,7 +7,7 @@ CREATE TABLE `admin_users` (
   UNIQUE KEY `username` (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 INSERT INTO `admin_users` VALUES
-('097fd181-0ddf-4527-a561-76ffffd12312','nikoa2020@gmail.com','$2b$10$nDvIgq3rIHo3A5B.756wLuJ/4vjRzc3POg2Ke/5csImEYRXna5R.a','2026-03-06 17:33:19');
+('097fd181-0ddf-4527-a561-76ffffd12312','nikoa2020@gmail.com','$2b$10$fl99ARI8yFAPvZdDSLLxW.XEZVhVbXBOmgzCmPz7KsaywPAOnTXNS','2026-03-06 17:33:19');
 CREATE TABLE `applications` (
   `id` varchar(36) NOT NULL,
   `lastName` varchar(255) NOT NULL DEFAULT '',
