@@ -119,7 +119,7 @@ async function sendNotificationEmail(application) {
       </div>
     </div>`;
 
-    await resend.emails.send({
+    const result = await resend.emails.send({
       from: SENDER_EMAIL,
       to: [settings.notification_email],
       subject: application.psychic_name
@@ -127,7 +127,11 @@ async function sendNotificationEmail(application) {
         : `Новая заявка от ${fullName} — Битва экстрасенсов`,
       html,
     });
-    console.log(`Notification email sent to ${settings.notification_email}`);
+    if (result && result.error) {
+      console.error(`Resend rejected application email: [${result.error.statusCode || '?'}] ${result.error.name || ''}: ${result.error.message || JSON.stringify(result.error)}`);
+      return;
+    }
+    console.log(`Notification email sent to ${settings.notification_email} (id=${result?.data?.id || 'n/a'})`);
   } catch (e) {
     console.error('Failed to send email:', e.message);
   }
@@ -159,13 +163,17 @@ async function sendContactNotification(msg) {
       </div>
     </div>`;
 
-    await resend.emails.send({
+    const result = await resend.emails.send({
       from: SENDER_EMAIL,
       to: [settings.notification_email],
       subject: `Новое сообщение от ${msg.name || 'клиента'} — Битва экстрасенсов`,
       html,
     });
-    console.log(`Contact notification sent to ${settings.notification_email}`);
+    if (result && result.error) {
+      console.error(`Resend rejected contact email: [${result.error.statusCode || '?'}] ${result.error.name || ''}: ${result.error.message || JSON.stringify(result.error)}`);
+      return;
+    }
+    console.log(`Contact notification sent to ${settings.notification_email} (id=${result?.data?.id || 'n/a'})`);
   } catch (e) {
     console.error('Failed to send contact email:', e.message);
   }
