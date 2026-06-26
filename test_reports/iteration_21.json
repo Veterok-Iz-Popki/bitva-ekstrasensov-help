@@ -1,0 +1,30 @@
+{
+  "summary": "End-to-end smoke after pod restart + DB restore. Backend pytest: 12/12 passed. Frontend Playwright: all critical flows OK (home, participant page, mobile overflow, anchor scroll, form→popup with correct phone, admin login→dashboard). Zero console errors, zero post-startup backend errors. DB rows verified: applications=0, participants=8, reviews=200, pages=16. Popup phone '+7 911 555-66-66' present in /api/settings, /api/contact.vcf (TEL:+79115556666), call-popup-phone testid. Applications endpoint correctly returns success without DB INSERT (verified count unchanged before/after POST).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_smoke_iter21.py",
+    "/app/test_reports/pytest/iter21.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "/app/backend/server.js:307-331 — POST /api/applications correctly skips DB INSERT while preserving validation + email notification + rate-limit. Comment block documents the intentional behavior and how to revert if needed; clean.",
+    "/app/backend/server.js — vCard endpoint serves popup_phone from site_settings (verified TEL:+79115556666 in vCard output).",
+    "/app/frontend/src/components/ApplicationForm.js — re-fetches /api/settings BEFORE opening popup (cache-buster + await), so popup_phone always reflects latest DB value. Verified popup-call element resolves to '+7 911 555-66-66' end-to-end.",
+    "Historical 'Startup failed: connect ECONNREFUSED 127.0.0.1:3306' lines in backend.out.log are from the pre-MariaDB-up window during restore; after 'Server running on http://0.0.0.0:8001' there are zero errors/exceptions. Recommend ensuring restore-db.sh waits on `mysqladmin ping` before starting backend to keep logs clean (cosmetic; not a regression)."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_smoke_iter21.py (new)"
+  ],
+  "success_rate": {"backend": "100% (12/12)", "frontend": "100% (all flows passed, 0 console errors)"},
+  "test_credentials": "admin: nikoa2020@gmail.com / aspire5542gl1952tq (from /app/memory/test_credentials.md)",
+  "seed_data_creation": "POST /api/applications with TEST_Тестов — accepted (200) but, as expected, NOT persisted (admin list still 0).",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Reusable smoke suite: /app/backend/tests/test_smoke_iter21.py covers participants=8, reviews=40, settings.popup_phone, vCard TEL, validation, no-persistence invariant, admin login, dashboard=0 apps. Re-run: pytest /app/backend/tests/test_smoke_iter21.py -v. Frontend Playwright covered: hero render, mobile overflow (390x844: scrollWidth===innerWidth, scrollX stays 0), anchor #otzyvy (heading top=56px after multi-pass scroll), form→popup phone '+7 911 555-66-66', admin /admin/login → /admin dashboard.",
+  "rca of the issue": "Not applicable for this iteration — verification-only run confirming /app/scripts/restore-db.sh correctly recovered the pod after MariaDB crashed. Build hashes (main.9ae3d7ef.js / main.00da6bbc.css) match committed values; no regressions introduced by rebuild."
+}
