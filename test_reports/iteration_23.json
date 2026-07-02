@@ -1,0 +1,24 @@
+{
+  "summary": "Iter23 post-restore full smoke verification. Backend pytest test_smoke_iter21.py: 12/12 PASSED (3.75s). All public APIs healthy: GET / 200, /api/pages/topic-porcha 200, /api/participants=8, /api/reviews=40 (5x8 random), /api/settings popup_phone='+7 911 555-66-66', /api/contact.vcf contains +79115556666, /uchastniki/elena-golunova 200. POST /api/applications validation (missing lastName -> 400) and success-without-persistence (200 {status:success}, DB count unchanged) both verified. Admin login (nikoa2020@gmail.com / aspire5542gl1952tq) -> /admin dashboard shows 0/0/0 (Всего/Новых/Сегодня заявок), 8 Участников, 200 Отзывов, 1 Сообщений. Frontend Playwright: home title correct ('Помощь экстрасенса онлайн — официальный сайт Битвы экстрасенсов'), hero visible, 26 menu links, participant page renders 'Голунова', mobile 390x844 has scrollWidth===innerWidth===390 & scrollX=0 (no overflow), #otzyvy anchor lands heading top=16px (<120), form /zapis-na-priem -> popup 'Спасибо! Ваша заявка отправлена' with call-popup-phone='+7 911 555-66-66'. Console errors: 0. Backend log confirms silent-failure fix: 6 lines of 'Resend rejected application email: [403] validation_error: You can only send testing emails to your own email address (nikoa2020@gmail.com)...' — EXPECTED state.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_smoke_iter21.py",
+    "/app/test_reports/pytest/iter23.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Restore-db.sh workflow is functional end-to-end: MariaDB up + dump.sql restored (8 participants, 16 pages, 200 reviews, 0 applications, popup_phone='+7 911 555-66-66') + frontend rebuilt + backend restarted. HTTP 200 on / and /api/participants confirmed.",
+    "Resend silent-failure fix (server.js:130-133 sendNotificationEmail and :172-175 sendContactNotification) remains live and effective — 6 occurrences of 'Resend rejected application email: [403] validation_error:...' in backend.err.log during this iteration.",
+    "Historical 'Startup failed: connect ECONNREFUSED 127.0.0.1:3306' entries are still present in backend.err.log from the pre-MariaDB-up window at restart; harmless but cosmetic — restore-db.sh could wait on mysqladmin ping before starting backend.",
+    "Resend sandbox limitation (onboarding@resend.dev can only send to nikoa2020@gmail.com) is an account-side issue — code path is already optimal. Pending product decision (a) switch notification_email to nikoa2020@gmail.com, (b) verify domain on resend.com/domains, or (c) accept current state."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100% (12/12 pytest)", "frontend": "100% (home, participant page, mobile overflow, anchor, form->popup, admin dashboard) — 0 console errors"},
+  "test_credentials": "admin: nikoa2020@gmail.com / aspire5542gl1952tq (from /app/memory/test_credentials.md)",
+  "seed_data_creation": "POST /api/applications with TEST_ payload via both pytest and Playwright — accepted (200, status:success), NOT persisted (admin Всего заявок still 0). Triggered new 'Resend rejected application email: [403] validation_error' line in backend.err.log.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Iter23 clean pass identical to iter22 post-restore verification. Reusable suite: pytest /app/backend/tests/test_smoke_iter21.py -v (12 tests, ~4s). Admin login inputs on /admin/login have data-testid='admin-username' and 'admin-password' (no type=email attr) — use nth(0)/nth(1) or these testids. Form canonical selectors: form-lastName, form-firstName, form-patronymic, form-phone, form-age, form-city, form-problem, call-popup-overlay, call-popup, call-popup-phone, call-popup-call-btn. Expected 'Resend rejected application email: [403] validation_error:...' log line in backend.err.log after every /api/applications submit until Resend sandbox is resolved.",
+  "rca of the issue": "N/A — verification-only iteration. Confirmed restore-db.sh recovered all seed data (8/16/200/0 + popup_phone), all APIs healthy, UI intact, silent-failure fix active, admin functional."
+}
