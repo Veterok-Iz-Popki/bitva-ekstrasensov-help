@@ -212,6 +212,12 @@ export default function ApplicationForm({ title, subtitle, psychicSlug, psychicN
         psychic_slug: psychicSlug || '',
         psychic_name: psychicName || '',
       });
+      // Yandex.Metrika goal — только после успешного 200-ответа сервера.
+      // axios бросает исключение на 4xx/5xx и мы попадаем в catch,
+      // поэтому эта строка недостижима при ошибке.
+      if (typeof window.ym === 'function') {
+        window.ym(110304923, 'reachGoal', 'form_send');
+      }
       toast.success('Заявка успешно отправлена! Мы свяжемся с вами.');
       setForm({
         lastName: '',
