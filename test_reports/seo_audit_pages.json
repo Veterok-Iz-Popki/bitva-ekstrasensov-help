@@ -1,0 +1,1106 @@
+[
+  {
+    "title": "Помощь экстрасенса онлайн — официальный сайт Битвы экстрасенсов",
+    "description": "Официальный сайт помощи участников «Битвы экстрасенсов» — сильнейших магов, ведьм, ясновидящих и медиумов России. Запись на приём, консультация онлайн и очно.",
+    "keywords": "битва экстрасенсов, официальный сайт битва экстрасенсов, новая битва экстрасенсов, экстрасенсы битва сильнейших, экстрасенсы реванш, помощь экстрасенса, консультация экстрасенса, приём экстрасенса, ведьма, маг, ясновидящая, медиум",
+    "canonical": "https://bitva-ekstrasensov-help.com/",
+    "h1_count": 1,
+    "jsonld_count": 1,
+    "jsonld_types": [
+      "ProfessionalService"
+    ],
+    "jsonld_raw": [
+      {
+        "@context": "https://schema.org",
+        "@type": "ProfessionalService",
+        "name": "Битва экстрасенсов — официальный сайт помощи",
+        "description": "Официальный сайт помощи участников «Битвы экстрасенсов» — сильнейших магов, ведьм, ясновидящих и медиумов России. Запись на приём, консультация онлайн и очно.",
+        "url": "https://bitva-ekstrasensov-help.com"
+      }
+    ],
+    "html_lang": "ru",
+    "viewport": "width=device-width,initial-scale=1",
+    "path": "/",
+    "console_errors": [],
+    "leaks": []
+  },
+  {
+    "path": "/uchastniki/elena-golunova",
+    "error": "goto: Page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"http://localhost:8001/uchastniki/elena-golunova\", waiting until \"networkidle\"\n"
+  },
+  {
+    "title": "Александр Шепс — Победитель 14 сезона «Битвы экстрасенсов» | Битва Экстрасенсов",
+    "description": "Александр Шепс — Победитель 14 сезона «Битвы экстрасенсов». Личный приём экстрасенса, онлайн-консультация, диагностика жизненных ситуаций, помощь в сложных вопросах.",
+    "keywords": "Александр Шепс, Победитель 14 сезона «Битвы экстрасенсов», экстрасенс, консультация, битва экстрасенсов, приём, помощь",
+    "canonical": "https://bitva-ekstrasensov-help.com/uchastniki/aleksandr-sheps",
+    "h1_count": 1,
+    "jsonld_count": 2,
+    "jsonld_types": [
+      "Person",
+      "BreadcrumbList"
+    ],
+    "jsonld_raw": [
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Александр Шепс",
+        "description": "Один из сильнейших экстрасенсов России, победитель 14 сезона «Битвы экстрасенсов». Обладает мощным даром ясновидения и телепатии. Работает с кармой, прошлыми жизнями и энергетическими потоками.",
+        "image": "/api/uploads/aleksandr-sheps-new.jpg",
+        "jobTitle": "Победитель 14 сезона «Битвы экстрасенсов»",
+        "url": "https://bitva-ekstrasensov-help.com/uchastniki/aleksandr-sheps"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Главная",
+            "item": "https://bitva-ekstrasensov-help.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Экстрасенсы",
+            "item": "https://bitva-ekstrasensov-help.com/#ekstrasensy"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Александр Шепс",
+            "item": "https://bitva-ekstrasensov-help.com/uchastniki/aleksandr-sheps"
+          }
+        ]
+      }
+    ],
+    "html_lang": "ru",
+    "viewport": "width=device-width,initial-scale=1",
+    "path": "/uchastniki/aleksandr-sheps",
+    "console_errors": [],
+    "leaks": []
+  },
+  {
+    "title": "Ангелина Изосимова — Финалистка 23 сезона «Битвы экстрасенсов» | Битва Экстрасенсов",
+    "description": "Ангелина Изосимова — Финалистка 23 сезона «Битвы экстрасенсов». Личный приём экстрасенса, онлайн-консультация, диагностика жизненных ситуаций, помощь в сложных вопросах.",
+    "keywords": "Ангелина Изосимова, Финалистка 23 сезона «Битвы экстрасенсов», экстрасенс, консультация, битва экстрасенсов, приём, помощь",
+    "canonical": "https://bitva-ekstrasensov-help.com/uchastniki/angelina-izosimova",
+    "h1_count": 1,
+    "jsonld_count": 2,
+    "jsonld_types": [
+      "Person",
+      "BreadcrumbList"
+    ],
+    "jsonld_raw": [
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Ангелина Изосимова",
+        "description": "Потомственная ведьма с уникальным даром чтения судеб. Владеет древними славянскими практиками, работает с родовыми программами и кармическими узлами. Помогает избавиться от негативных воздействий и обрести внутреннюю силу.",
+        "image": "/api/uploads/angelina-izosimova-new.jpg",
+        "jobTitle": "Финалистка 23 сезона «Битвы экстрасенсов»",
+        "url": "https://bitva-ekstrasensov-help.com/uchastniki/angelina-izosimova"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Главная",
+            "item": "https://bitva-ekstrasensov-help.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Экстрасенсы",
+            "item": "https://bitva-ekstrasensov-help.com/#ekstrasensy"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Ангелина Изосимова",
+            "item": "https://bitva-ekstrasensov-help.com/uchastniki/angelina-izosimova"
+          }
+        ]
+      }
+    ],
+    "html_lang": "ru",
+    "viewport": "width=device-width,initial-scale=1",
+    "path": "/uchastniki/angelina-izosimova",
+    "console_errors": [],
+    "leaks": []
+  },
+  {
+    "title": "Виктория Райдос — Победительница 16 сезона «Битвы экстрасенсов» | Битва Экстрасенсов",
+    "description": "Виктория Райдос — Победительница 16 сезона «Битвы экстрасенсов». Личный приём экстрасенса, онлайн-консультация, диагностика жизненных ситуаций, помощь в сложных вопросах.",
+    "keywords": "Виктория Райдос, Победительница 16 сезона «Битвы экстрасенсов», экстрасенс, консультация, битва экстрасенсов, приём, помощь",
+    "canonical": "https://bitva-ekstrasensov-help.com/uchastniki/viktoriya-raidos",
+    "h1_count": 1,
+    "jsonld_count": 2,
+    "jsonld_types": [
+      "Person",
+      "BreadcrumbList"
+    ],
+    "jsonld_raw": [
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Виктория Райдос",
+        "description": "Экстрасенс-медиум, победительница 16 сезона «Битвы экстрасенсов». Обладает редким даром связи с потусторонним миром. Проводит спиритические сеансы, считывает информацию по фотографиям и предметам, помогает в поиске пропавших людей.",
+        "image": "/api/uploads/viktoriya-raidos-new.jpg",
+        "jobTitle": "Победительница 16 сезона «Битвы экстрасенсов»",
+        "url": "https://bitva-ekstrasensov-help.com/uchastniki/viktoriya-raidos"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Главная",
+            "item": "https://bitva-ekstrasensov-help.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Экстрасенсы",
+            "item": "https://bitva-ekstrasensov-help.com/#ekstrasensy"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Виктория Райдос",
+            "item": "https://bitva-ekstrasensov-help.com/uchastniki/viktoriya-raidos"
+          }
+        ]
+      }
+    ],
+    "html_lang": "ru",
+    "viewport": "width=device-width,initial-scale=1",
+    "path": "/uchastniki/viktoriya-raidos",
+    "console_errors": [],
+    "leaks": []
+  },
+  {
+    "title": "Надежда Шевченко — Финалистка 17 сезона «Битвы экстрасенсов» | Битва Экстрасенсов",
+    "description": "Надежда Шевченко — Финалистка 17 сезона «Битвы экстрасенсов». Личный приём экстрасенса, онлайн-консультация, диагностика жизненных ситуаций, помощь в сложных вопросах.",
+    "keywords": "Надежда Шевченко, Финалистка 17 сезона «Битвы экстрасенсов», экстрасенс, консультация, битва экстрасенсов, приём, помощь",
+    "canonical": "https://bitva-ekstrasensov-help.com/uchastniki/nadezhda-shevchenko",
+    "h1_count": 1,
+    "jsonld_count": 2,
+    "jsonld_types": [
+      "Person",
+      "BreadcrumbList"
+    ],
+    "jsonld_raw": [
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Надежда Шевченко",
+        "description": "Ясновидящая и таролог с многолетним опытом. Работает через карты Таро и интуитивное считывание. Специализируется на вопросах любви, карьеры и финансового благополучия. Известна высокой точностью прогнозов.",
+        "image": "/api/uploads/nadezhda-shevchenko-new.jpg",
+        "jobTitle": "Финалистка 17 сезона «Битвы экстрасенсов»",
+        "url": "https://bitva-ekstrasensov-help.com/uchastniki/nadezhda-shevchenko"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Главная",
+            "item": "https://bitva-ekstrasensov-help.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Экстрасенсы",
+            "item": "https://bitva-ekstrasensov-help.com/#ekstrasensy"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Надежда Шевченко",
+            "item": "https://bitva-ekstrasensov-help.com/uchastniki/nadezhda-shevchenko"
+          }
+        ]
+      }
+    ],
+    "html_lang": "ru",
+    "viewport": "width=device-width,initial-scale=1",
+    "path": "/uchastniki/nadezhda-shevchenko",
+    "console_errors": [],
+    "leaks": []
+  },
+  {
+    "title": "Олег Шепс — Победитель 21 сезона «Битвы экстрасенсов» | Битва Экстрасенсов",
+    "description": "Олег Шепс — Победитель 21 сезона «Битвы экстрасенсов». Личный приём экстрасенса, онлайн-консультация, диагностика жизненных ситуаций, помощь в сложных вопросах.",
+    "keywords": "Олег Шепс, Победитель 21 сезона «Битвы экстрасенсов», экстрасенс, консультация, битва экстрасенсов, приём, помощь",
+    "canonical": "https://bitva-ekstrasensov-help.com/uchastniki/oleg-sheps",
+    "h1_count": 1,
+    "jsonld_count": 2,
+    "jsonld_types": [
+      "Person",
+      "BreadcrumbList"
+    ],
+    "jsonld_raw": [
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Олег Шепс",
+        "description": "Потомственный маг и практикующий оккультист. Владеет техниками церемониальной магии и энергетической защиты. Специализируется на снятии сложных негативных воздействий и создании мощных защитных барьеров.",
+        "image": "/api/uploads/oleg-sheps-new.jpg",
+        "jobTitle": "Победитель 21 сезона «Битвы экстрасенсов»",
+        "url": "https://bitva-ekstrasensov-help.com/uchastniki/oleg-sheps"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Главная",
+            "item": "https://bitva-ekstrasensov-help.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Экстрасенсы",
+            "item": "https://bitva-ekstrasensov-help.com/#ekstrasensy"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Олег Шепс",
+            "item": "https://bitva-ekstrasensov-help.com/uchastniki/oleg-sheps"
+          }
+        ]
+      }
+    ],
+    "html_lang": "ru",
+    "viewport": "width=device-width,initial-scale=1",
+    "path": "/uchastniki/oleg-sheps",
+    "console_errors": [],
+    "leaks": []
+  },
+  {
+    "title": "Зулия Раджабова — Победительница 2 сезона «Битвы экстрасенсов» | Битва Экстрасенсов",
+    "description": "Зулия Раджабова — Победительница 2 сезона «Битвы экстрасенсов». Личный приём экстрасенса, онлайн-консультация, диагностика жизненных ситуаций, помощь в сложных вопросах.",
+    "keywords": "Зулия Раджабова, Победительница 2 сезона «Битвы экстрасенсов», экстрасенс, консультация, битва экстрасенсов, приём, помощь",
+    "canonical": "https://bitva-ekstrasensov-help.com/uchastniki/zuliya-radzhabova",
+    "h1_count": 1,
+    "jsonld_count": 2,
+    "jsonld_types": [
+      "Person",
+      "BreadcrumbList"
+    ],
+    "jsonld_raw": [
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Зулия Раджабова",
+        "description": "Целительница и ясновидящая с восточными корнями. Владеет техниками энергетического целительства и духовных практик Востока. Помогает восстановить здоровье, гармонизировать отношения и обрести душевное равновесие.",
+        "image": "/api/uploads/zuliya-radzhabova-new.jpg",
+        "jobTitle": "Победительница 2 сезона «Битвы экстрасенсов»",
+        "url": "https://bitva-ekstrasensov-help.com/uchastniki/zuliya-radzhabova"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Главная",
+            "item": "https://bitva-ekstrasensov-help.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Экстрасенсы",
+            "item": "https://bitva-ekstrasensov-help.com/#ekstrasensy"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Зулия Раджабова",
+            "item": "https://bitva-ekstrasensov-help.com/uchastniki/zuliya-radzhabova"
+          }
+        ]
+      }
+    ],
+    "html_lang": "ru",
+    "viewport": "width=device-width,initial-scale=1",
+    "path": "/uchastniki/zuliya-radzhabova",
+    "console_errors": [],
+    "leaks": []
+  },
+  {
+    "title": "Влад Череватый — Победитель 23 сезона «Битвы экстрасенсов» | Битва Экстрасенсов",
+    "description": "Влад Череватый — Победитель 23 сезона «Битвы экстрасенсов». Личный приём экстрасенса, онлайн-консультация, диагностика жизненных ситуаций, помощь в сложных вопросах.",
+    "keywords": "Влад Череватый, Победитель 23 сезона «Битвы экстрасенсов», экстрасенс, консультация, битва экстрасенсов, приём, помощь",
+    "canonical": "https://bitva-ekstrasensov-help.com/uchastniki/vlad-cherevatyy",
+    "h1_count": 1,
+    "jsonld_count": 2,
+    "jsonld_types": [
+      "Person",
+      "BreadcrumbList"
+    ],
+    "jsonld_raw": [
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Влад Череватый",
+        "description": "Молодой и сильный экстрасенс, мастер рунической магии и энергетических практик. Создаёт индивидуальные рунические формулы для защиты, привлечения удачи и финансового успеха.",
+        "image": "/api/uploads/vlad-cherevatyy-new.jpg",
+        "jobTitle": "Победитель 23 сезона «Битвы экстрасенсов»",
+        "url": "https://bitva-ekstrasensov-help.com/uchastniki/vlad-cherevatyy"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Главная",
+            "item": "https://bitva-ekstrasensov-help.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Экстрасенсы",
+            "item": "https://bitva-ekstrasensov-help.com/#ekstrasensy"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Влад Череватый",
+            "item": "https://bitva-ekstrasensov-help.com/uchastniki/vlad-cherevatyy"
+          }
+        ]
+      }
+    ],
+    "html_lang": "ru",
+    "viewport": "width=device-width,initial-scale=1",
+    "path": "/uchastniki/vlad-cherevatyy",
+    "console_errors": [],
+    "leaks": []
+  },
+  {
+    "title": "Фотогалерея участников Битвы экстрасенсов — фото магов и ясновидящих",
+    "description": "Фотогалерея сильнейших экстрасенсов России — участников и победителей проекта «Битва экстрасенсов». Фото ясновидящих, магов, ведьм и медиумов.",
+    "keywords": "фотогалерея битвы экстрасенсов, фото экстрасенсов, участники битвы экстрасенсов",
+    "canonical": "https://bitva-ekstrasensov-help.com/foto-galereya",
+    "h1_count": 1,
+    "jsonld_count": 2,
+    "jsonld_types": [
+      "ImageGallery",
+      "BreadcrumbList"
+    ],
+    "jsonld_raw": [
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageGallery",
+        "name": "Фотогалерея участников Битвы экстрасенсов — фото магов и ясновидящих",
+        "url": "https://bitva-ekstrasensov-help.com/foto-galereya"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Главная",
+            "item": "https://bitva-ekstrasensov-help.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Фотогалерея",
+            "item": "https://bitva-ekstrasensov-help.com/foto-galereya"
+          }
+        ]
+      }
+    ],
+    "html_lang": "ru",
+    "viewport": "width=device-width,initial-scale=1",
+    "path": "/foto-galereya",
+    "console_errors": [],
+    "leaks": []
+  },
+  {
+    "title": "Видео — Битва экстрасенсов",
+    "description": "Видеоматериалы с участниками проекта «Битва экстрасенсов» — ясновидящими, магами, ведьмами и медиумами. Истории помощи и сеансы консультаций.",
+    "keywords": "видео битвы экстрасенсов",
+    "canonical": "https://bitva-ekstrasensov-help.com/video",
+    "h1_count": 1,
+    "jsonld_count": 2,
+    "jsonld_types": [
+      "CollectionPage",
+      "BreadcrumbList"
+    ],
+    "jsonld_raw": [
+      {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": "Видео — Битва экстрасенсов",
+        "url": "https://bitva-ekstrasensov-help.com/video",
+        "mainEntity": {
+          "@type": "ItemList",
+          "numberOfItems": 3,
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "item": {
+                "@type": "VideoObject",
+                "name": "adasd",
+                "description": "asdasd",
+                "thumbnailUrl": "https://bitva-ekstrasensov-help.com/api/uploads/90306a2c-af63-448c-8950-f7ab3e518a88.png",
+                "contentUrl": "https://bitva-ekstrasensov-help.com/api/uploads/f45b3a06-abc2-472b-92a5-964b3a7cd281_opt.mp4",
+                "uploadDate": "2026-05-28T10:34:38.000Z"
+              }
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "item": {
+                "@type": "VideoObject",
+                "name": "fsdfs",
+                "description": "dfsdf",
+                "thumbnailUrl": "https://bitva-ekstrasensov-help.com/api/uploads/e4cac4c9-c734-4d59-ab82-4a21340bf7e2.jpg",
+                "contentUrl": "https://bitva-ekstrasensov-help.com/api/uploads/0568b80f-8b10-49fb-bde6-fc4df137601f_opt.mp4",
+                "uploadDate": "2026-05-28T10:34:59.000Z"
+              }
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "item": {
+                "@type": "VideoObject",
+                "name": "asdasd",
+                "description": "asdasd",
+                "thumbnailUrl": "https://bitva-ekstrasensov-help.com/api/uploads/314e6487-03e5-4035-95ee-13eccec26692.jpg",
+                "contentUrl": "https://bitva-ekstrasensov-help.com/api/uploads/4ff52676-9a68-45c6-9ce3-a33da092850e_opt.mp4",
+                "uploadDate": "2026-05-28T10:35:26.000Z"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Главная",
+            "item": "https://bitva-ekstrasensov-help.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Видео",
+            "item": "https://bitva-ekstrasensov-help.com/video"
+          }
+        ]
+      }
+    ],
+    "html_lang": "ru",
+    "viewport": "width=device-width,initial-scale=1",
+    "path": "/video",
+    "console_errors": [],
+    "leaks": []
+  },
+  {
+    "title": "Частые вопросы — консультация экстрасенса",
+    "description": "Ответы на частые вопросы о помощи экстрасенсов — как проходит консультация, диагностика порчи, приворота, сглаза, цены и формат приёма.",
+    "keywords": "вопросы об экстрасенсах",
+    "canonical": "https://bitva-ekstrasensov-help.com/voprosy-i-otvety",
+    "h1_count": 1,
+    "jsonld_count": 2,
+    "jsonld_types": [
+      "FAQPage",
+      "BreadcrumbList"
+    ],
+    "jsonld_raw": [
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Как записаться на приём к экстрасенсу?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Для записи на приём заполните форму на нашем сайте, указав ваше имя, телефон и краткое описание ситуации. Наш администратор свяжется с вами в течение 24 часов."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Сколько стоит консультация экстрасенса?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Стоимость зависит от специалиста и формата проведения. Первичная консультация длится 60 минут. Точную стоимость уточняйте у администратора."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Можно ли получить консультацию онлайн?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Да, большинство специалистов проводят консультации как очно, так и онлайн."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Гарантируете ли вы результат?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Мы гарантируем, что с вами будет работать проверенный специалист. Наши экстрасенсы всегда честны в прогнозах."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Конфиденциальна ли информация?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Абсолютно. Мы строго соблюдаем конфиденциальность всех обращений."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "С какими проблемами можно обратиться?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Наши экстрасенсы помогают в широком спектре вопросов: любовь, здоровье, бизнес, поиск пропавших и многое другое."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Как подготовиться к консультации?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Специальной подготовки не требуется. Рекомендуем заранее сформулировать вопросы."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Все ли участники — настоящие экстрасенсы?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Все специалисты прошли строгий отбор и подтвердили свои способности."
+            }
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Главная",
+            "item": "https://bitva-ekstrasensov-help.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Вопросы-Ответы",
+            "item": "https://bitva-ekstrasensov-help.com/voprosy-i-otvety"
+          }
+        ]
+      }
+    ],
+    "html_lang": "ru",
+    "viewport": "width=device-width,initial-scale=1",
+    "path": "/voprosy-i-otvety",
+    "console_errors": [],
+    "leaks": []
+  },
+  {
+    "title": "Запись на приём к экстрасенсу — консультация онлайн и очно",
+    "description": "Запись на приём к экстрасенсу из проекта «Битва экстрасенсов». Консультация ясновидящей, мага, ведьмы или медиума онлайн и очно — диагностика и помощь.",
+    "keywords": "запись на приём экстрасенса",
+    "canonical": "https://bitva-ekstrasensov-help.com/zapis-na-priem",
+    "h1_count": 1,
+    "jsonld_count": 1,
+    "jsonld_types": [
+      "BreadcrumbList"
+    ],
+    "jsonld_raw": [
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Главная",
+            "item": "https://bitva-ekstrasensov-help.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Запись на приём",
+            "item": "https://bitva-ekstrasensov-help.com/zapis-na-priem"
+          }
+        ]
+      }
+    ],
+    "html_lang": "ru",
+    "viewport": "width=device-width,initial-scale=1",
+    "path": "/zapis-na-priem",
+    "console_errors": [],
+    "leaks": []
+  },
+  {
+    "title": "Финансовая магия — привлечение денег",
+    "description": "Финансовая магия от экстрасенсов проекта «Битва экстрасенсов» — привлечение денег, открытие денежного канала, снятие финансового негатива и защита бизнеса.",
+    "keywords": "финансовая магия, привлечение денег",
+    "canonical": "https://bitva-ekstrasensov-help.com/finansovaya-magiya",
+    "h1_count": 1,
+    "jsonld_count": 2,
+    "jsonld_types": [
+      "Service",
+      "BreadcrumbList"
+    ],
+    "jsonld_raw": [
+      {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        "name": "Финансовая магия — привлечение денег",
+        "description": "Финансовая магия от экстрасенсов проекта «Битва экстрасенсов» — привлечение денег, открытие денежного канала, снятие финансового негатива и защита бизнеса.",
+        "url": "https://bitva-ekstrasensov-help.com/finansovaya-magiya"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Главная",
+            "item": "https://bitva-ekstrasensov-help.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Финансовая магия",
+            "item": "https://bitva-ekstrasensov-help.com/finansovaya-magiya"
+          }
+        ]
+      }
+    ],
+    "html_lang": "ru",
+    "viewport": "width=device-width,initial-scale=1",
+    "path": "/finansovaya-magiya",
+    "console_errors": [],
+    "leaks": []
+  },
+  {
+    "title": "Любовная магия — возврат любимого",
+    "description": "Любовная магия от участников «Битвы экстрасенсов» — возврат любимого, привлечение партнёра, укрепление семьи и снятие венца безбрачия. Помощь онлайн и очно.",
+    "keywords": "любовная магия, возврат любимого",
+    "canonical": "https://bitva-ekstrasensov-help.com/lyubovnaya-magiya",
+    "h1_count": 1,
+    "jsonld_count": 2,
+    "jsonld_types": [
+      "Service",
+      "BreadcrumbList"
+    ],
+    "jsonld_raw": [
+      {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        "name": "Любовная магия — возврат любимого",
+        "description": "Любовная магия от участников «Битвы экстрасенсов» — возврат любимого, привлечение партнёра, укрепление семьи и снятие венца безбрачия. Помощь онлайн и очно.",
+        "url": "https://bitva-ekstrasensov-help.com/lyubovnaya-magiya"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Главная",
+            "item": "https://bitva-ekstrasensov-help.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Любовная магия",
+            "item": "https://bitva-ekstrasensov-help.com/lyubovnaya-magiya"
+          }
+        ]
+      }
+    ],
+    "html_lang": "ru",
+    "viewport": "width=device-width,initial-scale=1",
+    "path": "/lyubovnaya-magiya",
+    "console_errors": [],
+    "leaks": []
+  },
+  {
+    "title": "Магия жизни — улучшение качества жизни",
+    "description": "Магия жизни от сильнейших экстрасенсов «Битвы экстрасенсов» — снятие блоков, улучшение здоровья, гармонизация судьбы и привлечение удачи. Консультация онлайн и очно.",
+    "keywords": "магия жизни, снятие блоков",
+    "canonical": "https://bitva-ekstrasensov-help.com/magiya-zhizni",
+    "h1_count": 1,
+    "jsonld_count": 2,
+    "jsonld_types": [
+      "Service",
+      "BreadcrumbList"
+    ],
+    "jsonld_raw": [
+      {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        "name": "Магия жизни — улучшение качества жизни",
+        "description": "Магия жизни от сильнейших экстрасенсов «Битвы экстрасенсов» — снятие блоков, улучшение здоровья, гармонизация судьбы и привлечение удачи. Консультация онлайн и очно.",
+        "url": "https://bitva-ekstrasensov-help.com/magiya-zhizni"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Главная",
+            "item": "https://bitva-ekstrasensov-help.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Магия жизни",
+            "item": "https://bitva-ekstrasensov-help.com/magiya-zhizni"
+          }
+        ]
+      }
+    ],
+    "html_lang": "ru",
+    "viewport": "width=device-width,initial-scale=1",
+    "path": "/magiya-zhizni",
+    "console_errors": [],
+    "leaks": []
+  },
+  {
+    "title": "Магическая защита — обереги, амулеты",
+    "description": "Магическая защита от экстрасенсов «Битвы экстрасенсов» — обереги, амулеты, чистка пространства и защита семьи от негативного воздействия. Приём онлайн и очно.",
+    "keywords": "магическая защита, обереги, амулеты",
+    "canonical": "https://bitva-ekstrasensov-help.com/magicheskaya-zashchita",
+    "h1_count": 1,
+    "jsonld_count": 2,
+    "jsonld_types": [
+      "Service",
+      "BreadcrumbList"
+    ],
+    "jsonld_raw": [
+      {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        "name": "Магическая защита — обереги, амулеты",
+        "description": "Магическая защита от экстрасенсов «Битвы экстрасенсов» — обереги, амулеты, чистка пространства и защита семьи от негативного воздействия. Приём онлайн и очно.",
+        "url": "https://bitva-ekstrasensov-help.com/magicheskaya-zashchita"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Главная",
+            "item": "https://bitva-ekstrasensov-help.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Магическая защита",
+            "item": "https://bitva-ekstrasensov-help.com/magicheskaya-zashchita"
+          }
+        ]
+      }
+    ],
+    "html_lang": "ru",
+    "viewport": "width=device-width,initial-scale=1",
+    "path": "/magicheskaya-zashchita",
+    "console_errors": [],
+    "leaks": []
+  },
+  {
+    "title": "Снятие порчи — диагностика и помощь экстрасенса",
+    "description": "Снятие порчи у сильнейших экстрасенсов проекта «Битва экстрасенсов». Диагностика негативной программы, точные признаки порчи и помощь онлайн или очно.",
+    "keywords": "снятие порчи, признаки порчи",
+    "canonical": "https://bitva-ekstrasensov-help.com/porcha",
+    "h1_count": 1,
+    "jsonld_count": 2,
+    "jsonld_types": [
+      "WebPage",
+      "BreadcrumbList"
+    ],
+    "jsonld_raw": [
+      {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Снятие порчи — диагностика и помощь экстрасенса",
+        "description": "Снятие порчи у сильнейших экстрасенсов проекта «Битва экстрасенсов». Диагностика негативной программы, точные признаки порчи и помощь онлайн или очно.",
+        "url": "https://bitva-ekstrasensov-help.com/porcha"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Главная",
+            "item": "https://bitva-ekstrasensov-help.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Порча",
+            "item": "https://bitva-ekstrasensov-help.com/porcha"
+          }
+        ]
+      }
+    ],
+    "html_lang": "ru",
+    "viewport": "width=device-width,initial-scale=1",
+    "path": "/porcha",
+    "console_errors": [],
+    "leaks": []
+  },
+  {
+    "title": "Приворот — диагностика и снятие",
+    "description": "Снятие приворота у сильнейших магов и ведьм проекта «Битва экстрасенсов». Диагностика любовной привязки, очистка и защита — консультация онлайн или очно.",
+    "keywords": "приворот, снятие приворота",
+    "canonical": "https://bitva-ekstrasensov-help.com/privorot",
+    "h1_count": 1,
+    "jsonld_count": 2,
+    "jsonld_types": [
+      "WebPage",
+      "BreadcrumbList"
+    ],
+    "jsonld_raw": [
+      {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Приворот — диагностика и снятие",
+        "description": "Снятие приворота у сильнейших магов и ведьм проекта «Битва экстрасенсов». Диагностика любовной привязки, очистка и защита — консультация онлайн или очно.",
+        "url": "https://bitva-ekstrasensov-help.com/privorot"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Главная",
+            "item": "https://bitva-ekstrasensov-help.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Приворот",
+            "item": "https://bitva-ekstrasensov-help.com/privorot"
+          }
+        ]
+      }
+    ],
+    "html_lang": "ru",
+    "viewport": "width=device-width,initial-scale=1",
+    "path": "/privorot",
+    "console_errors": [],
+    "leaks": []
+  },
+  {
+    "title": "Снятие сглаза — диагностика и защита",
+    "description": "Снятие сглаза у экстрасенсов «Битвы экстрасенсов». Симптомы сглаза, диагностика и магическая защита — помощь ясновидящих, магов и ведьм онлайн и очно.",
+    "keywords": "снятие сглаза, признаки сглаза",
+    "canonical": "https://bitva-ekstrasensov-help.com/sglaz",
+    "h1_count": 1,
+    "jsonld_count": 2,
+    "jsonld_types": [
+      "WebPage",
+      "BreadcrumbList"
+    ],
+    "jsonld_raw": [
+      {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Снятие сглаза — диагностика и защита",
+        "description": "Снятие сглаза у экстрасенсов «Битвы экстрасенсов». Симптомы сглаза, диагностика и магическая защита — помощь ясновидящих, магов и ведьм онлайн и очно.",
+        "url": "https://bitva-ekstrasensov-help.com/sglaz"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Главная",
+            "item": "https://bitva-ekstrasensov-help.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Сглаз",
+            "item": "https://bitva-ekstrasensov-help.com/sglaz"
+          }
+        ]
+      }
+    ],
+    "html_lang": "ru",
+    "viewport": "width=device-width,initial-scale=1",
+    "path": "/sglaz",
+    "console_errors": [],
+    "leaks": []
+  },
+  {
+    "title": "Снятие проклятия — родовые проклятия",
+    "description": "Снятие проклятия и родовых программ у магов и ведьм «Битвы экстрасенсов». Диагностика рода, чистка кармы и восстановление — консультация онлайн и очно.",
+    "keywords": "снятие проклятия, родовое проклятие",
+    "canonical": "https://bitva-ekstrasensov-help.com/proklyatie",
+    "h1_count": 1,
+    "jsonld_count": 2,
+    "jsonld_types": [
+      "WebPage",
+      "BreadcrumbList"
+    ],
+    "jsonld_raw": [
+      {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Снятие проклятия — родовые проклятия",
+        "description": "Снятие проклятия и родовых программ у магов и ведьм «Битвы экстрасенсов». Диагностика рода, чистка кармы и восстановление — консультация онлайн и очно.",
+        "url": "https://bitva-ekstrasensov-help.com/proklyatie"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Главная",
+            "item": "https://bitva-ekstrasensov-help.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Проклятие",
+            "item": "https://bitva-ekstrasensov-help.com/proklyatie"
+          }
+        ]
+      }
+    ],
+    "html_lang": "ru",
+    "viewport": "width=device-width,initial-scale=1",
+    "path": "/proklyatie",
+    "console_errors": [],
+    "leaks": []
+  },
+  {
+    "title": "Снятие заклятия — диагностика и помощь",
+    "description": "Снятие заклятия у магов и экстрасенсов проекта «Битва экстрасенсов». Диагностика магического воздействия и снятие наговора — консультация онлайн и очно.",
+    "keywords": "заклятие, снятие заклятия",
+    "canonical": "https://bitva-ekstrasensov-help.com/zaklyatie",
+    "h1_count": 1,
+    "jsonld_count": 2,
+    "jsonld_types": [
+      "WebPage",
+      "BreadcrumbList"
+    ],
+    "jsonld_raw": [
+      {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Снятие заклятия — диагностика и помощь",
+        "description": "Снятие заклятия у магов и экстрасенсов проекта «Битва экстрасенсов». Диагностика магического воздействия и снятие наговора — консультация онлайн и очно.",
+        "url": "https://bitva-ekstrasensov-help.com/zaklyatie"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Главная",
+            "item": "https://bitva-ekstrasensov-help.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Заклятие",
+            "item": "https://bitva-ekstrasensov-help.com/zaklyatie"
+          }
+        ]
+      }
+    ],
+    "html_lang": "ru",
+    "viewport": "width=device-width,initial-scale=1",
+    "path": "/zaklyatie",
+    "console_errors": [],
+    "leaks": []
+  },
+  {
+    "title": "Снятие венца безбрачия — помощь экстрасенса",
+    "description": "Снятие венца безбрачия у сильнейших ведьм и ясновидящих «Битвы экстрасенсов». Диагностика, ритуалы снятия и восстановление личной жизни — приём онлайн и очно.",
+    "keywords": "венец безбрачия, снятие венца безбрачия",
+    "canonical": "https://bitva-ekstrasensov-help.com/venets-bezbrachiya",
+    "h1_count": 1,
+    "jsonld_count": 2,
+    "jsonld_types": [
+      "WebPage",
+      "BreadcrumbList"
+    ],
+    "jsonld_raw": [
+      {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Снятие венца безбрачия — помощь экстрасенса",
+        "description": "Снятие венца безбрачия у сильнейших ведьм и ясновидящих «Битвы экстрасенсов». Диагностика, ритуалы снятия и восстановление личной жизни — приём онлайн и очно.",
+        "url": "https://bitva-ekstrasensov-help.com/venets-bezbrachiya"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Главная",
+            "item": "https://bitva-ekstrasensov-help.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Венец безбрачия",
+            "item": "https://bitva-ekstrasensov-help.com/venets-bezbrachiya"
+          }
+        ]
+      }
+    ],
+    "html_lang": "ru",
+    "viewport": "width=device-width,initial-scale=1",
+    "path": "/venets-bezbrachiya",
+    "console_errors": [],
+    "leaks": []
+  }
+]

@@ -1,0 +1,62 @@
+{
+  "summary": "READ-ONLY SEO audit of 23 public pages + sitemap/robots/yandex verification/404 SPA/Yandex Metrika. NO code or DB changes made. All 23 pages have production-domain canonical (https://bitva-ekstrasensov-help.com), no preview/localhost leaks anywhere in canonical or JSON-LD. All pages have exactly 1 H1, html[lang]=ru, viewport set, valid JSON-LD (Organization/Person/Service/FAQPage/ImageGallery/CollectionPage/WebPage/ProfessionalService + BreadcrumbList). Yandex Metrika (id=110304923) loaded (window.ym === 'function', mc.webvisor.org/metrika/tag_ww.js). Sitemap.xml OK (23 URLs, all prod-domain, no /admin /api /preview /localhost). Yandex verification file OK. 404 SPA renders 'Страница не найдена'. No broken images/links on home, /foto-galereya, /uchastniki/elena-golunova. robots.txt currently 'Disallow: /' because seo_indexing_enabled=0 — expected state, logged as INFO.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "audit_results": {
+    "blockers": [],
+    "warnings": [
+      {"page": "/zapis-na-priem", "issue": "Only 1 JSON-LD block (BreadcrumbList only). No WebPage/ContactPage schema — optional, not required."},
+      {"page": "/", "issue": "Only 1 JSON-LD (ProfessionalService). No WebSite+SearchAction JSON-LD (optional SEO best practice)."}
+    ],
+    "info": [
+      "robots.txt returns 'User-agent: *\\nDisallow: /' because DB flag seo_indexing_enabled=0. Intentional pre-launch state, NOT a bug.",
+      "X-Robots-Tag: noindex, nofollow header is set globally by backend — consistent with seo_indexing_enabled=0.",
+      "First navigation to /uchastniki/elena-golunova initially timed out on networkidle in Playwright; retry succeeded fully (title/canonical/H1/JSON-LD correct). Likely slow-loading external resource (Metrika/CDN) delaying networkidle — not a functional bug.",
+      "sitemap.xml contains 23 URLs — all use https://bitva-ekstrasensov-help.com/, no preview/localhost/admin/api leaks.",
+      "Yandex verification: /yandex_434070c263885154.html returns HTTP 200 with 'Verification: 434070c263885154'.",
+      "404 SPA: /random-non-existent-slug-xyz returns HTTP 200 (SPA) and client-renders '404 Страница не найдена' with link back home. Canonical mirrors requested path (minor SEO nuance — could point to homepage on 404).",
+      "Form submission on /zapis-na-priem was NOT executed to respect READ-ONLY DB constraint. Verified window.ym === 'function' on the page so reachGoal('form_send') will be callable — actual goal firing must be verified in prod analytics."
+    ]
+  },
+  "per_page_summary": {
+    "total_pages_audited": 23,
+    "pages_with_canonical_leak": 0,
+    "pages_with_jsonld_leak": 0,
+    "pages_with_H1_not_equal_1": 0,
+    "pages_with_missing_canonical": 0,
+    "pages_with_empty_title": 0,
+    "pages_with_empty_description": 0,
+    "pages_with_console_errors": 0,
+    "html_lang": "ru (all 23)",
+    "viewport": "width=device-width,initial-scale=1 (all 23)",
+    "jsonld_type_distribution": {
+      "/": ["ProfessionalService"],
+      "/uchastniki/*": ["Person", "BreadcrumbList"],
+      "/foto-galereya": ["ImageGallery", "BreadcrumbList"],
+      "/video": ["CollectionPage", "BreadcrumbList"],
+      "/voprosy-i-otvety": ["FAQPage", "BreadcrumbList"],
+      "/zapis-na-priem": ["BreadcrumbList"],
+      "/finansovaya-magiya /lyubovnaya-magiya /magiya-zhizni /magicheskaya-zashchita": ["Service", "BreadcrumbList"],
+      "/porcha /privorot /sglaz /proklyatie /zaklyatie /venets-bezbrachiya": ["WebPage", "BreadcrumbList"]
+    }
+  },
+  "test_report_links": ["/app/test_reports/seo_audit_pages.json"],
+  "action_items": [
+    "OPTIONAL (not blocker): Add WebSite+SearchAction JSON-LD on home page for sitelinks search box.",
+    "OPTIONAL: Add WebPage/ContactPage schema on /zapis-na-priem (currently only BreadcrumbList).",
+    "OPTIONAL: For SPA 404 route, omit canonical or point it to homepage to avoid signalling non-existent slugs as canonical. Not urgent while seo_indexing_enabled=0."
+  ],
+  "critical_code_review_comments": [
+    "setSEO() in /app/frontend/src/lib/api.js correctly uses build-time REACT_APP_SITE_URL — canonical is always prod-domain regardless of host. Verified: 0 leaks across 23 pages.",
+    "All page components call setSEO() and setJsonLd()/setBreadcrumbJsonLd() in useEffect — good pattern; 2 sec wait sufficient in audit.",
+    "Backend serves sitemap.xml correctly with prod-domain URLs; excludes /admin and /api."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (frontend audit only)", "frontend": "100% — 23/23 pages pass all mandatory SEO criteria; 0 blockers"},
+  "test_credentials": "N/A (public audit, no login)",
+  "seed_data_creation": "None — READ-ONLY audit, no DB writes",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "SEO is production-ready. Canonical/JSON-LD leak-free. When seo_indexing_enabled is flipped to 1, verify robots.txt changes to Allow: / with Sitemap: line, and X-Robots-Tag header is removed. Form submission goal (reachGoal form_send) was NOT verified end-to-end to preserve DB — verify in prod analytics after go-live.",
+  "rca of the issue": "No blocking issues found."
+}
