@@ -1,0 +1,45 @@
+{
+  "summary": "Post-restart / DB-restore verification (iteration 24). All 12 backend smoke tests pass. Frontend flows (form submission, Yandex.Metrika goal 'form_send', popup, mobile viewport) all working. Resend silent-failure logging active.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "verification_details": {
+    "backend_pytest": "12/12 passed (test_smoke_iter21.py)",
+    "public_apis": {
+      "/api/pages/topic-porcha": "200 OK, blocks present",
+      "/api/participants": "8 items",
+      "/api/reviews": "40 items",
+      "/api/settings.popup_phone": "+7 911 555-66-66",
+      "/api/contact.vcf": "TEL contains +79115556666"
+    },
+    "yandex_metrika": {
+      "inline_script_id": 110304923,
+      "network_loads_tag_ww_js": true,
+      "window_ym_is_function": true,
+      "note": "HTML comment '<!-- Yandex.Metrika counter -->' is stripped by CRA HtmlWebpackPlugin minifier in production build (comments removed). Inline script + counter id 110304923 and mc.webvisor.org/metrika/tag_ww.js?id=110304923 are present and loading correctly, so functional requirement is met. If literal comment string is required in source, disable removeComments in HtmlWebpackPlugin minify options."
+    },
+    "goal_form_send": {
+      "failed_submit_no_patronymic": "0 ym calls (400 response, goal NOT fired) ✓",
+      "successful_submit": "EXACTLY 1 ym call = [110304923, 'reachGoal', 'form_send'] ✓"
+    },
+    "popup": "Visible, text 'Спасибо! Ваша заявка отправлена', phone '+7 911 555-66-66' ✓",
+    "applications_persistence": "before=0, after=0 (POST returns success but does NOT persist) ✓",
+    "mobile_viewport_390x844": "document horizontal overflow = 0px ✓",
+    "resend_silent_failure_log": "Backend log shows 'Resend rejected application email: [403] validation_error' repeatedly — silent failure fix active ✓",
+    "admin": "Login OK, dashboard '0 заявок' ✓",
+    "console_errors": 0
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_smoke_iter21.py",
+    "/app/test_reports/pytest/iter24_smoke.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Yandex.Metrika HTML comment marker '<!-- Yandex.Metrika counter -->' is removed by webpack HtmlWebpackPlugin minifier in production. Not a functional issue but if source-based verification is desired, add minify: { removeComments: false } or wrap the block in a script-preserved marker."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "seed_data_creation": "None. Applications intentionally not persisted; test data prefixed TEST_.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "restore-db.sh successfully re-hydrated MariaDB (8 participants, 16 pages, 200 reviews, 0 apps, popup_phone='+7 911 555-66-66'). Yandex.Metrika counter 110304923 + goal 'form_send' fully functional. Reusable smoke: /app/backend/tests/test_smoke_iter21.py."
+}
