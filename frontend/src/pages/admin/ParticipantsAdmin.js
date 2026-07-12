@@ -12,12 +12,28 @@ import { toast } from 'sonner';
 import api from '../../lib/api';
 
 const emptyForm = { slug: '', name: '', title: '', description: '', full_description: '', photo_url: '', specializations: [], is_active: true, order: 0 };
+const emptySeo = { title: '', description: '', keywords: '', h1: '', og_title: '', og_description: '' };
+
+const genSeoFromParticipant = (form, specText) => {
+  const name = (form.name || '').trim();
+  const shortDesc = (form.description || '').trim();
+  const specs = (specText || '').split(',').map((s) => s.trim()).filter(Boolean).join(', ');
+  return {
+    title: name ? `Экстрасенс ${name} — Официальный сайт помощи | Битва Экстрасенсов` : '',
+    description: shortDesc,
+    keywords: name ? [name, 'экстрасенс', 'консультация', 'битва экстрасенсов', 'помощь', 'приём', specs].filter(Boolean).join(', ') : '',
+    h1: name ? `Официальная страница помощи ${name}` : '',
+    og_title: name ? `${name} — приём экстрасенса` : '',
+    og_description: shortDesc,
+  };
+};
 
 export default function ParticipantsAdmin() {
   const [items, setItems] = useState([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editId, setEditId] = useState(null);
   const [form, setForm] = useState({ ...emptyForm });
+  const [seo, setSeo] = useState({ ...emptySeo });
   const [specText, setSpecText] = useState('');
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -28,7 +44,13 @@ export default function ParticipantsAdmin() {
   };
   useEffect(() => { load(); }, []);
 
-  const openCreate = () => { setEditId(null); setForm({ ...emptyForm }); setSpecText(''); setDialogOpen(true); };
+  const openCreate = () => {
+    setEditId(null);
+    setForm({ ...emptyForm });
+    setSeo({ ...emptySeo });
+    setSpecText('');
+    setDialogOpen(true);
+  };
   const openEdit = (item) => {
     setEditId(item.id);
     setForm({
@@ -43,19 +65,45 @@ export default function ParticipantsAdmin() {
       order: item.order || 0
     });
     setSpecText((item.specializations || []).join(', '));
+    // Подтянуть существующие SEO поля для этого участника (если сохранены).
+    // Если записи в seo_settings ещё нет — оставляем поля пустыми
+    // (сайт по-прежнему будет использовать автоматическую генерацию).
+    setSeo({ ...emptySeo });
+    api.get(`/seo/participant-${item.slug}`).then((res) => {
+      const d = res.data || {};
+      setSeo({
+        title: d.title || '',
+        description: d.description || '',
+        keywords: d.keywords || '',
+        h1: d.h1 || '',
+        og_title: d.og_title || '',
+        og_description: d.og_description || '',
+      });
+    }).catch(() => {});
     setDialogOpen(true);
   };
 
   const handleSave = async () => {
     const data = { ...form, specializations: specText.split(',').map((s) => s.trim()).filter(Boolean) };
     try {
+      let savedSlug = form.slug;
       if (editId) {
         await api.put(`/admin/participants/${editId}`, data);
-        toast.success('Участник обновлён');
       } else {
-        await api.post('/admin/participants', data);
-        toast.success('Участник добавлен');
+        const created = await api.post('/admin/participants', data);
+        savedSlug = created.data?.slug || form.slug;
       }
+      // Сохранение SEO — только если хоть одно поле непустое.
+      // Полностью пустой блок оставляем БЕЗ записи в seo_settings, тогда
+      // сайт продолжает использовать fallback-автогенерацию.
+      const hasAnySeo = Object.values(seo).some((v) => (v || '').trim() !== '');
+      if (hasAnySeo && savedSlug) {
+        await api.put(`/admin/seo/participant-${savedSlug}`, seo).catch((e) => {
+          console.error('SEO save failed:', e);
+          toast.error('Участник сохранён, но SEO не сохранилось');
+        });
+      }
+      toast.success(editId ? 'Участник обновлён' : 'Участник добавлен');
       setDialogOpen(false);
       load();
     } catch (err) {
@@ -285,6 +333,92 @@ export default function ParticipantsAdmin() {
                 className="bg-teal-dark/80 border-teal-light/30 text-white h-10"
                 placeholder="Ясновидящая, Экстрасенс, Маг"
               />
+            </div>
+
+            {/* ==== SEO блок ==== */}
+            <div className="space-y-3 border border-teal-light/20 rounded-lg p-4 bg-teal-dark/30" data-testid="participant-seo-block">
+              <div className="flex items-center justify-between">
+                <Label className="text-gold font-body text-sm font-semibold">SEO для страницы участника</Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSeo(genSeoFromParticipant(form, specText))}
+                  className="border-gold/50 text-gold hover:bg-gold/10 font-body text-xs h-8"
+                  data-testid="seo-autofill-btn"
+                >
+                  Заполнить автоматически
+                </Button>
+              </div>
+              <p className="text-white/40 text-xs font-body">
+                Если поля пустые, сайт использует автогенерацию из имени и описания участника.
+              </p>
+
+              <div className="space-y-2">
+                <Label className="text-white/60 font-body text-xs">SEO Title</Label>
+                <Input
+                  value={seo.title}
+                  onChange={(e) => setSeo({ ...seo, title: e.target.value })}
+                  className="bg-teal-dark/80 border-teal-light/30 text-white h-9 text-sm"
+                  placeholder="Экстрасенс {Имя} — Официальный сайт помощи | Битва Экстрасенсов"
+                  data-testid="seo-title-input"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-white/60 font-body text-xs">Meta Description</Label>
+                <Textarea
+                  value={seo.description}
+                  onChange={(e) => setSeo({ ...seo, description: e.target.value })}
+                  className="bg-teal-dark/80 border-teal-light/30 text-white min-h-[60px] text-sm"
+                  placeholder="Короткое описание для поисковой выдачи (150-160 символов)"
+                  data-testid="seo-description-input"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-white/60 font-body text-xs">Meta Keywords</Label>
+                <Input
+                  value={seo.keywords}
+                  onChange={(e) => setSeo({ ...seo, keywords: e.target.value })}
+                  className="bg-teal-dark/80 border-teal-light/30 text-white h-9 text-sm"
+                  placeholder="имя, экстрасенс, консультация, битва экстрасенсов"
+                  data-testid="seo-keywords-input"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-white/60 font-body text-xs">H1</Label>
+                <Input
+                  value={seo.h1}
+                  onChange={(e) => setSeo({ ...seo, h1: e.target.value })}
+                  className="bg-teal-dark/80 border-teal-light/30 text-white h-9 text-sm"
+                  placeholder="Основной заголовок H1 страницы"
+                  data-testid="seo-h1-input"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-white/60 font-body text-xs">OG Title</Label>
+                <Input
+                  value={seo.og_title}
+                  onChange={(e) => setSeo({ ...seo, og_title: e.target.value })}
+                  className="bg-teal-dark/80 border-teal-light/30 text-white h-9 text-sm"
+                  placeholder="Заголовок для превью в соцсетях"
+                  data-testid="seo-og-title-input"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-white/60 font-body text-xs">OG Description</Label>
+                <Textarea
+                  value={seo.og_description}
+                  onChange={(e) => setSeo({ ...seo, og_description: e.target.value })}
+                  className="bg-teal-dark/80 border-teal-light/30 text-white min-h-[60px] text-sm"
+                  placeholder="Описание для превью в соцсетях"
+                  data-testid="seo-og-description-input"
+                />
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">

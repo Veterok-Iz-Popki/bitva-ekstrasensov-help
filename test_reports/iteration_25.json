@@ -1,0 +1,40 @@
+{
+  "summary": "E2E test of new SEO-inside-participant-form feature. All 11 test cases from the review request pass: admin login, participant edit dialog opens with SEO block, all 6 data-testid inputs + autofill button present, autofill generates correct patterns (name in title, 'экстрасенс' in keywords, h1 starts with 'Официальная страница помощи'), PUT /api/admin/seo/participant-elena-golunova returns 200, persistence verified after reopening dialog, public /uchastniki/elena-golunova reflects saved title/description/keywords/og:title, empty SEO fields → NO PUT to /admin/seo (participant PUT still fires 200), fallback autogeneration works when DB row absent (public title becomes 'Экстрасенс Елена Голунова - Официальный сайт помощи | Битва Экстрасенсов'). 0 console errors on both admin and public pages.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "verification_details": {
+    "backend": {
+      "GET /api/seo/participant-elena-golunova": "200 OK returns saved row",
+      "PUT /api/admin/seo/participant-elena-golunova (with Bearer)": "200 OK, upsert works (INSERT on missing, UPDATE on existing)",
+      "auth": "requires Authorization: Bearer <token>, cookies not used"
+    },
+    "ui": {
+      "data-testid=participant-seo-block": "present inside dialog",
+      "6 SEO inputs testids": "seo-title-input, seo-description-input, seo-keywords-input, seo-h1-input, seo-og-title-input, seo-og-description-input — all present",
+      "seo-autofill-btn": "populates all 6 fields from form.name + form.description + specText",
+      "openEdit GET /api/seo/participant-<slug>": "pre-fills form on dialog open",
+      "handleSave empty-SEO branch": "hasAnySeo check works — 0 PUT calls when all 6 fields empty",
+      "toast": "'Участник обновлён' shown after save"
+    },
+    "public_page": {
+      "with saved SEO (AUTOTEST-ELENA-*)": "document.title, meta[name=description], meta[name=keywords], meta[property=og:title] all match saved values",
+      "fallback (row deleted from seo_settings)": "document.title = 'Экстрасенс Елена Голунова - Официальный сайт помощи | Битва Экстрасенсов', meta desc = participant.description — SEOHead fallback works"
+    },
+    "console_errors": {"admin": 0, "public": 0}
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_smoke_iter21.py"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Design choice: PUT /admin/seo is skipped when all 6 fields are empty, but this does NOT delete an existing seo_settings row. Admin cannot clear saved SEO from UI (only overwrite). If clearing back to fallback is intended, either send explicit empty values (currently guarded off) or add a delete endpoint. Not blocking — likely intentional.",
+    "openEdit resets seo to emptySeo BEFORE the GET promise resolves; on slow networks the input flashes empty then repopulates. Minor UX only."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "nikoa2020@gmail.com / aspire5542gl1952tq (from /app/memory/test_credentials.md)",
+  "seed_data_creation": "SEO row for participant-elena-golunova was mutated during testing (autotest values + deletion for fallback test) and restored at the end to original title/description/keywords/h1/og fields.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Feature works end-to-end. Backend endpoints (GET /api/seo/:slug public, PUT /api/admin/seo/:slug admin-only Bearer) unchanged from previous iterations. Frontend ParticipantsAdmin now embeds a 6-field SEO block + autofill button INSIDE the edit dialog (not a separate tab). Empty-block save skips SEO PUT. ParticipantDetailPage reads /api/seo/participant-<slug> and applies fallback autogen when title/desc missing. SEO row was restored to original values after tests."
+}
