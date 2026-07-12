@@ -20,7 +20,6 @@ function fetchSettings() {
 const NAV_ITEMS = [
   { path: '/', label: 'Главная' },
   { path: '/#ekstrasensy', label: 'Экстрасенсы' },
-  { path: '/#otzyvy', label: 'Отзывы' },
   { path: '/#uslugi', label: 'Услуги' },
   { path: '/foto-galereya', label: 'Фотогалерея' },
   { path: '/video', label: 'Видео' },

@@ -1,12 +1,9 @@
-import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Shield, Users, HelpCircle, Globe, MessageCircle, UserCheck } from 'lucide-react';
 import api, { setSEO, setJsonLd, getSiteUrl } from '../lib/api';
 import PictureImg from '../components/PictureImg';
 import useInView from '../hooks/useInView';
-
-// ReviewsCarousel — отдельный чанк, грузится только когда секция входит в viewport
-const ReviewsCarousel = lazy(() => import('../components/ReviewsCarousel'));
 
 const PROBLEM_CATEGORIES = [
   { label: 'Порча', path: '/porcha' },
@@ -36,12 +33,10 @@ const SERVICE_LINKS = [
 export default function HomePage() {
   const [page, setPage] = useState(null);
   const [participants, setParticipants] = useState([]);
-  const [reviews, setReviews] = useState([]);
 
   // Sentinel-рефы для defer-mount тяжёлых below-the-fold секций.
   // Секция рендерится только когда пользователь приблизится к ней при скролле.
   const [participantsRef, participantsInView] = useInView({ rootMargin: '400px' });
-  const [reviewsRef, reviewsInView] = useInView({ rootMargin: '400px' });
 
   // Critical path: только данные, нужные above-the-fold (hero + SEO)
   useEffect(() => {
@@ -78,12 +73,6 @@ export default function HomePage() {
     if (!participantsInView || participants.length) return;
     api.get('/participants').then(res => setParticipants(res.data || [])).catch(() => {});
   }, [participantsInView, participants.length]);
-
-  // Deferred: отзывы тоже подгружаются по мере приближения секции
-  useEffect(() => {
-    if (!reviewsInView || reviews.length) return;
-    api.get('/reviews?limit=40').then(res => setReviews(res.data || [])).catch(() => {});
-  }, [reviewsInView, reviews.length]);
 
   const b = page?.blocks || {};
 
@@ -296,21 +285,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ===== REVIEWS CAROUSEL ===== */}
-      <section ref={reviewsRef} id="otzyvy" className="py-10 px-4" data-testid="reviews-section">
-        {reviews.length > 0 && (
-          <div className="max-w-6xl mx-auto">
-            <h2 className="font-heading text-3xl md:text-5xl font-bold text-white text-center mb-10">
-              {b.reviews_title || 'Отзывы'}
-            </h2>
-            <Suspense fallback={<div className="text-white/40 font-body text-center py-10">Загрузка отзывов…</div>}>
-              <ReviewsCarousel reviews={reviews} />
-            </Suspense>
-          </div>
-        )}
-      </section>
-
-      {/* ===== CTA BETWEEN REVIEWS AND SERVICES ===== */}
+      {/* ===== CTA BETWEEN PARTICIPANTS AND SERVICES ===== */}
       <section className="py-6 md:py-8 px-4" data-testid="cta-mid-section">
         <div className="max-w-sm mx-auto teal-card p-6 text-center">
           <p className="text-white font-body font-medium mb-4 text-base">
