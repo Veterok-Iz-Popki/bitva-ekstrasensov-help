@@ -10,31 +10,10 @@ import { Badge } from '../../components/ui/badge';
 import { Plus, Pencil, Trash2, Upload, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '../../lib/api';
+import { buildFallbackSeo } from '../../lib/participantSeoFallback';
 
 const emptyForm = { slug: '', name: '', title: '', description: '', full_description: '', photo_url: '', specializations: [], is_active: true, order: 0 };
 const emptySeo = { title: '', description: '', keywords: '', h1: '', og_title: '', og_description: '' };
-
-const genSeoFromParticipant = (form) => {
-  const name = (form.name || '').trim();
-  const achievement = (form.title || '').trim(); // реальное достижение из БД: "Финалистка 13 сезона «Битвы экстрасенсов»" и т.п.
-  const seoTitle = achievement
-    ? `${name} — ${achievement} | Битва Экстрасенсов`
-    : (name ? `Экстрасенс ${name} — приём и консультация | Битва Экстрасенсов` : '');
-  const desc = achievement
-    ? `${name} — ${achievement}. Личный приём экстрасенса, онлайн-консультация, диагностика жизненных ситуаций, помощь в сложных вопросах.`
-    : (name ? `Личный приём экстрасенса ${name}. Онлайн-консультация, диагностика жизненных ситуаций.` : '');
-  const keywords = name
-    ? [name, achievement, 'экстрасенс', 'консультация', 'битва экстрасенсов', 'приём', 'помощь'].filter(Boolean).join(', ')
-    : '';
-  return {
-    title: seoTitle,
-    description: desc,
-    keywords,
-    h1: name,
-    og_title: achievement ? `${name} — ${achievement}` : (name ? `${name} — приём экстрасенса` : ''),
-    og_description: desc,
-  };
-};
 
 export default function ParticipantsAdmin() {
   const [items, setItems] = useState([]);
@@ -73,20 +52,27 @@ export default function ParticipantsAdmin() {
       order: item.order || 0
     });
     setSpecText((item.specializations || []).join(', '));
-    // Подтянуть существующие SEO поля для этого участника (если сохранены).
-    // Если записи в seo_settings ещё нет — оставляем поля пустыми
-    // (сайт по-прежнему будет использовать автоматическую генерацию).
-    setSeo({ ...emptySeo });
+    // При открытии формы всегда показываем то, что реально видит пользователь на сайте.
+    // Если в seo_settings нет записи для этого участника — заполняем поля тем же fallback,
+    // что использует публичная страница (единый генератор buildFallbackSeo).
+    // Запись в БД при этом НЕ создаётся — она появится только после явного «Сохранить».
+    // Если запись уже существует — показываем именно сохранённые значения.
+    setSeo(buildFallbackSeo(item));
     api.get(`/seo/participant-${item.slug}`).then((res) => {
       const d = res.data || {};
-      setSeo({
-        title: d.title || '',
-        description: d.description || '',
-        keywords: d.keywords || '',
-        h1: d.h1 || '',
-        og_title: d.og_title || '',
-        og_description: d.og_description || '',
-      });
+      // Признак того, что запись реально сохранена в seo_settings, — наличие поля id
+      // (endpoint без записи возвращает объект без id).
+      if (d && d.id) {
+        setSeo({
+          title: d.title || '',
+          description: d.description || '',
+          keywords: d.keywords || '',
+          h1: d.h1 || '',
+          og_title: d.og_title || '',
+          og_description: d.og_description || '',
+        });
+      }
+      // Иначе оставляем уже подставленный fallback preview.
     }).catch(() => {});
     setDialogOpen(true);
   };
@@ -351,7 +337,7 @@ export default function ParticipantsAdmin() {
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => setSeo(genSeoFromParticipant(form))}
+                  onClick={() => setSeo(buildFallbackSeo(form))}
                   className="border-gold/50 text-gold hover:bg-gold/10 font-body text-xs h-8"
                   data-testid="seo-autofill-btn"
                 >
@@ -359,7 +345,7 @@ export default function ParticipantsAdmin() {
                 </Button>
               </div>
               <p className="text-white/40 text-xs font-body">
-                Если поля пустые, сайт использует автогенерацию из имени и описания участника.
+                Если поля не сохранены в БД, здесь автоматически показывается тот же fallback, что использует сайт. Изменения запишутся в БД только после «Сохранить».
               </p>
 
               <div className="space-y-2">
