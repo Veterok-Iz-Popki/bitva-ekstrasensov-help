@@ -14,17 +14,25 @@ import api from '../../lib/api';
 const emptyForm = { slug: '', name: '', title: '', description: '', full_description: '', photo_url: '', specializations: [], is_active: true, order: 0 };
 const emptySeo = { title: '', description: '', keywords: '', h1: '', og_title: '', og_description: '' };
 
-const genSeoFromParticipant = (form, specText) => {
+const genSeoFromParticipant = (form) => {
   const name = (form.name || '').trim();
-  const shortDesc = (form.description || '').trim();
-  const specs = (specText || '').split(',').map((s) => s.trim()).filter(Boolean).join(', ');
+  const achievement = (form.title || '').trim(); // реальное достижение из БД: "Финалистка 13 сезона «Битвы экстрасенсов»" и т.п.
+  const seoTitle = achievement
+    ? `${name} — ${achievement} | Битва Экстрасенсов`
+    : (name ? `Экстрасенс ${name} — приём и консультация | Битва Экстрасенсов` : '');
+  const desc = achievement
+    ? `${name} — ${achievement}. Личный приём экстрасенса, онлайн-консультация, диагностика жизненных ситуаций, помощь в сложных вопросах.`
+    : (name ? `Личный приём экстрасенса ${name}. Онлайн-консультация, диагностика жизненных ситуаций.` : '');
+  const keywords = name
+    ? [name, achievement, 'экстрасенс', 'консультация', 'битва экстрасенсов', 'приём', 'помощь'].filter(Boolean).join(', ')
+    : '';
   return {
-    title: name ? `Экстрасенс ${name} — Официальный сайт помощи | Битва Экстрасенсов` : '',
-    description: shortDesc,
-    keywords: name ? [name, 'экстрасенс', 'консультация', 'битва экстрасенсов', 'помощь', 'приём', specs].filter(Boolean).join(', ') : '',
-    h1: name ? `Официальная страница помощи ${name}` : '',
-    og_title: name ? `${name} — приём экстрасенса` : '',
-    og_description: shortDesc,
+    title: seoTitle,
+    description: desc,
+    keywords,
+    h1: name,
+    og_title: achievement ? `${name} — ${achievement}` : (name ? `${name} — приём экстрасенса` : ''),
+    og_description: desc,
   };
 };
 
@@ -343,7 +351,7 @@ export default function ParticipantsAdmin() {
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => setSeo(genSeoFromParticipant(form, specText))}
+                  onClick={() => setSeo(genSeoFromParticipant(form))}
                   className="border-gold/50 text-gold hover:bg-gold/10 font-body text-xs h-8"
                   data-testid="seo-autofill-btn"
                 >

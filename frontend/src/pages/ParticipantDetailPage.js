@@ -90,13 +90,25 @@ export default function ParticipantDetailPage() {
       setAllParticipants(allRes.data || []);
       const p = partRes.data;
       const seo = seoRes.data;
+      // Fallback SEO использует РЕАЛЬНОЕ звание участника из p.title
+      // (например "Финалистка 13 сезона «Битвы экстрасенсов»"), чтобы автоген
+      // не подставлял обобщённые/неверные достижения. Если админ сохранил
+      // явное SEO — оно приоритетнее.
+      const ach = (p.title || '').trim();
+      const fallbackTitle = ach
+        ? `${p.name} — ${ach} | Битва Экстрасенсов`
+        : `Экстрасенс ${p.name} — приём и консультация | Битва Экстрасенсов`;
+      const fallbackDesc = ach
+        ? `${p.name} — ${ach}. Личный приём экстрасенса, онлайн-консультация, диагностика жизненных ситуаций, помощь в сложных вопросах.`
+        : `Личный приём экстрасенса ${p.name}. Онлайн-консультация, диагностика жизненных ситуаций.`;
+      const fallbackOgTitle = ach ? `${p.name} — ${ach}` : `${p.name} — приём экстрасенса`;
       setSEO({
-        title: seo?.title || `Экстрасенс ${p.name} - Официальный сайт помощи | Битва Экстрасенсов`,
-        description: seo?.description || p.description,
-        keywords: seo?.keywords || `${p.name}, экстрасенс, консультация, битва экстрасенсов, помощь, прием`,
+        title: seo?.title || fallbackTitle,
+        description: seo?.description || fallbackDesc,
+        keywords: seo?.keywords || [p.name, ach, 'экстрасенс', 'консультация', 'битва экстрасенсов', 'помощь', 'приём'].filter(Boolean).join(', '),
         canonicalPath: `/uchastniki/${slug}`,
-        ogTitle: seo?.og_title || `${p.name} — приём экстрасенса`,
-        ogDescription: seo?.og_description || p.description,
+        ogTitle: seo?.og_title || fallbackOgTitle,
+        ogDescription: seo?.og_description || fallbackDesc,
         ogImage: p.photo_url ? (p.photo_url.startsWith('http') ? p.photo_url : `${getSiteUrl()}${p.photo_url}`) : undefined,
       });
       setJsonLd({
