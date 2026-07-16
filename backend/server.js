@@ -89,13 +89,15 @@ async function requireAdmin(req, res, next) {
 
 // Email notification (заявка)
 async function sendNotificationEmail(application) {
-  if (!RESEND_API_KEY) return;
+  if (!RESEND_API_KEY) { console.warn('[email] sendNotificationEmail SKIPPED: RESEND_API_KEY env is empty'); return; }
+  if (!SENDER_EMAIL)   { console.warn('[email] sendNotificationEmail SKIPPED: SENDER_EMAIL env is empty'); return; }
   try {
     const { Resend } = require('resend');
     const resend = new Resend(RESEND_API_KEY);
     const [rows] = await db.query("SELECT notification_email, email_notifications_enabled FROM site_settings WHERE id = 'site_settings'");
     const settings = rows[0] || {};
-    if (!settings.notification_email || !settings.email_notifications_enabled) return;
+    if (!settings.notification_email)      { console.warn('[email] sendNotificationEmail SKIPPED: site_settings.notification_email is empty'); return; }
+    if (!settings.email_notifications_enabled) { console.warn('[email] sendNotificationEmail SKIPPED: site_settings.email_notifications_enabled=0 (выключено в админке)'); return; }
 
     const fullName = application.name || `${application.lastName} ${application.firstName} ${application.patronymic}`.trim();
     const html = `
@@ -139,13 +141,15 @@ async function sendNotificationEmail(application) {
 
 // Email notification (contact / обратный звонок)
 async function sendContactNotification(msg) {
-  if (!RESEND_API_KEY) return;
+  if (!RESEND_API_KEY) { console.warn('[email] sendContactNotification SKIPPED: RESEND_API_KEY env is empty'); return; }
+  if (!SENDER_EMAIL)   { console.warn('[email] sendContactNotification SKIPPED: SENDER_EMAIL env is empty'); return; }
   try {
     const { Resend } = require('resend');
     const resend = new Resend(RESEND_API_KEY);
     const [rows] = await db.query("SELECT notification_email, email_notifications_enabled FROM site_settings WHERE id = 'site_settings'");
     const settings = rows[0] || {};
-    if (!settings.notification_email || !settings.email_notifications_enabled) return;
+    if (!settings.notification_email)      { console.warn('[email] sendContactNotification SKIPPED: site_settings.notification_email is empty'); return; }
+    if (!settings.email_notifications_enabled) { console.warn('[email] sendContactNotification SKIPPED: site_settings.email_notifications_enabled=0'); return; }
 
     const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
