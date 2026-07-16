@@ -13,6 +13,7 @@
     "db:restore": "node scripts/db-restore.js",
     "db:seed": "node -e \"require('./db'); const {runSeed}=require('./seed'); runSeed(require('./db')).then(()=>process.exit(0))\"",
     "setup": "npm run db:init && npm run db:seed",
+    "test:email": "node scripts/test-email.js",
     "test": "echo \"No tests\" && exit 0"
   },
   "keywords": [],
