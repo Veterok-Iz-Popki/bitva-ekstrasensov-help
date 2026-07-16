@@ -15,8 +15,35 @@
  *
  * Не изменяет БД. Не влияет на работу сайта.
  */
-require('dotenv').config();
+// Захватываем значения ДО загрузки dotenv — это то, что реально проставлено
+// платформой (Emergent Deploy Settings / docker env / shell export).
+// dotenv.config() по умолчанию НЕ переопределяет уже существующие переменные —
+// поэтому если prod env что-то задал, оно приоритетнее .env файла.
+const before = {
+  RESEND_API_KEY: process.env.RESEND_API_KEY,
+  SENDER_EMAIL:   process.env.SENDER_EMAIL,
+};
+
+const path = require('path');
+const fs = require('fs');
+const envPath = path.join(__dirname, '..', '.env');
+const envFileExists = fs.existsSync(envPath);
+
+const dotenvResult = require('dotenv').config({ path: envPath });
 const { Resend } = require('resend');
+
+const after = {
+  RESEND_API_KEY: process.env.RESEND_API_KEY,
+  SENDER_EMAIL:   process.env.SENDER_EMAIL,
+};
+
+// Определяем источник для каждой переменной
+function whichSource(key) {
+  if (before[key] && after[key] === before[key]) return 'REAL ENV (platform/shell) — dotenv left as-is';
+  if (!before[key] && after[key])                return `.env file (${envPath})`;
+  if (!after[key])                                return '<NOT SET anywhere>';
+  return 'REAL ENV (overrode .env)';
+}
 
 const mask = (s) => (s ? `${s.slice(0, 6)}…${s.slice(-4)}` : '<empty>');
 
@@ -26,8 +53,13 @@ async function main() {
   const argRecipient = (process.argv[2] || '').trim();
 
   console.log('===== TEST EMAIL DIAGNOSTIC =====');
+  console.log(`.env file: ${envFileExists ? `FOUND at ${envPath}` : `NOT FOUND (dotenv is a no-op)`}`);
+  if (dotenvResult.error && envFileExists) console.log(`  dotenv error: ${dotenvResult.error.message}`);
+  console.log('');
   console.log(`RESEND_API_KEY:   ${mask(RESEND_API_KEY)} (${RESEND_API_KEY.length} chars)`);
+  console.log(`  source:         ${whichSource('RESEND_API_KEY')}`);
   console.log(`SENDER_EMAIL:     ${SENDER_EMAIL || '<empty>'}`);
+  console.log(`  source:         ${whichSource('SENDER_EMAIL')}`);
 
   if (!RESEND_API_KEY) {
     console.error('❌ RESEND_API_KEY is empty in ENV — Resend client cannot be created.');
