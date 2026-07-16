@@ -60,12 +60,13 @@ async function main() {
   // Полный дамп process.env (секреты маскируются). Полезно на prod чтобы
   // понять что реально проставлено платформой Emergent Deploy Settings.
   console.log('----- process.env dump (secrets masked) -----');
-  const secretRegex = /(KEY|SECRET|TOKEN|PASSWORD|PWD|PRIVATE|AUTH|JWT|APIKEY)/i;
+  const secretRegex = /(KEY|SECRET|TOKEN|PASSWORD|PRIVATE|AUTH|JWT|APIKEY)/i;
+  const isSecret = (k) => secretRegex.test(k) && k !== 'PWD' && k !== 'OLDPWD';
   const keys = Object.keys(process.env).sort();
   console.log(`Total env variables: ${keys.length}`);
   for (const k of keys) {
     const v = process.env[k] || '';
-    const shown = secretRegex.test(k) ? `${mask(v)} (${v.length} chars)` : v;
+    const shown = isSecret(k) ? `${mask(v)} (${v.length} chars)` : v;
     console.log(`  ${k} = ${shown}`);
   }
   console.log('');
