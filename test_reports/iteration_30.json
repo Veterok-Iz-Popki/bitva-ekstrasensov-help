@@ -1,0 +1,33 @@
+{
+  "summary": "Post-restart iter30 smoke: 12/12 pytest passed + full UI E2E validated. DB restore verified (8 participants, popup_phone='+7 911 555-66-66', Elena='Финалистка 13 сезона', Viktoriya='Победительница 16 сезона'). Silent-failure fix confirmed in backend logs (Resend 403 rejected but API returns 200 and 0 apps persisted). YM goal form_send fires exactly 1x on submit. Mobile overflow=0. Console errors=0 on all checked pages.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_smoke_iter21.py",
+    "/app/test_reports/pytest/iter30_smoke.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "admin: nikoa2020@gmail.com / aspire5542gl1952tq (from /app/memory/test_credentials.md)",
+  "seed_data_creation": "None (used existing restored dump.sql data)",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "test_smoke_iter21.py is the canonical reusable smoke suite (12 tests). Elena/Viktoriya title assertions confirmed via SEO fallback rendering document.title. Form flow test wraps window.ym to count reachGoal('form_send') calls. Popup phone check by scanning body.innerText for '+7 911 555-66-66'. Mobile overflow scrollWidth==clientWidth check on both / and /zapis-na-priem.",
+  "verified_features": [
+    "8 participants + 40 reviews returned by API",
+    "popup_phone='+7 911 555-66-66' in /api/settings and vcard",
+    "topic-porcha page blocks intact",
+    "POST /api/applications returns 200 but 0 persisted (silent-failure fix)",
+    "Backend log contains 'Resend rejected application email: [403]' (12 entries)",
+    "Admin login + admin/applications requires token + returns 0 apps",
+    "SEO fallback: elena-golunova title contains 'Финалистка 13 сезона', viktoriya-raidos contains 'Победительница 16 сезона'",
+    "Menu excludes 'Отзывы' on homepage header",
+    "Yandex Metrika: window.ym === function, tag_ww.js?id=110304923 loaded",
+    "reachGoal('form_send') fires exactly 1x on valid /zapis-na-priem submit; popup shows '+7 911 555-66-66'",
+    "Mobile 390x844: no horizontal overflow on / and /zapis-na-priem",
+    "Admin /admin/participants shows all 8 participants with correct achievements",
+    "Zero console errors across all tested pages"
+  ]
+}
