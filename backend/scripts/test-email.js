@@ -56,6 +56,21 @@ async function main() {
   console.log(`.env file: ${envFileExists ? `FOUND at ${envPath}` : `NOT FOUND (dotenv is a no-op)`}`);
   if (dotenvResult.error && envFileExists) console.log(`  dotenv error: ${dotenvResult.error.message}`);
   console.log('');
+
+  // Полный дамп process.env (секреты маскируются). Полезно на prod чтобы
+  // понять что реально проставлено платформой Emergent Deploy Settings.
+  console.log('----- process.env dump (secrets masked) -----');
+  const secretRegex = /(KEY|SECRET|TOKEN|PASSWORD|PWD|PRIVATE|AUTH|JWT|APIKEY)/i;
+  const keys = Object.keys(process.env).sort();
+  console.log(`Total env variables: ${keys.length}`);
+  for (const k of keys) {
+    const v = process.env[k] || '';
+    const shown = secretRegex.test(k) ? `${mask(v)} (${v.length} chars)` : v;
+    console.log(`  ${k} = ${shown}`);
+  }
+  console.log('');
+
+  console.log('----- Key variables for email delivery -----');
   console.log(`RESEND_API_KEY:   ${mask(RESEND_API_KEY)} (${RESEND_API_KEY.length} chars)`);
   console.log(`  source:         ${whichSource('RESEND_API_KEY')}`);
   console.log(`SENDER_EMAIL:     ${SENDER_EMAIL || '<empty>'}`);

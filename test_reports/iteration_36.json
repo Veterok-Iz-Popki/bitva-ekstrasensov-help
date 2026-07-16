@@ -1,0 +1,18 @@
+{
+  "summary": "Verified new process.env dump block in /app/backend/scripts/test-email.js. All 7 test criteria passed with a single real Resend send.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Regex /(KEY|SECRET|TOKEN|PASSWORD|PWD|PRIVATE|AUTH|JWT|APIKEY)/i matches PWD (as substring): PWD env var is masked to '/app/b…kend (12 chars)'. Not a real secret — cosmetic. Consider anchoring or using word boundaries if plain PWD path is desired.",
+    "OLDPWD similarly masked. Same cosmetic reason. Non-blocking."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100%", "frontend": "n/a"},
+  "seed_data_creation": "",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Test criteria verification: (1) Block '----- process.env dump (secrets masked) -----' present with 'Total env variables: 80'. (2) JWT_SECRET = 'mystic…tion (42 chars)' — masked. (3) RESEND_API_KEY = 're_MLL…U1L3 (36 chars)' — masked. (4) SENDER_EMAIL = 'no-reply@bitva-ekstrasensov-help.com' — full plain value. (5) MONGO_URL='mongodb://localhost:27017', DB_NAME='psychic_battle', DB_HOST='localhost' — all full. (6) Key variables block appears after dump with source detection. (7) Resend send succeeded — exit 0, id=d63d15b3-45df-4c57-b43b-e843d8c3c215, daily quota 17 remaining. Sorted alphabetically confirmed (AGENT_… first, run_id last). Note: PWD/OLDPWD unnecessarily masked because regex matches PWD substring — cosmetic only, not a security issue.",
+  "rca of the issue": "n/a"
+}
