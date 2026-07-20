@@ -38,8 +38,15 @@ export default function ContactsPage() {
       await api.post('/contact', form);
       toast.success('Сообщение отправлено!');
       setForm({ name: '', email: '', message: '', honeypot: '' });
-    } catch {
-      toast.error('Произошла ошибка.');
+    } catch (err) {
+      if (err.response?.data?.error) {
+        const detail = err.response.data.detail || 'Ошибка';
+        toast.error(`${detail}: ${err.response.data.error}`, { duration: 15000 });
+      } else if (err.response?.data?.detail) {
+        toast.error(err.response.data.detail);
+      } else {
+        toast.error('Произошла ошибка.');
+      }
     } finally {
       setSubmitting(false);
     }

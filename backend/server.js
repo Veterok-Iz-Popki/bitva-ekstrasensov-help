@@ -87,17 +87,35 @@ async function requireAdmin(req, res, next) {
   }
 }
 
-// Email notification (заявка)
+// Email notification (заявка).
+// Возвращает { ok: true, id } при успешной отправке или { ok: false, error: '<текст>' }
+// при любой проблеме — конфигурационной или сетевой. Роут решает, что делать с результатом.
 async function sendNotificationEmail(application) {
-  if (!RESEND_API_KEY) { console.warn('[email] sendNotificationEmail SKIPPED: RESEND_API_KEY env is empty'); return; }
-  if (!SENDER_EMAIL)   { console.warn('[email] sendNotificationEmail SKIPPED: SENDER_EMAIL env is empty'); return; }
+  if (!RESEND_API_KEY) {
+    const err = 'RESEND_API_KEY env is empty';
+    console.warn(`[email] sendNotificationEmail FAILED: ${err}`);
+    return { ok: false, error: err };
+  }
+  if (!SENDER_EMAIL) {
+    const err = 'SENDER_EMAIL env is empty';
+    console.warn(`[email] sendNotificationEmail FAILED: ${err}`);
+    return { ok: false, error: err };
+  }
   try {
     const { Resend } = require('resend');
     const resend = new Resend(RESEND_API_KEY);
     const [rows] = await db.query("SELECT notification_email, email_notifications_enabled FROM site_settings WHERE id = 'site_settings'");
     const settings = rows[0] || {};
-    if (!settings.notification_email)      { console.warn('[email] sendNotificationEmail SKIPPED: site_settings.notification_email is empty'); return; }
-    if (!settings.email_notifications_enabled) { console.warn('[email] sendNotificationEmail SKIPPED: site_settings.email_notifications_enabled=0 (выключено в админке)'); return; }
+    if (!settings.notification_email) {
+      const err = 'site_settings.notification_email is empty (заполни в админке → Настройки сайта)';
+      console.warn(`[email] sendNotificationEmail FAILED: ${err}`);
+      return { ok: false, error: err };
+    }
+    if (!settings.email_notifications_enabled) {
+      const err = 'site_settings.email_notifications_enabled=0 (email-уведомления выключены в админке)';
+      console.warn(`[email] sendNotificationEmail FAILED: ${err}`);
+      return { ok: false, error: err };
+    }
 
     const fullName = application.name || `${application.lastName} ${application.firstName} ${application.patronymic}`.trim();
     const html = `
@@ -130,26 +148,46 @@ async function sendNotificationEmail(application) {
       html,
     });
     if (result && result.error) {
-      console.error(`Resend rejected application email: [${result.error.statusCode || '?'}] ${result.error.name || ''}: ${result.error.message || JSON.stringify(result.error)}`);
-      return;
+      const err = `Resend rejected: [${result.error.statusCode || '?'}] ${result.error.name || ''}: ${result.error.message || JSON.stringify(result.error)}`;
+      console.error(`Resend rejected application email: ${err}`);
+      return { ok: false, error: err };
     }
     console.log(`Notification email sent to ${settings.notification_email} (id=${result?.data?.id || 'n/a'})`);
+    return { ok: true, id: result?.data?.id || null };
   } catch (e) {
     console.error('Failed to send email:', e.message);
+    return { ok: false, error: `Exception: ${e.message}` };
   }
 }
 
-// Email notification (contact / обратный звонок)
+// Email notification (contact / обратный звонок).
+// Возвращает { ok: true, id } или { ok: false, error: '<текст>' } — см. sendNotificationEmail.
 async function sendContactNotification(msg) {
-  if (!RESEND_API_KEY) { console.warn('[email] sendContactNotification SKIPPED: RESEND_API_KEY env is empty'); return; }
-  if (!SENDER_EMAIL)   { console.warn('[email] sendContactNotification SKIPPED: SENDER_EMAIL env is empty'); return; }
+  if (!RESEND_API_KEY) {
+    const err = 'RESEND_API_KEY env is empty';
+    console.warn(`[email] sendContactNotification FAILED: ${err}`);
+    return { ok: false, error: err };
+  }
+  if (!SENDER_EMAIL) {
+    const err = 'SENDER_EMAIL env is empty';
+    console.warn(`[email] sendContactNotification FAILED: ${err}`);
+    return { ok: false, error: err };
+  }
   try {
     const { Resend } = require('resend');
     const resend = new Resend(RESEND_API_KEY);
     const [rows] = await db.query("SELECT notification_email, email_notifications_enabled FROM site_settings WHERE id = 'site_settings'");
     const settings = rows[0] || {};
-    if (!settings.notification_email)      { console.warn('[email] sendContactNotification SKIPPED: site_settings.notification_email is empty'); return; }
-    if (!settings.email_notifications_enabled) { console.warn('[email] sendContactNotification SKIPPED: site_settings.email_notifications_enabled=0'); return; }
+    if (!settings.notification_email) {
+      const err = 'site_settings.notification_email is empty';
+      console.warn(`[email] sendContactNotification FAILED: ${err}`);
+      return { ok: false, error: err };
+    }
+    if (!settings.email_notifications_enabled) {
+      const err = 'site_settings.email_notifications_enabled=0';
+      console.warn(`[email] sendContactNotification FAILED: ${err}`);
+      return { ok: false, error: err };
+    }
 
     const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -174,12 +212,15 @@ async function sendContactNotification(msg) {
       html,
     });
     if (result && result.error) {
-      console.error(`Resend rejected contact email: [${result.error.statusCode || '?'}] ${result.error.name || ''}: ${result.error.message || JSON.stringify(result.error)}`);
-      return;
+      const err = `Resend rejected: [${result.error.statusCode || '?'}] ${result.error.name || ''}: ${result.error.message || JSON.stringify(result.error)}`;
+      console.error(`Resend rejected contact email: ${err}`);
+      return { ok: false, error: err };
     }
     console.log(`Contact notification sent to ${settings.notification_email} (id=${result?.data?.id || 'n/a'})`);
+    return { ok: true, id: result?.data?.id || null };
   } catch (e) {
     console.error('Failed to send contact email:', e.message);
+    return { ok: false, error: `Exception: ${e.message}` };
   }
 }
 
@@ -338,7 +379,16 @@ api.post('/applications', async (req, res) => {
   // но новые заявки в нём появляться НЕ будут.
   // Если потребуется вернуть сохранение — восстановить INSERT INTO applications с полями выше.
 
-  sendNotificationEmail({ ...data, name: fullName, psychic_slug: data.psychic_slug, psychic_name: data.psychic_name, created_at: now }).catch(() => {});
+  // Ждём результат отправки. Если письмо не ушло — возвращаем 500 с текстом ошибки,
+  // чтобы клиент понял, в чём проблема (пустой ключ, отклонение Resend, сетевой сбой и т.д.).
+  const emailResult = await sendNotificationEmail({ ...data, name: fullName, psychic_slug: data.psychic_slug, psychic_name: data.psychic_name, created_at: now });
+  if (!emailResult.ok) {
+    return res.status(500).json({
+      status: 'error',
+      detail: 'Не удалось отправить уведомление о заявке',
+      error: emailResult.error,
+    });
+  }
   return res.json({ status: 'success', message: 'Заявка успешно отправлена' });
 });
 
@@ -355,7 +405,16 @@ api.post('/contact', async (req, res) => {
     'INSERT INTO contact_messages (id, name, email, message, status, created_at) VALUES (?,?,?,?,?,?)',
     [id, data.name, data.email, data.message, 'new', now]
   );
-  sendContactNotification({ ...data, created_at: now }).catch(() => {});
+  // Ждём отправку письма и при ошибке возвращаем 500 с деталями.
+  // Сообщение при этом уже сохранено в contact_messages — не теряется.
+  const emailResult = await sendContactNotification({ ...data, created_at: now });
+  if (!emailResult.ok) {
+    return res.status(500).json({
+      status: 'error',
+      detail: 'Сообщение сохранено, но письмо-уведомление не отправлено',
+      error: emailResult.error,
+    });
+  }
   return res.json({ status: 'success', message: 'Сообщение отправлено' });
 });
 
