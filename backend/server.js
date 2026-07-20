@@ -163,8 +163,13 @@ async function sendNotificationEmail(application) {
       html,
     });
     if (result && result.error) {
-      const err = `Resend rejected: [${result.error.statusCode || '?'}] ${result.error.name || ''}: ${result.error.message || JSON.stringify(result.error)}` + emailDebugSuffix(settings.notification_email);
-      console.error(`Resend rejected application email: ${err}`);
+      // Извлекаем всё, что можно — вплоть до e.cause (там Node.js прячет ENOTFOUND/ECONNREFUSED/UND_ERR_...)
+      const err_obj = result.error;
+      const cause = err_obj.cause || {};
+      const fullDump = JSON.stringify(err_obj, Object.getOwnPropertyNames(err_obj));
+      const causeInfo = cause.code || cause.message ? ` [cause: ${cause.code || ''} ${cause.message || ''}]` : '';
+      const err = `Resend rejected: [${err_obj.statusCode || '?'}] ${err_obj.name || ''}: ${err_obj.message || fullDump}${causeInfo}` + emailDebugSuffix(settings.notification_email);
+      console.error(`Resend rejected application email: ${err} | full: ${fullDump}`);
       return { ok: false, error: err };
     }
     console.log(`Notification email sent to ${settings.notification_email} (id=${result?.data?.id || 'n/a'})`);
@@ -227,8 +232,12 @@ async function sendContactNotification(msg) {
       html,
     });
     if (result && result.error) {
-      const err = `Resend rejected: [${result.error.statusCode || '?'}] ${result.error.name || ''}: ${result.error.message || JSON.stringify(result.error)}` + emailDebugSuffix(settings.notification_email);
-      console.error(`Resend rejected contact email: ${err}`);
+      const err_obj = result.error;
+      const cause = err_obj.cause || {};
+      const fullDump = JSON.stringify(err_obj, Object.getOwnPropertyNames(err_obj));
+      const causeInfo = cause.code || cause.message ? ` [cause: ${cause.code || ''} ${cause.message || ''}]` : '';
+      const err = `Resend rejected: [${err_obj.statusCode || '?'}] ${err_obj.name || ''}: ${err_obj.message || fullDump}${causeInfo}` + emailDebugSuffix(settings.notification_email);
+      console.error(`Resend rejected contact email: ${err} | full: ${fullDump}`);
       return { ok: false, error: err };
     }
     console.log(`Contact notification sent to ${settings.notification_email} (id=${result?.data?.id || 'n/a'})`);
@@ -454,6 +463,111 @@ api.post('/admin/login', async (req, res) => {
 
 api.get('/admin/me', requireAdmin, (req, res) => {
   return res.json({ username: req.admin.username });
+});
+
+// ===== ADMIN EMAIL DIAGNOSTICS =====
+// Cетевая диагностика для случая, когда fetch не может достучаться до api.resend.com.
+// Возвращает результат трёх независимых проверок:
+//   1) DNS-резолвинг api.resend.com (dns.promises.lookup)
+//   2) сырой HTTPS-запрос через глобальный fetch к https://api.resend.com/domains
+//      (авторизованный, но без SDK-обёртки — чтобы увидеть настоящую ошибку сети)
+//   3) вызов resend.emails.send() на реальный notification_email — как в проде
+// Все три проверки завёрнуты в try/catch по отдельности, ошибка одной не мешает остальным.
+api.post('/admin/email-probe', requireAdmin, async (req, res) => {
+  const out = {
+    env: {
+      SENDER_EMAIL: SENDER_EMAIL || '<empty>',
+      RESEND_API_KEY: RESEND_API_KEY ? `${RESEND_API_KEY.slice(0, 6)}…${RESEND_API_KEY.slice(-4)} (${RESEND_API_KEY.length} chars)` : '<empty>',
+      NODE_VERSION: process.version,
+    },
+    dns_lookup: null,
+    raw_fetch: null,
+    resend_send: null,
+  };
+
+  // 1) DNS
+  try {
+    const dns = require('dns').promises;
+    const t0 = Date.now();
+    const r = await dns.lookup('api.resend.com', { all: true });
+    out.dns_lookup = { ok: true, addresses: r, ms: Date.now() - t0 };
+  } catch (e) {
+    out.dns_lookup = { ok: false, error: `${e.code || ''}: ${e.message}`, syscall: e.syscall || null };
+  }
+
+  // 2) Raw HTTPS fetch (bypass Resend SDK)
+  try {
+    const t0 = Date.now();
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 10000);
+    const resp = await fetch('https://api.resend.com/domains', {
+      method: 'GET',
+      headers: { 'Authorization': `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+      signal: ctrl.signal,
+    });
+    clearTimeout(timer);
+    const bodyText = await resp.text();
+    out.raw_fetch = {
+      ok: resp.ok,
+      status: resp.status,
+      statusText: resp.statusText,
+      ms: Date.now() - t0,
+      body_preview: bodyText.slice(0, 500),
+    };
+  } catch (e) {
+    // Node.js fetch кладёт настоящую сетевую ошибку в e.cause
+    const cause = e.cause || {};
+    out.raw_fetch = {
+      ok: false,
+      error_name: e.name || null,
+      error_message: e.message || null,
+      cause_code: cause.code || null,           // ENOTFOUND, ECONNREFUSED, UND_ERR_...
+      cause_errno: cause.errno || null,
+      cause_syscall: cause.syscall || null,
+      cause_hostname: cause.hostname || null,
+      cause_message: cause.message || null,
+    };
+  }
+
+  // 3) Resend SDK send
+  try {
+    const { Resend } = require('resend');
+    const resend = new Resend(RESEND_API_KEY);
+    const [rows] = await db.query("SELECT notification_email FROM site_settings WHERE id = 'site_settings'");
+    const recipient = (rows[0] && rows[0].notification_email) || '';
+    if (!recipient) {
+      out.resend_send = { ok: false, error: 'notification_email пуст в site_settings' };
+    } else {
+      const t0 = Date.now();
+      const stamp = new Date().toISOString();
+      const result = await resend.emails.send({
+        from: SENDER_EMAIL,
+        to: [recipient],
+        subject: `Email probe from admin (${stamp})`,
+        html: `<p>Диагностическое письмо от /api/admin/email-probe.</p><p>Timestamp: ${stamp}</p>`,
+      });
+      out.resend_send = {
+        ok: !result?.error,
+        ms: Date.now() - t0,
+        recipient,
+        id: result?.data?.id || null,
+        error: result?.error ? JSON.parse(JSON.stringify(result.error, Object.getOwnPropertyNames(result.error))) : null,
+      };
+    }
+  } catch (e) {
+    const cause = e.cause || {};
+    out.resend_send = {
+      ok: false,
+      exception: true,
+      error_name: e.name,
+      error_message: e.message,
+      cause_code: cause.code || null,
+      cause_message: cause.message || null,
+      stack: (e.stack || '').split('\n').slice(0, 5).join('\n'),
+    };
+  }
+
+  return res.json(out);
 });
 
 // ===== ADMIN APPLICATIONS =====
