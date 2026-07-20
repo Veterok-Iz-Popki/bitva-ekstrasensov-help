@@ -90,14 +90,29 @@ async function requireAdmin(req, res, next) {
 // Email notification (заявка).
 // Возвращает { ok: true, id } при успешной отправке или { ok: false, error: '<текст>' }
 // при любой проблеме — конфигурационной или сетевой. Роут решает, что делать с результатом.
+//
+// ⚠ ВРЕМЕННО (по запросу владельца): в текст каждой ошибки дописывается диагностический
+// суффикс с маскированным RESEND_API_KEY и полным SENDER_EMAIL, чтобы владелец мог
+// сверить значения на prod с настройками Resend Dashboard. УБРАТЬ после диагностики.
+function maskKey(s) {
+  if (!s) return '<empty>';
+  if (s.length <= 10) return `${s} (${s.length} chars, too short to mask)`;
+  return `${s.slice(0, 6)}…${s.slice(-4)} (${s.length} chars)`;
+}
+function emailDebugSuffix(notifTo) {
+  // Показываем что реально использовалось на этом запросе. Ключ маскируем —
+  // публичный endpoint, полный ключ в HTTP-ответе = утечка.
+  return ` | DEBUG: SENDER_EMAIL="${SENDER_EMAIL || '<empty>'}", RESEND_API_KEY=${maskKey(RESEND_API_KEY)}, notification_email="${notifTo || '<empty>'}"`;
+}
+
 async function sendNotificationEmail(application) {
   if (!RESEND_API_KEY) {
-    const err = 'RESEND_API_KEY env is empty';
+    const err = 'RESEND_API_KEY env is empty' + emailDebugSuffix(null);
     console.warn(`[email] sendNotificationEmail FAILED: ${err}`);
     return { ok: false, error: err };
   }
   if (!SENDER_EMAIL) {
-    const err = 'SENDER_EMAIL env is empty';
+    const err = 'SENDER_EMAIL env is empty' + emailDebugSuffix(null);
     console.warn(`[email] sendNotificationEmail FAILED: ${err}`);
     return { ok: false, error: err };
   }
@@ -107,12 +122,12 @@ async function sendNotificationEmail(application) {
     const [rows] = await db.query("SELECT notification_email, email_notifications_enabled FROM site_settings WHERE id = 'site_settings'");
     const settings = rows[0] || {};
     if (!settings.notification_email) {
-      const err = 'site_settings.notification_email is empty (заполни в админке → Настройки сайта)';
+      const err = 'site_settings.notification_email is empty (заполни в админке → Настройки сайта)' + emailDebugSuffix(settings.notification_email);
       console.warn(`[email] sendNotificationEmail FAILED: ${err}`);
       return { ok: false, error: err };
     }
     if (!settings.email_notifications_enabled) {
-      const err = 'site_settings.email_notifications_enabled=0 (email-уведомления выключены в админке)';
+      const err = 'site_settings.email_notifications_enabled=0 (email-уведомления выключены в админке)' + emailDebugSuffix(settings.notification_email);
       console.warn(`[email] sendNotificationEmail FAILED: ${err}`);
       return { ok: false, error: err };
     }
@@ -148,7 +163,7 @@ async function sendNotificationEmail(application) {
       html,
     });
     if (result && result.error) {
-      const err = `Resend rejected: [${result.error.statusCode || '?'}] ${result.error.name || ''}: ${result.error.message || JSON.stringify(result.error)}`;
+      const err = `Resend rejected: [${result.error.statusCode || '?'}] ${result.error.name || ''}: ${result.error.message || JSON.stringify(result.error)}` + emailDebugSuffix(settings.notification_email);
       console.error(`Resend rejected application email: ${err}`);
       return { ok: false, error: err };
     }
@@ -156,7 +171,7 @@ async function sendNotificationEmail(application) {
     return { ok: true, id: result?.data?.id || null };
   } catch (e) {
     console.error('Failed to send email:', e.message);
-    return { ok: false, error: `Exception: ${e.message}` };
+    return { ok: false, error: `Exception: ${e.message}` + emailDebugSuffix(null) };
   }
 }
 
@@ -164,12 +179,12 @@ async function sendNotificationEmail(application) {
 // Возвращает { ok: true, id } или { ok: false, error: '<текст>' } — см. sendNotificationEmail.
 async function sendContactNotification(msg) {
   if (!RESEND_API_KEY) {
-    const err = 'RESEND_API_KEY env is empty';
+    const err = 'RESEND_API_KEY env is empty' + emailDebugSuffix(null);
     console.warn(`[email] sendContactNotification FAILED: ${err}`);
     return { ok: false, error: err };
   }
   if (!SENDER_EMAIL) {
-    const err = 'SENDER_EMAIL env is empty';
+    const err = 'SENDER_EMAIL env is empty' + emailDebugSuffix(null);
     console.warn(`[email] sendContactNotification FAILED: ${err}`);
     return { ok: false, error: err };
   }
@@ -179,12 +194,12 @@ async function sendContactNotification(msg) {
     const [rows] = await db.query("SELECT notification_email, email_notifications_enabled FROM site_settings WHERE id = 'site_settings'");
     const settings = rows[0] || {};
     if (!settings.notification_email) {
-      const err = 'site_settings.notification_email is empty';
+      const err = 'site_settings.notification_email is empty' + emailDebugSuffix(settings.notification_email);
       console.warn(`[email] sendContactNotification FAILED: ${err}`);
       return { ok: false, error: err };
     }
     if (!settings.email_notifications_enabled) {
-      const err = 'site_settings.email_notifications_enabled=0';
+      const err = 'site_settings.email_notifications_enabled=0' + emailDebugSuffix(settings.notification_email);
       console.warn(`[email] sendContactNotification FAILED: ${err}`);
       return { ok: false, error: err };
     }
@@ -212,7 +227,7 @@ async function sendContactNotification(msg) {
       html,
     });
     if (result && result.error) {
-      const err = `Resend rejected: [${result.error.statusCode || '?'}] ${result.error.name || ''}: ${result.error.message || JSON.stringify(result.error)}`;
+      const err = `Resend rejected: [${result.error.statusCode || '?'}] ${result.error.name || ''}: ${result.error.message || JSON.stringify(result.error)}` + emailDebugSuffix(settings.notification_email);
       console.error(`Resend rejected contact email: ${err}`);
       return { ok: false, error: err };
     }
@@ -220,7 +235,7 @@ async function sendContactNotification(msg) {
     return { ok: true, id: result?.data?.id || null };
   } catch (e) {
     console.error('Failed to send contact email:', e.message);
-    return { ok: false, error: `Exception: ${e.message}` };
+    return { ok: false, error: `Exception: ${e.message}` + emailDebugSuffix(null) };
   }
 }
 
