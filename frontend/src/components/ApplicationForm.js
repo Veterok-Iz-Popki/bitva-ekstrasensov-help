@@ -241,11 +241,6 @@ export default function ApplicationForm({ title, subtitle, psychicSlug, psychicN
     } catch (err) {
       if (err.response?.status === 429) {
         toast.error('Слишком много запросов. Попробуйте позже.');
-      } else if (err.response?.data?.error) {
-        // Backend вернул технический текст ошибки Resend/конфигурации — показываем целиком,
-        // чтобы пользователь/владелец сайта мог понять, в чём именно проблема.
-        const detail = err.response.data.detail || 'Ошибка';
-        toast.error(`${detail}: ${err.response.data.error}`, { duration: 15000 });
       } else if (err.response?.data?.detail) {
         toast.error(err.response.data.detail);
       } else {

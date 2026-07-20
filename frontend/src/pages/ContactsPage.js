@@ -39,10 +39,7 @@ export default function ContactsPage() {
       toast.success('Сообщение отправлено!');
       setForm({ name: '', email: '', message: '', honeypot: '' });
     } catch (err) {
-      if (err.response?.data?.error) {
-        const detail = err.response.data.detail || 'Ошибка';
-        toast.error(`${detail}: ${err.response.data.error}`, { duration: 15000 });
-      } else if (err.response?.data?.detail) {
+      if (err.response?.data?.detail) {
         toast.error(err.response.data.detail);
       } else {
         toast.error('Произошла ошибка.');

@@ -17,17 +17,12 @@ const PORT = process.env.PORT || 8001;
 // Config
 const JWT_SECRET = process.env.JWT_SECRET || 'change-me-in-production';
 const JWT_EXPIRY = '24h';
-const RESEND_API_KEY = process.env.RESEND_API_KEY || '';
-const SENDER_EMAIL = process.env.SENDER_EMAIL || 'onboarding@resend.dev';
-// EMAIL_TRANSPORT: 'auto' (default — HTTP API с SMTP-fallback), 'api', 'smtp'
-const EMAIL_TRANSPORT = (process.env.EMAIL_TRANSPORT || 'auto').toLowerCase();
-// SMTP-конфиг. По умолчанию — Resend SMTP (user='resend', pass=RESEND_API_KEY).
-// Для внешнего SMTP-сервера (напр. хостинг-провайдер) задай SMTP_PASSWORD отдельно;
-// если он не задан — используется RESEND_API_KEY как пароль (совместимость с Resend).
-const SMTP_HOST = process.env.SMTP_HOST || 'smtp.resend.com';
-const SMTP_PORT = parseInt(process.env.SMTP_PORT || '2587', 10);
-const SMTP_USER = process.env.SMTP_USER || 'resend';
-const SMTP_PASSWORD = process.env.SMTP_PASSWORD || RESEND_API_KEY;
+// SMTP-конфиг. Обязательные ENV на prod: SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SENDER_EMAIL.
+const SENDER_EMAIL = process.env.SENDER_EMAIL || '';
+const SMTP_HOST = process.env.SMTP_HOST || '';
+const SMTP_PORT = parseInt(process.env.SMTP_PORT || '465', 10);
+const SMTP_USER = process.env.SMTP_USER || '';
+const SMTP_PASSWORD = process.env.SMTP_PASSWORD || '';
 
 // Uploads dir
 const UPLOADS_DIR = path.join(__dirname, 'uploads');
@@ -96,91 +91,52 @@ async function requireAdmin(req, res, next) {
   }
 }
 
-// Email notification (заявка).
-// Возвращает { ok: true, id } при успешной отправке или { ok: false, error: '<текст>' }
-// при любой проблеме — конфигурационной или сетевой. Роут решает, что делать с результатом.
-//
-// ⚠ ВРЕМЕННО (по запросу владельца): в текст каждой ошибки дописывается диагностический
-// суффикс с маскированным RESEND_API_KEY и полным SENDER_EMAIL, чтобы владелец мог
-// сверить значения на prod с настройками Resend Dashboard. УБРАТЬ после диагностики.
-function maskKey(s) {
-  if (!s) return '<empty>';
-  if (s.length <= 10) return `${s} (${s.length} chars, too short to mask)`;
-  return `${s.slice(0, 6)}…${s.slice(-4)} (${s.length} chars)`;
-}
-function emailDebugSuffix(notifTo) {
-  // Показываем что реально использовалось на этом запросе. Пароли маскируем —
-  // публичный endpoint, полный секрет в HTTP-ответе = утечка.
-  return ` | DEBUG: SENDER_EMAIL="${SENDER_EMAIL || '<empty>'}", RESEND_API_KEY=${maskKey(RESEND_API_KEY)}, notification_email="${notifTo || '<empty>'}", EMAIL_TRANSPORT=${EMAIL_TRANSPORT}, SMTP=${SMTP_HOST}:${SMTP_PORT}, SMTP_USER=${SMTP_USER}, SMTP_PASSWORD=${maskKey(SMTP_PASSWORD)}`;
-}
-
-// SMTP-отправка через nodemailer. Используется как fallback, когда HTTP API
-// Resend недоступен (сетевые блокировки egress к api.resend.com).
-// Возвращает { ok, id?, error? } — тот же контракт, что и HTTP-путь.
+// SMTP-отправка через nodemailer. Единственный транспорт — с prod-сервера
+// доступен SMTP хостинга (порт 465, SSL/TLS). Возвращает { ok, id? } или
+// { ok: false, error }. Роут решает, что делать при неудаче.
 async function sendViaSmtp({ to, subject, html }) {
-  try {
-    const nodemailer = require('nodemailer');
-    // secure=true для 465/2465 (SMTPS сразу TLS); false для 587/2587 (STARTTLS).
-    const transporter = nodemailer.createTransport({
-      host: SMTP_HOST,
-      port: SMTP_PORT,
-      secure: SMTP_PORT === 465 || SMTP_PORT === 2465,
-      auth: { user: SMTP_USER, pass: SMTP_PASSWORD },
-      // Разумные таймауты — иначе висит минуту при заблокированном egress.
-      connectionTimeout: 10000,
-      greetingTimeout: 10000,
-      socketTimeout: 15000,
-    });
-    const info = await transporter.sendMail({
-      from: SENDER_EMAIL,
-      to: [to],
-      subject,
-      html,
-    });
-    return { ok: true, id: info.messageId || null, response: info.response || null };
-  } catch (e) {
-    return {
-      ok: false,
-      error: `SMTP failed [${e.code || '?'}]: ${e.message}`,
-      code: e.code || null,
-      command: e.command || null,
-    };
-  }
+  const nodemailer = require('nodemailer');
+  // secure=true для 465/2465 (SMTPS сразу TLS); false для 587/2587 (STARTTLS).
+  const transporter = nodemailer.createTransport({
+    host: SMTP_HOST,
+    port: SMTP_PORT,
+    secure: SMTP_PORT === 465 || SMTP_PORT === 2465,
+    auth: { user: SMTP_USER, pass: SMTP_PASSWORD },
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
+  });
+  const info = await transporter.sendMail({
+    from: SENDER_EMAIL,
+    to: [to],
+    subject,
+    html,
+  });
+  return { id: info.messageId || null, response: info.response || null };
 }
 
-async function sendNotificationEmail(application) {
-  // Guard'ы зависят от транспорта: SMTP не требует RESEND_API_KEY.
-  if (EMAIL_TRANSPORT !== 'smtp' && !RESEND_API_KEY) {
-    const err = 'RESEND_API_KEY env is empty (нужен для HTTP API транспорта)' + emailDebugSuffix(null);
-    console.warn(`[email] sendNotificationEmail FAILED: ${err}`);
-    return { ok: false, error: err };
+// Общие guard'ы для обеих email-функций.
+async function checkEmailPreconditions() {
+  if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASSWORD) {
+    return { ok: false, error: 'SMTP настройки не заданы (SMTP_HOST / SMTP_PORT / SMTP_USER / SMTP_PASSWORD)' };
   }
-  if (EMAIL_TRANSPORT !== 'api' && !SMTP_PASSWORD) {
-    const err = 'SMTP_PASSWORD env is empty (нужен для SMTP транспорта)' + emailDebugSuffix(null);
-    console.warn(`[email] sendNotificationEmail FAILED: ${err}`);
-    return { ok: false, error: err };
-  }
-  if (!SENDER_EMAIL) {
-    const err = 'SENDER_EMAIL env is empty' + emailDebugSuffix(null);
-    console.warn(`[email] sendNotificationEmail FAILED: ${err}`);
-    return { ok: false, error: err };
-  }
-  try {
-    const [rows] = await db.query("SELECT notification_email, email_notifications_enabled FROM site_settings WHERE id = 'site_settings'");
-    const settings = rows[0] || {};
-    if (!settings.notification_email) {
-      const err = 'site_settings.notification_email is empty (заполни в админке → Настройки сайта)' + emailDebugSuffix(settings.notification_email);
-      console.warn(`[email] sendNotificationEmail FAILED: ${err}`);
-      return { ok: false, error: err };
-    }
-    if (!settings.email_notifications_enabled) {
-      const err = 'site_settings.email_notifications_enabled=0 (email-уведомления выключены в админке)' + emailDebugSuffix(settings.notification_email);
-      console.warn(`[email] sendNotificationEmail FAILED: ${err}`);
-      return { ok: false, error: err };
-    }
+  if (!SENDER_EMAIL) return { ok: false, error: 'SENDER_EMAIL env is empty' };
+  const [rows] = await db.query("SELECT notification_email, email_notifications_enabled FROM site_settings WHERE id = 'site_settings'");
+  const settings = rows[0] || {};
+  if (!settings.notification_email) return { ok: false, error: 'site_settings.notification_email is empty (заполни в админке → Настройки сайта)' };
+  if (!settings.email_notifications_enabled) return { ok: false, error: 'email-уведомления выключены в админке' };
+  return { ok: true, notification_email: settings.notification_email };
+}
 
-    const fullName = application.name || `${application.lastName} ${application.firstName} ${application.patronymic}`.trim();
-    const html = `
+// Email notification (заявка).
+async function sendNotificationEmail(application) {
+  const pre = await checkEmailPreconditions();
+  if (!pre.ok) {
+    console.warn(`[email] sendNotificationEmail FAILED: ${pre.error}`);
+    return pre;
+  }
+  const fullName = application.name || `${application.lastName} ${application.firstName} ${application.patronymic}`.trim();
+  const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <div style="background: #0d3040; padding: 20px; text-align: center;">
         <h1 style="color: #d4a637; margin: 0;">Новая заявка</h1>
@@ -200,101 +156,29 @@ async function sendNotificationEmail(application) {
         <p style="color:#666;font-size:12px;margin-top:20px">Дата заявки: ${application.created_at || '-'}</p>
       </div>
     </div>`;
+  const subject = application.psychic_name
+    ? `Новая заявка от ${fullName} к ${application.psychic_name} — Битва экстрасенсов`
+    : `Новая заявка от ${fullName} — Битва экстрасенсов`;
 
-    const subject = application.psychic_name
-      ? `Новая заявка от ${fullName} к ${application.psychic_name} — Битва экстрасенсов`
-      : `Новая заявка от ${fullName} — Битва экстрасенсов`;
-
-    // Транспорт: 'smtp' → сразу SMTP, 'api' → только HTTP API, 'auto' (default) →
-    // HTTP API, а при сетевом сбое (fetch не долетел) — fallback на SMTP.
-    if (EMAIL_TRANSPORT === 'smtp') {
-      const s = await sendViaSmtp({ to: settings.notification_email, subject, html });
-      if (!s.ok) {
-        const err = s.error + emailDebugSuffix(settings.notification_email);
-        console.error(`SMTP failed for application email: ${err}`);
-        return { ok: false, error: err };
-      }
-      console.log(`Notification email sent via SMTP to ${settings.notification_email} (id=${s.id || 'n/a'})`);
-      return { ok: true, id: s.id };
-    }
-
-    // Ниже — путь через HTTP API Resend (transport === 'api' | 'auto')
-    const { Resend } = require('resend');
-    const resend = new Resend(RESEND_API_KEY);
-    const result = await resend.emails.send({
-      from: SENDER_EMAIL,
-      to: [settings.notification_email],
-      subject,
-      html,
-    });
-    if (result && result.error) {
-      // Извлекаем всё, что можно — вплоть до e.cause (там Node.js прячет ENOTFOUND/ECONNREFUSED/UND_ERR_...)
-      const err_obj = result.error;
-      const cause = err_obj.cause || {};
-      const fullDump = JSON.stringify(err_obj, Object.getOwnPropertyNames(err_obj));
-      const causeInfo = cause.code || cause.message ? ` [cause: ${cause.code || ''} ${cause.message || ''}]` : '';
-      const httpErr = `Resend rejected: [${err_obj.statusCode || '?'}] ${err_obj.name || ''}: ${err_obj.message || fullDump}${causeInfo}`;
-      console.error(`Resend HTTP failed for application email: ${httpErr} | full: ${fullDump}`);
-
-      // Fallback на SMTP только если transport='auto' И ошибка выглядит как сетевая
-      // (нет statusCode или name='application_error' с 'Unable to fetch data').
-      const isNetworkError = !err_obj.statusCode
-        || err_obj.name === 'application_error'
-        || (err_obj.message || '').includes('Unable to fetch data');
-      if (EMAIL_TRANSPORT === 'auto' && isNetworkError) {
-        console.warn('[email] HTTP API network error — trying SMTP fallback...');
-        const s = await sendViaSmtp({ to: settings.notification_email, subject, html });
-        if (s.ok) {
-          console.log(`Notification email sent via SMTP fallback to ${settings.notification_email} (id=${s.id || 'n/a'})`);
-          return { ok: true, id: s.id };
-        }
-        const err = `${httpErr} + SMTP fallback also failed: ${s.error}` + emailDebugSuffix(settings.notification_email);
-        return { ok: false, error: err };
-      }
-      const err = httpErr + emailDebugSuffix(settings.notification_email);
-      return { ok: false, error: err };
-    }
-    console.log(`Notification email sent via HTTP API to ${settings.notification_email} (id=${result?.data?.id || 'n/a'})`);
-    return { ok: true, id: result?.data?.id || null };
+  try {
+    const info = await sendViaSmtp({ to: pre.notification_email, subject, html });
+    console.log(`Notification email sent to ${pre.notification_email} (id=${info.id || 'n/a'})`);
+    return { ok: true, id: info.id };
   } catch (e) {
-    console.error('Failed to send email:', e.message);
-    return { ok: false, error: `Exception: ${e.message}` + emailDebugSuffix(null) };
+    const err = `SMTP failed [${e.code || '?'}]: ${e.message}`;
+    console.error(`sendNotificationEmail SMTP error: ${err}`);
+    return { ok: false, error: err };
   }
 }
 
 // Email notification (contact / обратный звонок).
-// Возвращает { ok: true, id } или { ok: false, error: '<текст>' } — см. sendNotificationEmail.
 async function sendContactNotification(msg) {
-  if (EMAIL_TRANSPORT !== 'smtp' && !RESEND_API_KEY) {
-    const err = 'RESEND_API_KEY env is empty (нужен для HTTP API транспорта)' + emailDebugSuffix(null);
-    console.warn(`[email] sendContactNotification FAILED: ${err}`);
-    return { ok: false, error: err };
+  const pre = await checkEmailPreconditions();
+  if (!pre.ok) {
+    console.warn(`[email] sendContactNotification FAILED: ${pre.error}`);
+    return pre;
   }
-  if (EMAIL_TRANSPORT !== 'api' && !SMTP_PASSWORD) {
-    const err = 'SMTP_PASSWORD env is empty (нужен для SMTP транспорта)' + emailDebugSuffix(null);
-    console.warn(`[email] sendContactNotification FAILED: ${err}`);
-    return { ok: false, error: err };
-  }
-  if (!SENDER_EMAIL) {
-    const err = 'SENDER_EMAIL env is empty' + emailDebugSuffix(null);
-    console.warn(`[email] sendContactNotification FAILED: ${err}`);
-    return { ok: false, error: err };
-  }
-  try {
-    const [rows] = await db.query("SELECT notification_email, email_notifications_enabled FROM site_settings WHERE id = 'site_settings'");
-    const settings = rows[0] || {};
-    if (!settings.notification_email) {
-      const err = 'site_settings.notification_email is empty' + emailDebugSuffix(settings.notification_email);
-      console.warn(`[email] sendContactNotification FAILED: ${err}`);
-      return { ok: false, error: err };
-    }
-    if (!settings.email_notifications_enabled) {
-      const err = 'site_settings.email_notifications_enabled=0' + emailDebugSuffix(settings.notification_email);
-      console.warn(`[email] sendContactNotification FAILED: ${err}`);
-      return { ok: false, error: err };
-    }
-
-    const html = `
+  const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <div style="background: #0d3040; padding: 20px; text-align: center;">
         <h1 style="color: #d4a637; margin: 0;">Новое сообщение / звонок</h1>
@@ -309,58 +193,15 @@ async function sendContactNotification(msg) {
         <p style="color:#666;font-size:12px;margin-top:20px">Дата: ${msg.created_at || '-'}</p>
       </div>
     </div>`;
-
-    const subject = `Новое сообщение от ${msg.name || 'клиента'} — Битва экстрасенсов`;
-
-    if (EMAIL_TRANSPORT === 'smtp') {
-      const s = await sendViaSmtp({ to: settings.notification_email, subject, html });
-      if (!s.ok) {
-        const err = s.error + emailDebugSuffix(settings.notification_email);
-        console.error(`SMTP failed for contact email: ${err}`);
-        return { ok: false, error: err };
-      }
-      console.log(`Contact notification sent via SMTP to ${settings.notification_email} (id=${s.id || 'n/a'})`);
-      return { ok: true, id: s.id };
-    }
-
-    // Путь через HTTP API Resend (transport === 'api' | 'auto')
-    const { Resend } = require('resend');
-    const resend = new Resend(RESEND_API_KEY);
-    const result = await resend.emails.send({
-      from: SENDER_EMAIL,
-      to: [settings.notification_email],
-      subject,
-      html,
-    });
-    if (result && result.error) {
-      const err_obj = result.error;
-      const cause = err_obj.cause || {};
-      const fullDump = JSON.stringify(err_obj, Object.getOwnPropertyNames(err_obj));
-      const causeInfo = cause.code || cause.message ? ` [cause: ${cause.code || ''} ${cause.message || ''}]` : '';
-      const httpErr = `Resend rejected: [${err_obj.statusCode || '?'}] ${err_obj.name || ''}: ${err_obj.message || fullDump}${causeInfo}`;
-      console.error(`Resend HTTP failed for contact email: ${httpErr} | full: ${fullDump}`);
-
-      const isNetworkError = !err_obj.statusCode
-        || err_obj.name === 'application_error'
-        || (err_obj.message || '').includes('Unable to fetch data');
-      if (EMAIL_TRANSPORT === 'auto' && isNetworkError) {
-        console.warn('[email] HTTP API network error — trying SMTP fallback...');
-        const s = await sendViaSmtp({ to: settings.notification_email, subject, html });
-        if (s.ok) {
-          console.log(`Contact notification sent via SMTP fallback to ${settings.notification_email} (id=${s.id || 'n/a'})`);
-          return { ok: true, id: s.id };
-        }
-        const err = `${httpErr} + SMTP fallback also failed: ${s.error}` + emailDebugSuffix(settings.notification_email);
-        return { ok: false, error: err };
-      }
-      const err = httpErr + emailDebugSuffix(settings.notification_email);
-      return { ok: false, error: err };
-    }
-    console.log(`Contact notification sent via HTTP API to ${settings.notification_email} (id=${result?.data?.id || 'n/a'})`);
-    return { ok: true, id: result?.data?.id || null };
+  const subject = `Новое сообщение от ${msg.name || 'клиента'} — Битва экстрасенсов`;
+  try {
+    const info = await sendViaSmtp({ to: pre.notification_email, subject, html });
+    console.log(`Contact notification sent to ${pre.notification_email} (id=${info.id || 'n/a'})`);
+    return { ok: true, id: info.id };
   } catch (e) {
-    console.error('Failed to send contact email:', e.message);
-    return { ok: false, error: `Exception: ${e.message}` + emailDebugSuffix(null) };
+    const err = `SMTP failed [${e.code || '?'}]: ${e.message}`;
+    console.error(`sendContactNotification SMTP error: ${err}`);
+    return { ok: false, error: err };
   }
 }
 
@@ -519,14 +360,13 @@ api.post('/applications', async (req, res) => {
   // но новые заявки в нём появляться НЕ будут.
   // Если потребуется вернуть сохранение — восстановить INSERT INTO applications с полями выше.
 
-  // Ждём результат отправки. Если письмо не ушло — возвращаем 500 с текстом ошибки,
-  // чтобы клиент понял, в чём проблема (пустой ключ, отклонение Resend, сетевой сбой и т.д.).
+  // Ждём результат отправки. Если письмо не ушло — 500 с человеческим текстом.
+  // Технические детали остаются в логах backend (не показываем публично).
   const emailResult = await sendNotificationEmail({ ...data, name: fullName, psychic_slug: data.psychic_slug, psychic_name: data.psychic_name, created_at: now });
   if (!emailResult.ok) {
     return res.status(500).json({
       status: 'error',
-      detail: 'Не удалось отправить уведомление о заявке',
-      error: emailResult.error,
+      detail: 'Не удалось отправить уведомление о заявке. Попробуйте позже.',
     });
   }
   return res.json({ status: 'success', message: 'Заявка успешно отправлена' });
@@ -545,14 +385,12 @@ api.post('/contact', async (req, res) => {
     'INSERT INTO contact_messages (id, name, email, message, status, created_at) VALUES (?,?,?,?,?,?)',
     [id, data.name, data.email, data.message, 'new', now]
   );
-  // Ждём отправку письма и при ошибке возвращаем 500 с деталями.
-  // Сообщение при этом уже сохранено в contact_messages — не теряется.
+  // Сообщение уже сохранено в contact_messages. Если письмо не ушло — 500.
   const emailResult = await sendContactNotification({ ...data, created_at: now });
   if (!emailResult.ok) {
     return res.status(500).json({
       status: 'error',
-      detail: 'Сообщение сохранено, но письмо-уведомление не отправлено',
-      error: emailResult.error,
+      detail: 'Сообщение сохранено, но письмо-уведомление не отправлено. Попробуйте позже.',
     });
   }
   return res.json({ status: 'success', message: 'Сообщение отправлено' });
@@ -582,116 +420,53 @@ api.get('/admin/me', requireAdmin, (req, res) => {
 });
 
 // ===== ADMIN EMAIL DIAGNOSTICS =====
-// Cетевая диагностика для случая, когда fetch не может достучаться до api.resend.com.
-// Возвращает результат трёх независимых проверок:
-//   1) DNS-резолвинг api.resend.com (dns.promises.lookup)
-//   2) сырой HTTPS-запрос через глобальный fetch к https://api.resend.com/domains
-//      (авторизованный, но без SDK-обёртки — чтобы увидеть настоящую ошибку сети)
-//   3) вызов resend.emails.send() на реальный notification_email — как в проде
-// Все три проверки завёрнуты в try/catch по отдельности, ошибка одной не мешает остальным.
+// Диагностика SMTP-отправки: DNS lookup + TCP connect + AUTH + реальная отправка.
+// Позволяет админу проверить настройки SMTP не роняя реальную форму заявки.
 api.post('/admin/email-probe', requireAdmin, async (req, res) => {
   const out = {
     env: {
       SENDER_EMAIL: SENDER_EMAIL || '<empty>',
-      RESEND_API_KEY: RESEND_API_KEY ? `${RESEND_API_KEY.slice(0, 6)}…${RESEND_API_KEY.slice(-4)} (${RESEND_API_KEY.length} chars)` : '<empty>',
-      NODE_VERSION: process.version,
-      EMAIL_TRANSPORT,
-      SMTP_HOST,
+      SMTP_HOST: SMTP_HOST || '<empty>',
       SMTP_PORT,
-      SMTP_USER,
-      SMTP_PASSWORD: SMTP_PASSWORD ? `${SMTP_PASSWORD.slice(0, 4)}…${SMTP_PASSWORD.slice(-3)} (${SMTP_PASSWORD.length} chars)` : '<empty>',
-      SMTP_PASSWORD_same_as_RESEND_KEY: SMTP_PASSWORD === RESEND_API_KEY,
+      SMTP_USER: SMTP_USER || '<empty>',
+      SMTP_PASSWORD_set: !!SMTP_PASSWORD,
+      NODE_VERSION: process.version,
     },
     dns_lookup: null,
-    raw_fetch: null,
-    resend_send: null,
+    tcp_connect: null,
     smtp_verify: null,
     smtp_send: null,
   };
 
-  // 1) DNS
-  try {
-    const dns = require('dns').promises;
-    const t0 = Date.now();
-    const r = await dns.lookup('api.resend.com', { all: true });
-    out.dns_lookup = { ok: true, addresses: r, ms: Date.now() - t0 };
-  } catch (e) {
-    out.dns_lookup = { ok: false, error: `${e.code || ''}: ${e.message}`, syscall: e.syscall || null };
-  }
-
-  // 2) Raw HTTPS fetch (bypass Resend SDK)
-  try {
-    const t0 = Date.now();
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), 10000);
-    const resp = await fetch('https://api.resend.com/domains', {
-      method: 'GET',
-      headers: { 'Authorization': `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-      signal: ctrl.signal,
-    });
-    clearTimeout(timer);
-    const bodyText = await resp.text();
-    out.raw_fetch = {
-      ok: resp.ok,
-      status: resp.status,
-      statusText: resp.statusText,
-      ms: Date.now() - t0,
-      body_preview: bodyText.slice(0, 500),
-    };
-  } catch (e) {
-    // Node.js fetch кладёт настоящую сетевую ошибку в e.cause
-    const cause = e.cause || {};
-    out.raw_fetch = {
-      ok: false,
-      error_name: e.name || null,
-      error_message: e.message || null,
-      cause_code: cause.code || null,           // ENOTFOUND, ECONNREFUSED, UND_ERR_...
-      cause_errno: cause.errno || null,
-      cause_syscall: cause.syscall || null,
-      cause_hostname: cause.hostname || null,
-      cause_message: cause.message || null,
-    };
-  }
-
-  // 3) Resend SDK send
-  try {
-    const { Resend } = require('resend');
-    const resend = new Resend(RESEND_API_KEY);
-    const [rows] = await db.query("SELECT notification_email FROM site_settings WHERE id = 'site_settings'");
-    const recipient = (rows[0] && rows[0].notification_email) || '';
-    if (!recipient) {
-      out.resend_send = { ok: false, error: 'notification_email пуст в site_settings' };
-    } else {
+  // 1) DNS lookup SMTP_HOST
+  if (SMTP_HOST) {
+    try {
+      const dns = require('dns').promises;
       const t0 = Date.now();
-      const stamp = new Date().toISOString();
-      const result = await resend.emails.send({
-        from: SENDER_EMAIL,
-        to: [recipient],
-        subject: `Email probe from admin (${stamp})`,
-        html: `<p>Диагностическое письмо от /api/admin/email-probe.</p><p>Timestamp: ${stamp}</p>`,
-      });
-      out.resend_send = {
-        ok: !result?.error,
-        ms: Date.now() - t0,
-        recipient,
-        id: result?.data?.id || null,
-        error: result?.error ? JSON.parse(JSON.stringify(result.error, Object.getOwnPropertyNames(result.error))) : null,
-      };
+      const r = await dns.lookup(SMTP_HOST, { all: true });
+      out.dns_lookup = { ok: true, addresses: r, ms: Date.now() - t0 };
+    } catch (e) {
+      out.dns_lookup = { ok: false, error: `${e.code || ''}: ${e.message}` };
     }
-  } catch (e) {
-    const cause = e.cause || {};
-    out.resend_send = {
-      ok: false,
-      exception: true,
-      error_name: e.name,
-      error_message: e.message,
-      cause_code: cause.code || null,
-      cause_message: cause.message || null,
-      stack: (e.stack || '').split('\n').slice(0, 5).join('\n'),
-    };
   }
 
-  // 4) SMTP verify (TCP connect + EHLO + AUTH, БЕЗ отправки письма)
+  // 2) Raw TCP connect SMTP_HOST:SMTP_PORT
+  if (SMTP_HOST && SMTP_PORT) {
+    const net = require('net');
+    out.tcp_connect = await new Promise((resolve) => {
+      const t0 = Date.now();
+      const sock = new net.Socket();
+      let done = false;
+      const finish = (r) => { if (done) return; done = true; try { sock.destroy(); } catch (_) {} resolve({ ...r, ms: Date.now() - t0 }); };
+      sock.setTimeout(6000);
+      sock.on('connect', () => finish({ ok: true }));
+      sock.on('error', (e) => finish({ ok: false, code: e.code || null, message: e.message }));
+      sock.on('timeout', () => finish({ ok: false, code: 'ETIMEDOUT', message: 'timeout 6s' }));
+      sock.connect(SMTP_PORT, SMTP_HOST);
+    });
+  }
+
+  // 3) SMTP verify (TCP + EHLO + AUTH, БЕЗ отправки письма)
   try {
     const nodemailer = require('nodemailer');
     const transporter = nodemailer.createTransport({
@@ -705,19 +480,19 @@ api.post('/admin/email-probe', requireAdmin, async (req, res) => {
     });
     const t0 = Date.now();
     await transporter.verify();
-    out.smtp_verify = { ok: true, ms: Date.now() - t0, host: SMTP_HOST, port: SMTP_PORT };
+    out.smtp_verify = { ok: true, ms: Date.now() - t0 };
   } catch (e) {
     out.smtp_verify = {
       ok: false,
-      code: e.code || null,             // ECONNREFUSED, ETIMEDOUT, EAUTH, EDNS, ...
-      command: e.command || null,       // CONN, EHLO, AUTH LOGIN, ...
-      response: e.response || null,     // SMTP-ответ сервера если был
+      code: e.code || null,          // ECONNREFUSED, ETIMEDOUT, EAUTH, EDNS, ...
+      command: e.command || null,    // CONN, EHLO, AUTH LOGIN, ...
+      response: e.response || null,
       responseCode: e.responseCode || null,
       message: e.message,
     };
   }
 
-  // 5) SMTP send (реальная отправка тестового письма через SMTP)
+  // 4) Реальная отправка тестового письма
   try {
     const [rows] = await db.query("SELECT notification_email FROM site_settings WHERE id = 'site_settings'");
     const recipient = (rows[0] && rows[0].notification_email) || '';
@@ -726,70 +501,16 @@ api.post('/admin/email-probe', requireAdmin, async (req, res) => {
     } else {
       const stamp = new Date().toISOString();
       const t0 = Date.now();
-      const s = await sendViaSmtp({
+      const info = await sendViaSmtp({
         to: recipient,
         subject: `SMTP probe from admin (${stamp})`,
         html: `<p>Диагностическое письмо через SMTP (${SMTP_HOST}:${SMTP_PORT}).</p><p>Timestamp: ${stamp}</p>`,
       });
-      out.smtp_send = { ...s, ms: Date.now() - t0, recipient };
+      out.smtp_send = { ok: true, id: info.id, response: info.response, ms: Date.now() - t0, recipient };
     }
   } catch (e) {
-    out.smtp_send = { ok: false, exception: true, error: e.message };
+    out.smtp_send = { ok: false, code: e.code || null, command: e.command || null, error: e.message };
   }
-
-  // 6) Port scan — сырой TCP-connect к разным SMTP-портам. Сканируем и
-  //    настроенный SMTP_HOST (важно на prod), и smtp.resend.com для сравнения.
-  //    Если один из портов открыт (ok=true) — можно переключиться через SMTP_PORT env.
-  out.smtp_port_scan = {};
-  const net = require('net');
-  const tryPort = (host, port) => new Promise((resolve) => {
-    const t0 = Date.now();
-    const sock = new net.Socket();
-    let done = false;
-    const finish = (r) => { if (done) return; done = true; try { sock.destroy(); } catch (_) {} resolve({ ...r, ms: Date.now() - t0 }); };
-    sock.setTimeout(6000);
-    sock.on('connect', () => finish({ ok: true }));
-    sock.on('error', (e) => finish({ ok: false, code: e.code || null, message: e.message }));
-    sock.on('timeout', () => finish({ ok: false, code: 'ETIMEDOUT', message: 'timeout 6s' }));
-    sock.connect(port, host);
-  });
-  const hostsToScan = SMTP_HOST === 'smtp.resend.com'
-    ? ['smtp.resend.com']
-    : [SMTP_HOST, 'smtp.resend.com'];
-  for (const host of hostsToScan) {
-    for (const port of [25, 465, 587, 2465, 2525, 2587]) {
-      out.smtp_port_scan[`${host}:${port}`] = await tryPort(host, port);
-    }
-  }
-
-  // 7) Проверка исходящего наружу вообще — маленький HTTPS-запрос
-  //    к нескольким контрольным сервисам. Если все ok:false — заблокирован
-  //    весь egress. Если некоторые ok — блок избирательный (только Resend).
-  out.external_reachability = {};
-  const probeHttps = async (url) => {
-    const t0 = Date.now();
-    try {
-      const ctrl = new AbortController();
-      const timer = setTimeout(() => ctrl.abort(), 6000);
-      const r = await fetch(url, { method: 'HEAD', signal: ctrl.signal });
-      clearTimeout(timer);
-      return { ok: true, status: r.status, ms: Date.now() - t0 };
-    } catch (e) {
-      const cause = e.cause || {};
-      return {
-        ok: false,
-        error_name: e.name,
-        cause_code: cause.code || null,
-        cause_message: cause.message || null,
-        ms: Date.now() - t0,
-      };
-    }
-  };
-  out.external_reachability['https://api.resend.com'] = await probeHttps('https://api.resend.com');
-  out.external_reachability['https://www.google.com']  = await probeHttps('https://www.google.com');
-  out.external_reachability['https://api.sendgrid.com']= await probeHttps('https://api.sendgrid.com');
-  out.external_reachability['https://api.postmarkapp.com'] = await probeHttps('https://api.postmarkapp.com');
-  out.external_reachability['https://smtp.gmail.com']  = await probeHttps('https://smtp.gmail.com');
 
   return res.json(out);
 });

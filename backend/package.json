@@ -13,7 +13,6 @@
     "db:restore": "node scripts/db-restore.js",
     "db:seed": "node -e \"require('./db'); const {runSeed}=require('./seed'); runSeed(require('./db')).then(()=>process.exit(0))\"",
     "setup": "npm run db:init && npm run db:seed",
-    "test:email": "node scripts/test-email.js",
     "test": "echo \"No tests\" && exit 0"
   },
   "keywords": [],
@@ -31,7 +30,6 @@
     "multer": "^2.1.1",
     "mysql2": "^3.19.0",
     "nodemailer": "^9.0.3",
-    "resend": "^6.9.3",
     "sharp": "^0.34.5",
     "uuid": "^13.0.0"
   }

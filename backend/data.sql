@@ -22,7 +22,7 @@
 LOCK TABLES `admin_users` WRITE;
 /*!40000 ALTER TABLE `admin_users` DISABLE KEYS */;
 INSERT INTO `admin_users` VALUES
-('097fd181-0ddf-4527-a561-76ffffd12312','nikoa2020@gmail.com','$2b$10$uUhVUeT2rymGXyboUnBUf.bBO/k8EYvkOhtV/dy1qnQztSZQ8gxLq','2026-03-06 17:33:19');
+('097fd181-0ddf-4527-a561-76ffffd12312','nikoa2020@gmail.com','$2b$10$/TVxK4Q5jZ55WzGBtRb2Xu6FqoLSSGsMsCmDYvceCynb8mZmxkyZS','2026-03-06 17:33:19');
 /*!40000 ALTER TABLE `admin_users` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -44,6 +44,8 @@ LOCK TABLES `contact_messages` WRITE;
 INSERT INTO `contact_messages` VALUES
 ('3ff6357d-7941-4043-95b7-d89fce530961','Тест Контакт','+7 999 888 77 66','Тестовое сообщение для проверки contact email','new','2026-05-27 12:57:39'),
 ('577b5268-18f6-4edf-8b0f-a69762c3063e','Test User','test@example.com','E2E contact test','new','2026-07-20 10:50:21'),
+('816defd1-8273-4987-a655-2e1772ae7009','Тест','test@example.com','e2e','new','2026-07-20 11:55:01'),
+('8bf6622a-0a5c-424b-90b9-e8c84b0b3396','Debug','debug@test.com','debug','new','2026-07-20 11:02:49'),
 ('c1b9c182-a1f4-4bdf-8378-789ed8fd8f3d','Fail','fail@test.com','should fail','new','2026-07-20 10:51:03'),
 ('fac2646c-60c1-4f6d-8b34-ed34ebe5a3a4','Fail','fail@test.com','should fail','new','2026-07-20 10:51:27');
 /*!40000 ALTER TABLE `contact_messages` ENABLE KEYS */;
@@ -394,4 +396,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-07-20 10:52:48
+-- Dump completed on 2026-07-20 11:56:35
