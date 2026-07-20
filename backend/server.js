@@ -720,6 +720,54 @@ api.post('/admin/email-probe', requireAdmin, async (req, res) => {
     out.smtp_send = { ok: false, exception: true, error: e.message };
   }
 
+  // 6) Port scan — сырой TCP-connect к разным SMTP-портам Resend.
+  // Если один из них открыт (ok=true) — можно переключиться на SMTP через SMTP_PORT env.
+  out.smtp_port_scan = {};
+  const net = require('net');
+  const tryPort = (host, port) => new Promise((resolve) => {
+    const t0 = Date.now();
+    const sock = new net.Socket();
+    let done = false;
+    const finish = (r) => { if (done) return; done = true; try { sock.destroy(); } catch (_) {} resolve({ ...r, ms: Date.now() - t0 }); };
+    sock.setTimeout(6000);
+    sock.on('connect', () => finish({ ok: true }));
+    sock.on('error', (e) => finish({ ok: false, code: e.code || null, message: e.message }));
+    sock.on('timeout', () => finish({ ok: false, code: 'ETIMEDOUT', message: 'timeout 6s' }));
+    sock.connect(port, host);
+  });
+  for (const port of [25, 465, 587, 2465, 2525, 2587]) {
+    out.smtp_port_scan[`smtp.resend.com:${port}`] = await tryPort('smtp.resend.com', port);
+  }
+
+  // 7) Проверка исходящего наружу вообще — маленький HTTPS-запрос
+  //    к нескольким контрольным сервисам. Если все ok:false — заблокирован
+  //    весь egress. Если некоторые ok — блок избирательный (только Resend).
+  out.external_reachability = {};
+  const probeHttps = async (url) => {
+    const t0 = Date.now();
+    try {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 6000);
+      const r = await fetch(url, { method: 'HEAD', signal: ctrl.signal });
+      clearTimeout(timer);
+      return { ok: true, status: r.status, ms: Date.now() - t0 };
+    } catch (e) {
+      const cause = e.cause || {};
+      return {
+        ok: false,
+        error_name: e.name,
+        cause_code: cause.code || null,
+        cause_message: cause.message || null,
+        ms: Date.now() - t0,
+      };
+    }
+  };
+  out.external_reachability['https://api.resend.com'] = await probeHttps('https://api.resend.com');
+  out.external_reachability['https://www.google.com']  = await probeHttps('https://www.google.com');
+  out.external_reachability['https://api.sendgrid.com']= await probeHttps('https://api.sendgrid.com');
+  out.external_reachability['https://api.postmarkapp.com'] = await probeHttps('https://api.postmarkapp.com');
+  out.external_reachability['https://smtp.gmail.com']  = await probeHttps('https://smtp.gmail.com');
+
   return res.json(out);
 });
 
