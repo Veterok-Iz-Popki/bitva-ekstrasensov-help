@@ -21,11 +21,13 @@ const RESEND_API_KEY = process.env.RESEND_API_KEY || '';
 const SENDER_EMAIL = process.env.SENDER_EMAIL || 'onboarding@resend.dev';
 // EMAIL_TRANSPORT: 'auto' (default — HTTP API с SMTP-fallback), 'api', 'smtp'
 const EMAIL_TRANSPORT = (process.env.EMAIL_TRANSPORT || 'auto').toLowerCase();
-// SMTP-конфиг для fallback. Resend SMTP: smtp.resend.com, user='resend', pass=RESEND_API_KEY.
-// Порт 2587 — TLS через STARTTLS (обычно проходит там где 587 блокирован ISP).
+// SMTP-конфиг. По умолчанию — Resend SMTP (user='resend', pass=RESEND_API_KEY).
+// Для внешнего SMTP-сервера (напр. хостинг-провайдер) задай SMTP_PASSWORD отдельно;
+// если он не задан — используется RESEND_API_KEY как пароль (совместимость с Resend).
 const SMTP_HOST = process.env.SMTP_HOST || 'smtp.resend.com';
 const SMTP_PORT = parseInt(process.env.SMTP_PORT || '2587', 10);
 const SMTP_USER = process.env.SMTP_USER || 'resend';
+const SMTP_PASSWORD = process.env.SMTP_PASSWORD || RESEND_API_KEY;
 
 // Uploads dir
 const UPLOADS_DIR = path.join(__dirname, 'uploads');
@@ -107,9 +109,9 @@ function maskKey(s) {
   return `${s.slice(0, 6)}…${s.slice(-4)} (${s.length} chars)`;
 }
 function emailDebugSuffix(notifTo) {
-  // Показываем что реально использовалось на этом запросе. Ключ маскируем —
-  // публичный endpoint, полный ключ в HTTP-ответе = утечка.
-  return ` | DEBUG: SENDER_EMAIL="${SENDER_EMAIL || '<empty>'}", RESEND_API_KEY=${maskKey(RESEND_API_KEY)}, notification_email="${notifTo || '<empty>'}", EMAIL_TRANSPORT=${EMAIL_TRANSPORT}, SMTP=${SMTP_HOST}:${SMTP_PORT}`;
+  // Показываем что реально использовалось на этом запросе. Пароли маскируем —
+  // публичный endpoint, полный секрет в HTTP-ответе = утечка.
+  return ` | DEBUG: SENDER_EMAIL="${SENDER_EMAIL || '<empty>'}", RESEND_API_KEY=${maskKey(RESEND_API_KEY)}, notification_email="${notifTo || '<empty>'}", EMAIL_TRANSPORT=${EMAIL_TRANSPORT}, SMTP=${SMTP_HOST}:${SMTP_PORT}, SMTP_USER=${SMTP_USER}, SMTP_PASSWORD=${maskKey(SMTP_PASSWORD)}`;
 }
 
 // SMTP-отправка через nodemailer. Используется как fallback, когда HTTP API
@@ -118,12 +120,12 @@ function emailDebugSuffix(notifTo) {
 async function sendViaSmtp({ to, subject, html }) {
   try {
     const nodemailer = require('nodemailer');
-    // secure=false + port=2587 → STARTTLS. Для порта 465 нужен secure=true.
+    // secure=true для 465/2465 (SMTPS сразу TLS); false для 587/2587 (STARTTLS).
     const transporter = nodemailer.createTransport({
       host: SMTP_HOST,
       port: SMTP_PORT,
       secure: SMTP_PORT === 465 || SMTP_PORT === 2465,
-      auth: { user: SMTP_USER, pass: RESEND_API_KEY },
+      auth: { user: SMTP_USER, pass: SMTP_PASSWORD },
       // Разумные таймауты — иначе висит минуту при заблокированном egress.
       connectionTimeout: 10000,
       greetingTimeout: 10000,
@@ -147,8 +149,14 @@ async function sendViaSmtp({ to, subject, html }) {
 }
 
 async function sendNotificationEmail(application) {
-  if (!RESEND_API_KEY) {
-    const err = 'RESEND_API_KEY env is empty' + emailDebugSuffix(null);
+  // Guard'ы зависят от транспорта: SMTP не требует RESEND_API_KEY.
+  if (EMAIL_TRANSPORT !== 'smtp' && !RESEND_API_KEY) {
+    const err = 'RESEND_API_KEY env is empty (нужен для HTTP API транспорта)' + emailDebugSuffix(null);
+    console.warn(`[email] sendNotificationEmail FAILED: ${err}`);
+    return { ok: false, error: err };
+  }
+  if (EMAIL_TRANSPORT !== 'api' && !SMTP_PASSWORD) {
+    const err = 'SMTP_PASSWORD env is empty (нужен для SMTP транспорта)' + emailDebugSuffix(null);
     console.warn(`[email] sendNotificationEmail FAILED: ${err}`);
     return { ok: false, error: err };
   }
@@ -158,8 +166,6 @@ async function sendNotificationEmail(application) {
     return { ok: false, error: err };
   }
   try {
-    const { Resend } = require('resend');
-    const resend = new Resend(RESEND_API_KEY);
     const [rows] = await db.query("SELECT notification_email, email_notifications_enabled FROM site_settings WHERE id = 'site_settings'");
     const settings = rows[0] || {};
     if (!settings.notification_email) {
@@ -212,6 +218,9 @@ async function sendNotificationEmail(application) {
       return { ok: true, id: s.id };
     }
 
+    // Ниже — путь через HTTP API Resend (transport === 'api' | 'auto')
+    const { Resend } = require('resend');
+    const resend = new Resend(RESEND_API_KEY);
     const result = await resend.emails.send({
       from: SENDER_EMAIL,
       to: [settings.notification_email],
@@ -256,8 +265,13 @@ async function sendNotificationEmail(application) {
 // Email notification (contact / обратный звонок).
 // Возвращает { ok: true, id } или { ok: false, error: '<текст>' } — см. sendNotificationEmail.
 async function sendContactNotification(msg) {
-  if (!RESEND_API_KEY) {
-    const err = 'RESEND_API_KEY env is empty' + emailDebugSuffix(null);
+  if (EMAIL_TRANSPORT !== 'smtp' && !RESEND_API_KEY) {
+    const err = 'RESEND_API_KEY env is empty (нужен для HTTP API транспорта)' + emailDebugSuffix(null);
+    console.warn(`[email] sendContactNotification FAILED: ${err}`);
+    return { ok: false, error: err };
+  }
+  if (EMAIL_TRANSPORT !== 'api' && !SMTP_PASSWORD) {
+    const err = 'SMTP_PASSWORD env is empty (нужен для SMTP транспорта)' + emailDebugSuffix(null);
     console.warn(`[email] sendContactNotification FAILED: ${err}`);
     return { ok: false, error: err };
   }
@@ -267,8 +281,6 @@ async function sendContactNotification(msg) {
     return { ok: false, error: err };
   }
   try {
-    const { Resend } = require('resend');
-    const resend = new Resend(RESEND_API_KEY);
     const [rows] = await db.query("SELECT notification_email, email_notifications_enabled FROM site_settings WHERE id = 'site_settings'");
     const settings = rows[0] || {};
     if (!settings.notification_email) {
@@ -311,6 +323,9 @@ async function sendContactNotification(msg) {
       return { ok: true, id: s.id };
     }
 
+    // Путь через HTTP API Resend (transport === 'api' | 'auto')
+    const { Resend } = require('resend');
+    const resend = new Resend(RESEND_API_KEY);
     const result = await resend.emails.send({
       from: SENDER_EMAIL,
       to: [settings.notification_email],
@@ -584,6 +599,8 @@ api.post('/admin/email-probe', requireAdmin, async (req, res) => {
       SMTP_HOST,
       SMTP_PORT,
       SMTP_USER,
+      SMTP_PASSWORD: SMTP_PASSWORD ? `${SMTP_PASSWORD.slice(0, 4)}…${SMTP_PASSWORD.slice(-3)} (${SMTP_PASSWORD.length} chars)` : '<empty>',
+      SMTP_PASSWORD_same_as_RESEND_KEY: SMTP_PASSWORD === RESEND_API_KEY,
     },
     dns_lookup: null,
     raw_fetch: null,
@@ -681,7 +698,7 @@ api.post('/admin/email-probe', requireAdmin, async (req, res) => {
       host: SMTP_HOST,
       port: SMTP_PORT,
       secure: SMTP_PORT === 465 || SMTP_PORT === 2465,
-      auth: { user: SMTP_USER, pass: RESEND_API_KEY },
+      auth: { user: SMTP_USER, pass: SMTP_PASSWORD },
       connectionTimeout: 10000,
       greetingTimeout: 10000,
       socketTimeout: 15000,
@@ -720,8 +737,9 @@ api.post('/admin/email-probe', requireAdmin, async (req, res) => {
     out.smtp_send = { ok: false, exception: true, error: e.message };
   }
 
-  // 6) Port scan — сырой TCP-connect к разным SMTP-портам Resend.
-  // Если один из них открыт (ok=true) — можно переключиться на SMTP через SMTP_PORT env.
+  // 6) Port scan — сырой TCP-connect к разным SMTP-портам. Сканируем и
+  //    настроенный SMTP_HOST (важно на prod), и smtp.resend.com для сравнения.
+  //    Если один из портов открыт (ok=true) — можно переключиться через SMTP_PORT env.
   out.smtp_port_scan = {};
   const net = require('net');
   const tryPort = (host, port) => new Promise((resolve) => {
@@ -735,8 +753,13 @@ api.post('/admin/email-probe', requireAdmin, async (req, res) => {
     sock.on('timeout', () => finish({ ok: false, code: 'ETIMEDOUT', message: 'timeout 6s' }));
     sock.connect(port, host);
   });
-  for (const port of [25, 465, 587, 2465, 2525, 2587]) {
-    out.smtp_port_scan[`smtp.resend.com:${port}`] = await tryPort('smtp.resend.com', port);
+  const hostsToScan = SMTP_HOST === 'smtp.resend.com'
+    ? ['smtp.resend.com']
+    : [SMTP_HOST, 'smtp.resend.com'];
+  for (const host of hostsToScan) {
+    for (const port of [25, 465, 587, 2465, 2525, 2587]) {
+      out.smtp_port_scan[`${host}:${port}`] = await tryPort(host, port);
+    }
   }
 
   // 7) Проверка исходящего наружу вообще — маленький HTTPS-запрос
