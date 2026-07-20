@@ -473,3 +473,33 @@ Stub-объект `window.posthog` остаётся синхронным — в�
 - Дизайн (шрифты, цвета, отступы) сохранён ✅
 
 - Console errors: 0
+
+
+---
+
+## 2026-02-26 — test-email.js: CLI флаги для sender/key/to
+
+### Что сделано
+- `backend/scripts/test-email.js` теперь принимает три именованных флага:
+  - `--to=<email>` — получатель (переопределяет позиционный аргумент и БД)
+  - `--sender=<email>` — переопределяет `SENDER_EMAIL`
+  - `--key=<resend-key>` — переопределяет `RESEND_API_KEY`
+- Поддержаны формы `--flag=value` и `--flag value`
+- Обратная совместимость: первый позиционный аргумент по-прежнему трактуется как email получателя
+- Приоритет источников: **CLI flag > REAL ENV (platform/shell) > .env file**
+- В диагностическом выводе явно показан источник каждого значения (`CLI flag` / `REAL ENV` / `.env file` / `<NOT SET>`)
+
+### Проверено
+- TEST 1 (без флагов, ENV из .env): ✅ реальная отправка через Resend, success
+- TEST 2 (--to + --sender + --key с фейковым ключом): ✅ парсинг корректен, `source: CLI flag`, Resend возвращает 401 validation_error как ожидалось
+- TEST 3 (позиционный email + --sender + --key): ✅ обратная совместимость, `source: CLI positional arg`
+- TEST 4 (--flag value без `=`): ✅ парсинг работает
+- Lint: ✅ no issues
+
+### Пример использования на prod
+```
+node scripts/test-email.js --to=you@mail.com --sender=noreply@yourdomain.ru --key=re_xxx
+```
+
+### Commit
+`5fd5fe3 test-email: add --to/--sender/--key CLI flags with priority over ENV`
