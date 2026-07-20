@@ -19,6 +19,13 @@ const JWT_SECRET = process.env.JWT_SECRET || 'change-me-in-production';
 const JWT_EXPIRY = '24h';
 const RESEND_API_KEY = process.env.RESEND_API_KEY || '';
 const SENDER_EMAIL = process.env.SENDER_EMAIL || 'onboarding@resend.dev';
+// EMAIL_TRANSPORT: 'auto' (default — HTTP API с SMTP-fallback), 'api', 'smtp'
+const EMAIL_TRANSPORT = (process.env.EMAIL_TRANSPORT || 'auto').toLowerCase();
+// SMTP-конфиг для fallback. Resend SMTP: smtp.resend.com, user='resend', pass=RESEND_API_KEY.
+// Порт 2587 — TLS через STARTTLS (обычно проходит там где 587 блокирован ISP).
+const SMTP_HOST = process.env.SMTP_HOST || 'smtp.resend.com';
+const SMTP_PORT = parseInt(process.env.SMTP_PORT || '2587', 10);
+const SMTP_USER = process.env.SMTP_USER || 'resend';
 
 // Uploads dir
 const UPLOADS_DIR = path.join(__dirname, 'uploads');
@@ -102,7 +109,41 @@ function maskKey(s) {
 function emailDebugSuffix(notifTo) {
   // Показываем что реально использовалось на этом запросе. Ключ маскируем —
   // публичный endpoint, полный ключ в HTTP-ответе = утечка.
-  return ` | DEBUG: SENDER_EMAIL="${SENDER_EMAIL || '<empty>'}", RESEND_API_KEY=${maskKey(RESEND_API_KEY)}, notification_email="${notifTo || '<empty>'}"`;
+  return ` | DEBUG: SENDER_EMAIL="${SENDER_EMAIL || '<empty>'}", RESEND_API_KEY=${maskKey(RESEND_API_KEY)}, notification_email="${notifTo || '<empty>'}", EMAIL_TRANSPORT=${EMAIL_TRANSPORT}, SMTP=${SMTP_HOST}:${SMTP_PORT}`;
+}
+
+// SMTP-отправка через nodemailer. Используется как fallback, когда HTTP API
+// Resend недоступен (сетевые блокировки egress к api.resend.com).
+// Возвращает { ok, id?, error? } — тот же контракт, что и HTTP-путь.
+async function sendViaSmtp({ to, subject, html }) {
+  try {
+    const nodemailer = require('nodemailer');
+    // secure=false + port=2587 → STARTTLS. Для порта 465 нужен secure=true.
+    const transporter = nodemailer.createTransport({
+      host: SMTP_HOST,
+      port: SMTP_PORT,
+      secure: SMTP_PORT === 465 || SMTP_PORT === 2465,
+      auth: { user: SMTP_USER, pass: RESEND_API_KEY },
+      // Разумные таймауты — иначе висит минуту при заблокированном egress.
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 15000,
+    });
+    const info = await transporter.sendMail({
+      from: SENDER_EMAIL,
+      to: [to],
+      subject,
+      html,
+    });
+    return { ok: true, id: info.messageId || null, response: info.response || null };
+  } catch (e) {
+    return {
+      ok: false,
+      error: `SMTP failed [${e.code || '?'}]: ${e.message}`,
+      code: e.code || null,
+      command: e.command || null,
+    };
+  }
 }
 
 async function sendNotificationEmail(application) {
@@ -154,12 +195,27 @@ async function sendNotificationEmail(application) {
       </div>
     </div>`;
 
+    const subject = application.psychic_name
+      ? `Новая заявка от ${fullName} к ${application.psychic_name} — Битва экстрасенсов`
+      : `Новая заявка от ${fullName} — Битва экстрасенсов`;
+
+    // Транспорт: 'smtp' → сразу SMTP, 'api' → только HTTP API, 'auto' (default) →
+    // HTTP API, а при сетевом сбое (fetch не долетел) — fallback на SMTP.
+    if (EMAIL_TRANSPORT === 'smtp') {
+      const s = await sendViaSmtp({ to: settings.notification_email, subject, html });
+      if (!s.ok) {
+        const err = s.error + emailDebugSuffix(settings.notification_email);
+        console.error(`SMTP failed for application email: ${err}`);
+        return { ok: false, error: err };
+      }
+      console.log(`Notification email sent via SMTP to ${settings.notification_email} (id=${s.id || 'n/a'})`);
+      return { ok: true, id: s.id };
+    }
+
     const result = await resend.emails.send({
       from: SENDER_EMAIL,
       to: [settings.notification_email],
-      subject: application.psychic_name
-        ? `Новая заявка от ${fullName} к ${application.psychic_name} — Битва экстрасенсов`
-        : `Новая заявка от ${fullName} — Битва экстрасенсов`,
+      subject,
       html,
     });
     if (result && result.error) {
@@ -168,11 +224,28 @@ async function sendNotificationEmail(application) {
       const cause = err_obj.cause || {};
       const fullDump = JSON.stringify(err_obj, Object.getOwnPropertyNames(err_obj));
       const causeInfo = cause.code || cause.message ? ` [cause: ${cause.code || ''} ${cause.message || ''}]` : '';
-      const err = `Resend rejected: [${err_obj.statusCode || '?'}] ${err_obj.name || ''}: ${err_obj.message || fullDump}${causeInfo}` + emailDebugSuffix(settings.notification_email);
-      console.error(`Resend rejected application email: ${err} | full: ${fullDump}`);
+      const httpErr = `Resend rejected: [${err_obj.statusCode || '?'}] ${err_obj.name || ''}: ${err_obj.message || fullDump}${causeInfo}`;
+      console.error(`Resend HTTP failed for application email: ${httpErr} | full: ${fullDump}`);
+
+      // Fallback на SMTP только если transport='auto' И ошибка выглядит как сетевая
+      // (нет statusCode или name='application_error' с 'Unable to fetch data').
+      const isNetworkError = !err_obj.statusCode
+        || err_obj.name === 'application_error'
+        || (err_obj.message || '').includes('Unable to fetch data');
+      if (EMAIL_TRANSPORT === 'auto' && isNetworkError) {
+        console.warn('[email] HTTP API network error — trying SMTP fallback...');
+        const s = await sendViaSmtp({ to: settings.notification_email, subject, html });
+        if (s.ok) {
+          console.log(`Notification email sent via SMTP fallback to ${settings.notification_email} (id=${s.id || 'n/a'})`);
+          return { ok: true, id: s.id };
+        }
+        const err = `${httpErr} + SMTP fallback also failed: ${s.error}` + emailDebugSuffix(settings.notification_email);
+        return { ok: false, error: err };
+      }
+      const err = httpErr + emailDebugSuffix(settings.notification_email);
       return { ok: false, error: err };
     }
-    console.log(`Notification email sent to ${settings.notification_email} (id=${result?.data?.id || 'n/a'})`);
+    console.log(`Notification email sent via HTTP API to ${settings.notification_email} (id=${result?.data?.id || 'n/a'})`);
     return { ok: true, id: result?.data?.id || null };
   } catch (e) {
     console.error('Failed to send email:', e.message);
@@ -225,10 +298,23 @@ async function sendContactNotification(msg) {
       </div>
     </div>`;
 
+    const subject = `Новое сообщение от ${msg.name || 'клиента'} — Битва экстрасенсов`;
+
+    if (EMAIL_TRANSPORT === 'smtp') {
+      const s = await sendViaSmtp({ to: settings.notification_email, subject, html });
+      if (!s.ok) {
+        const err = s.error + emailDebugSuffix(settings.notification_email);
+        console.error(`SMTP failed for contact email: ${err}`);
+        return { ok: false, error: err };
+      }
+      console.log(`Contact notification sent via SMTP to ${settings.notification_email} (id=${s.id || 'n/a'})`);
+      return { ok: true, id: s.id };
+    }
+
     const result = await resend.emails.send({
       from: SENDER_EMAIL,
       to: [settings.notification_email],
-      subject: `Новое сообщение от ${msg.name || 'клиента'} — Битва экстрасенсов`,
+      subject,
       html,
     });
     if (result && result.error) {
@@ -236,11 +322,26 @@ async function sendContactNotification(msg) {
       const cause = err_obj.cause || {};
       const fullDump = JSON.stringify(err_obj, Object.getOwnPropertyNames(err_obj));
       const causeInfo = cause.code || cause.message ? ` [cause: ${cause.code || ''} ${cause.message || ''}]` : '';
-      const err = `Resend rejected: [${err_obj.statusCode || '?'}] ${err_obj.name || ''}: ${err_obj.message || fullDump}${causeInfo}` + emailDebugSuffix(settings.notification_email);
-      console.error(`Resend rejected contact email: ${err} | full: ${fullDump}`);
+      const httpErr = `Resend rejected: [${err_obj.statusCode || '?'}] ${err_obj.name || ''}: ${err_obj.message || fullDump}${causeInfo}`;
+      console.error(`Resend HTTP failed for contact email: ${httpErr} | full: ${fullDump}`);
+
+      const isNetworkError = !err_obj.statusCode
+        || err_obj.name === 'application_error'
+        || (err_obj.message || '').includes('Unable to fetch data');
+      if (EMAIL_TRANSPORT === 'auto' && isNetworkError) {
+        console.warn('[email] HTTP API network error — trying SMTP fallback...');
+        const s = await sendViaSmtp({ to: settings.notification_email, subject, html });
+        if (s.ok) {
+          console.log(`Contact notification sent via SMTP fallback to ${settings.notification_email} (id=${s.id || 'n/a'})`);
+          return { ok: true, id: s.id };
+        }
+        const err = `${httpErr} + SMTP fallback also failed: ${s.error}` + emailDebugSuffix(settings.notification_email);
+        return { ok: false, error: err };
+      }
+      const err = httpErr + emailDebugSuffix(settings.notification_email);
       return { ok: false, error: err };
     }
-    console.log(`Contact notification sent to ${settings.notification_email} (id=${result?.data?.id || 'n/a'})`);
+    console.log(`Contact notification sent via HTTP API to ${settings.notification_email} (id=${result?.data?.id || 'n/a'})`);
     return { ok: true, id: result?.data?.id || null };
   } catch (e) {
     console.error('Failed to send contact email:', e.message);
@@ -479,10 +580,16 @@ api.post('/admin/email-probe', requireAdmin, async (req, res) => {
       SENDER_EMAIL: SENDER_EMAIL || '<empty>',
       RESEND_API_KEY: RESEND_API_KEY ? `${RESEND_API_KEY.slice(0, 6)}…${RESEND_API_KEY.slice(-4)} (${RESEND_API_KEY.length} chars)` : '<empty>',
       NODE_VERSION: process.version,
+      EMAIL_TRANSPORT,
+      SMTP_HOST,
+      SMTP_PORT,
+      SMTP_USER,
     },
     dns_lookup: null,
     raw_fetch: null,
     resend_send: null,
+    smtp_verify: null,
+    smtp_send: null,
   };
 
   // 1) DNS
@@ -565,6 +672,52 @@ api.post('/admin/email-probe', requireAdmin, async (req, res) => {
       cause_message: cause.message || null,
       stack: (e.stack || '').split('\n').slice(0, 5).join('\n'),
     };
+  }
+
+  // 4) SMTP verify (TCP connect + EHLO + AUTH, БЕЗ отправки письма)
+  try {
+    const nodemailer = require('nodemailer');
+    const transporter = nodemailer.createTransport({
+      host: SMTP_HOST,
+      port: SMTP_PORT,
+      secure: SMTP_PORT === 465 || SMTP_PORT === 2465,
+      auth: { user: SMTP_USER, pass: RESEND_API_KEY },
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 15000,
+    });
+    const t0 = Date.now();
+    await transporter.verify();
+    out.smtp_verify = { ok: true, ms: Date.now() - t0, host: SMTP_HOST, port: SMTP_PORT };
+  } catch (e) {
+    out.smtp_verify = {
+      ok: false,
+      code: e.code || null,             // ECONNREFUSED, ETIMEDOUT, EAUTH, EDNS, ...
+      command: e.command || null,       // CONN, EHLO, AUTH LOGIN, ...
+      response: e.response || null,     // SMTP-ответ сервера если был
+      responseCode: e.responseCode || null,
+      message: e.message,
+    };
+  }
+
+  // 5) SMTP send (реальная отправка тестового письма через SMTP)
+  try {
+    const [rows] = await db.query("SELECT notification_email FROM site_settings WHERE id = 'site_settings'");
+    const recipient = (rows[0] && rows[0].notification_email) || '';
+    if (!recipient) {
+      out.smtp_send = { ok: false, error: 'notification_email пуст в site_settings' };
+    } else {
+      const stamp = new Date().toISOString();
+      const t0 = Date.now();
+      const s = await sendViaSmtp({
+        to: recipient,
+        subject: `SMTP probe from admin (${stamp})`,
+        html: `<p>Диагностическое письмо через SMTP (${SMTP_HOST}:${SMTP_PORT}).</p><p>Timestamp: ${stamp}</p>`,
+      });
+      out.smtp_send = { ...s, ms: Date.now() - t0, recipient };
+    }
+  } catch (e) {
+    out.smtp_send = { ok: false, exception: true, error: e.message };
   }
 
   return res.json(out);
