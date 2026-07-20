@@ -1,0 +1,21 @@
+{
+  "summary": "Post-restart restore verification: all 11 test criteria passed. Backend up, MariaDB restored (8 participants, 200 reviews, 0 applications, popup_phone=+7 911 555-66-66). Frontend rebuilt without Emergent badge (as expected). All previously landed fixes present in live: Yandex Metrika loads, form_send goal fires once, SEO fallback titles for participants correct, Viktoriya/Vlad descriptions corrected, admin dashboard shows correct stats, 0 console errors, no mobile horizontal overflow. One booking form submission executed — email sent via Resend, backend logged 'Notification email sent to krzysztofjankowski510@gmail.com', DB applications count stayed 0 (persistence disabled by design).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_restore_verification.py",
+    "/app/backend/tests/test_smoke_iter21.py",
+    "/app/backend/tests/test_applications_disabled.py",
+    "/app/backend/tests/test_popup_phone.py"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "admin: nikoa2020@gmail.com / aspire5542gl1952tq (from /app/memory/test_credentials.md)",
+  "seed_data_creation": "One test application submitted via UI (Test problem for E2E validation). Not persisted in DB by design; Resend email sent (id=94f9f7a7-d814-4d3e-819c-4962c996f2da).",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Detailed verification results: (1) Home /: title correct, hero 'Битва экстрасенсов' renders, nav = Главная/Экстрасенсы/Услуги/Фотогалерея/Видео/Вопросы-Ответы (no Отзывы item — correct). (2) GET /api/participants returns 8. (3) GET /api/settings.popup_phone = '+7 911 555-66-66'. (4) Public GET /api/reviews returns 40 (by design: 5 random per participant × 8); admin /api/admin/reviews returns 200 (full count). Admin stats: total_applications=0, total_participants=8, total_reviews=200, total_contacts=1. (5) window.ym is function, mc.webvisor.org/metrika/tag_ww.js?id=110304923 loaded. (6) /zapis-na-priem form submit → popup 'Спасибо! Ваша заявка отправлена' + '+7 911 555-66-66', ym reachGoal form_send fired exactly 1x, POST /api/applications executed, backend log shows 'Notification email sent to krzysztofjankowski510@gmail.com (id=94f9f7a7…)', admin stats still 0 apps (as designed). (7) SEO: elena-golunova title has 'Финалистка 13 сезона', viktoriya-raidos has 'Победительница 16 сезона', vlad-cherevatyy has 'Победитель 23 сезона'. (8) Viktoriya full_description contains 'Родом из Москвы, во взрослом возрасте переехала в Санкт-Петербург…', does NOT contain 'родилась в Санкт-Петербурге'. (9) Vlad specializations = ['Медиум','Экстрасенс']; description contains 'экстрасенс-медиум'; no 'рун' word in description/full_description (only false-positive 'грунтовке' from an unrelated review). (10) Mobile 390px viewport: scrollWidth-clientWidth = 0 (no overflow). (11) /admin dashboard: '0 Всего заявок / 8 Участников / 200 Отзывов / 1 Сообщений'. (12) Console errors on home, participant pages, form flow, admin: 0. Note: HTML meta description for participant pages uses a generic fallback ('Личный приём экстрасенса, онлайн-консультация…') — this is by design SEO fallback, not the participant.description text; the 'экстрасенс-медиум' substring lives inside participant API description and visible page body, not the <meta name=description>.",
+  "rca of the issue": "n/a"
+}
