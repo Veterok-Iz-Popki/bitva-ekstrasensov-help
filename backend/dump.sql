@@ -40,7 +40,7 @@ CREATE TABLE `admin_users` (
 LOCK TABLES `admin_users` WRITE;
 /*!40000 ALTER TABLE `admin_users` DISABLE KEYS */;
 INSERT INTO `admin_users` VALUES
-('097fd181-0ddf-4527-a561-76ffffd12312','nikoa2020@gmail.com','$2b$10$/TVxK4Q5jZ55WzGBtRb2Xu6FqoLSSGsMsCmDYvceCynb8mZmxkyZS','2026-03-06 17:33:19');
+('097fd181-0ddf-4527-a561-76ffffd12312','nikoa2020@gmail.com','$2b$10$ffjxVV98Af8Mqw4IVUef3ey7g0w1jNqL2H0T4/QiYtt4sqQxTadWi','2026-03-06 17:33:19');
 /*!40000 ALTER TABLE `admin_users` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -627,4 +627,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-07-20 11:56:35
+-- Dump completed on 2026-07-22 12:17:42
