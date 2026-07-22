@@ -150,6 +150,28 @@ function Header() {
     return () => clearTimeout(t);
   }, [location]);
 
+  // ===== Яндекс.Метрика — hit при SPA-переходах =====
+  // Первичный hit уже отправлен через ym('init', ...) в index.html — его НЕ дублируем.
+  // На каждое изменение pathname+search шлём новый просмотр с previousUrl как referer.
+  // location.hash игнорируем: hash-переходы (якоря) не создают нового просмотра страницы.
+  const prevUrlRef = useRef(null);
+  const isFirstHitRef = useRef(true);
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.ym !== 'function') return;
+    if (isFirstHitRef.current) {
+      // Первый рендер после mount — init в index.html уже сделал hit для этого URL.
+      isFirstHitRef.current = false;
+      prevUrlRef.current = window.location.href;
+      return;
+    }
+    const currentUrl = window.location.href;
+    window.ym(110304923, 'hit', currentUrl, {
+      referer: prevUrlRef.current || document.referrer || undefined,
+      title: document.title,
+    });
+    prevUrlRef.current = currentUrl;
+  }, [location.pathname, location.search]);
+
   const handleNavClick = (e, item) => {
     if (item.path.startsWith('/#')) {
       e.preventDefault();
