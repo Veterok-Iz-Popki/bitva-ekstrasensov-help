@@ -1092,8 +1092,26 @@ if (fs.existsSync(BUILD_DIR)) {
   //     (React через createRoot полностью перерисует этот блок при mount).
   // НИКАКОГО клоакинга: один и тот же HTML отдаётся любому клиенту.
   const seoRenderer = require('./seo/renderer');
-  const INDEX_PATH = path.join(BUILD_DIR, 'index.html');
+  // Production: build/index.html удаляется постбилд-скриптом чтобы reverse proxy
+  // (Caddy/Nginx) не отдавал его напрямую для `/`. Backend читает index.template.html.
+  // Dev/локально: если постбилд не запускался — используем оригинальный index.html.
+  const INDEX_TEMPLATE_PATH = path.join(BUILD_DIR, 'index.template.html');
+  const INDEX_FALLBACK_PATH = path.join(BUILD_DIR, 'index.html');
   const MANIFEST_PATH = path.join(BUILD_DIR, 'asset-manifest.json');
+
+  // Вычисляется на каждый запрос — hot reload при dev (переключение с fallback на template)
+  // не требует restart. Ошибка "no file at all" залогируется явно.
+  function resolveIndexPath() {
+    if (fs.existsSync(INDEX_TEMPLATE_PATH)) return INDEX_TEMPLATE_PATH;
+    if (fs.existsSync(INDEX_FALLBACK_PATH)) return INDEX_FALLBACK_PATH;
+    return null;
+  }
+  const initialPath = resolveIndexPath();
+  if (initialPath) {
+    console.log(`[seo] SPA template file: ${path.basename(initialPath)}`);
+  } else {
+    console.error(`[seo] WARNING: neither index.template.html nor index.html found in ${BUILD_DIR}`);
+  }
 
   // Маппинг URL → тип страницы + ключ seo_settings + ключ pages.
   // Порядок важен — сначала точные совпадения, потом participant regex, потом 404.
@@ -1177,6 +1195,13 @@ if (fs.existsSync(BUILD_DIR)) {
   }
 
   app.get('/{*splat}', async (req, res) => {
+    // Определяем путь к template на КАЖДЫЙ запрос — так после yarn build
+    // без restart backend'а сразу подхватится обновлённый шаблон.
+    const indexPath = resolveIndexPath();
+    if (!indexPath) {
+      console.error('[seo] No index template file to render');
+      return res.status(500).send('Internal Server Error: SPA template not found');
+    }
     try {
       const pathname = req.path || '/';
       const route = await resolveRoute(pathname);
@@ -1184,7 +1209,7 @@ if (fs.existsSync(BUILD_DIR)) {
       // Админка: отдаём базовый HTML с noindex, без БД-контента.
       if (route.type === 'admin') {
         const html = seoRenderer.injectSeoIntoHtml(
-          INDEX_PATH,
+          indexPath,
           MANIFEST_PATH,
           {
             title: 'Админ-панель — Битва экстрасенсов',
@@ -1244,7 +1269,7 @@ if (fs.existsSync(BUILD_DIR)) {
       });
 
       const html = seoRenderer.injectSeoIntoHtml(
-        INDEX_PATH,
+        indexPath,
         MANIFEST_PATH,
         seoRender,
         seoRenderer.buildSiteBgPreloads(MANIFEST_PATH)
@@ -1255,9 +1280,9 @@ if (fs.existsSync(BUILD_DIR)) {
       res.status(seoRender.statusCode).send(html);
     } catch (err) {
       console.error('[seo-renderer] failed:', err.message);
-      // Fallback: отдать чистый index.html с диска (без инъекций), чтобы сайт не упал.
+      // Fallback: отдать чистый template с диска (без инъекций), чтобы сайт не упал.
       try {
-        const raw = fs.readFileSync(INDEX_PATH, 'utf-8');
+        const raw = fs.readFileSync(indexPath, 'utf-8');
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
         res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
         return res.send(raw);

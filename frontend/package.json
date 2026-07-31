@@ -59,7 +59,7 @@
   },
   "scripts": {
     "start": "craco start",
-    "build": "BUILD_PATH=../backend/build craco build",
+    "build": "BUILD_PATH=../backend/build craco build && BUILD_PATH=../backend/build node scripts/postbuild-rename-index.js",
     "test": "craco test"
   },
   "browserslist": {
