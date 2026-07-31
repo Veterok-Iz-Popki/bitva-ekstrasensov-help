@@ -40,7 +40,7 @@ CREATE TABLE `admin_users` (
 LOCK TABLES `admin_users` WRITE;
 /*!40000 ALTER TABLE `admin_users` DISABLE KEYS */;
 INSERT INTO `admin_users` VALUES
-('097fd181-0ddf-4527-a561-76ffffd12312','nikoa2020@gmail.com','$2b$10$ffjxVV98Af8Mqw4IVUef3ey7g0w1jNqL2H0T4/QiYtt4sqQxTadWi','2026-03-06 17:33:19');
+('097fd181-0ddf-4527-a561-76ffffd12312','nikoa2020@gmail.com','$2b$10$S3FCanfhUdwvivtqBqepd.BOc1lIeo5S6Ll5wjoKEWTemKzXxHrvK','2026-03-06 17:33:19');
 /*!40000 ALTER TABLE `admin_users` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -614,7 +614,7 @@ CREATE TABLE `site_settings` (
 LOCK TABLES `site_settings` WRITE;
 /*!40000 ALTER TABLE `site_settings` DISABLE KEYS */;
 INSERT INTO `site_settings` VALUES
-('site_settings','info@example.com','+7 (800) 123-45-67','+7 911 555-66-66','Москва, Россия','krzysztofjankowski510@gmail.com','Пн-Вс: 9:00 — 21:00','2024 Битва экстрасенсов. Все права защищены.',1,'','Битва Экстрасенсов',56,48,0);
+('site_settings','info@example.com','+7 (800) 123-45-67','+7 911 555-66-66','Москва, Россия','krzysztofjankowski510@gmail.com','Пн-Вс: 9:00 — 21:00','2024 Битва экстрасенсов. Все права защищены.',1,'','Битва Экстрасенсов',56,48,1);
 /*!40000 ALTER TABLE `site_settings` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -627,4 +627,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-07-22 12:17:42
+-- Dump completed on 2026-07-31  9:51:00

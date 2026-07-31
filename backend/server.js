@@ -1070,7 +1070,7 @@ if (fs.existsSync(BUILD_DIR)) {
     maxAge: '1y',
     immutable: true,
     // index: false — отключаем автоматическое отдавание index.html для `/`,
-    // потому что мы хотим инжектить preload-теги в HTML через свой роут ниже.
+    // потому что мы хотим инжектить SEO-теги и per-URL контент через свой роут ниже.
     index: false,
     setHeaders: (res, filePath) => {
       // index.html, sw.js, manifest.json не фингерпринтованы — должны проверяться при каждом запросе,
@@ -1082,44 +1082,189 @@ if (fs.existsSync(BUILD_DIR)) {
     },
   }));
 
-  // Подготавливаем index.html с инъекцией preload для background-картинок.
-  // Webpack хеширует имена файлов (site-bg.HASH.avif/webp/jpg), поэтому читаем их
-  // из asset-manifest.json и подставляем актуальные URL в <head>.
-  // Это даёт максимально ранний сигнал браузеру на загрузку фона → улучшает LCP.
-  let cachedIndexHtml = null;
-  function buildEnrichedIndexHtml() {
+  // ===== Server-side SEO injection =====
+  // На каждый публичный URL:
+  //  1) читаем index.html С ДИСКА (без in-memory cache — иначе после `yarn build`
+  //     без рестарта backend отдавался stale HTML со stale JS-hash);
+  //  2) достаём из БД seo_settings + контент;
+  //  3) подставляем title, meta description, canonical, robots, OG-теги;
+  //  4) инжектим видимый H1 + intro + основной текст внутрь <div id="root">…</div>
+  //     (React через createRoot полностью перерисует этот блок при mount).
+  // НИКАКОГО клоакинга: один и тот же HTML отдаётся любому клиенту.
+  const seoRenderer = require('./seo/renderer');
+  const INDEX_PATH = path.join(BUILD_DIR, 'index.html');
+  const MANIFEST_PATH = path.join(BUILD_DIR, 'asset-manifest.json');
+
+  // Маппинг URL → тип страницы + ключ seo_settings + ключ pages.
+  // Порядок важен — сначала точные совпадения, потом participant regex, потом 404.
+  const STATIC_ROUTES = {
+    '/':                        { type: 'home',     seoKey: 'home',     pageKey: 'home' },
+    '/zapis-na-priem':          { type: 'booking',  seoKey: 'booking',  pageKey: 'booking' },
+    '/voprosy-i-otvety':        { type: 'faq',      seoKey: 'faq',      pageKey: 'faq' },
+    '/foto-galereya':           { type: 'gallery',  seoKey: 'foto-galereya', pageKey: null },
+    '/video':                   { type: 'video',    seoKey: 'video',    pageKey: null },
+    // Услуги
+    '/finansovaya-magiya':      { type: 'service',  seoKey: 'service-finansovaya-magiya',      pageKey: 'service-finansovaya-magiya',      slug: 'finansovaya-magiya' },
+    '/lyubovnaya-magiya':       { type: 'service',  seoKey: 'service-lyubovnaya-magiya',       pageKey: 'service-lyubovnaya-magiya',       slug: 'lyubovnaya-magiya' },
+    '/magiya-zhizni':           { type: 'service',  seoKey: 'service-magiya-zhizni',           pageKey: 'service-magiya-zhizni',           slug: 'magiya-zhizni' },
+    '/magicheskaya-zashchita':  { type: 'service',  seoKey: 'service-magicheskaya-zashchita',  pageKey: 'service-magicheskaya-zashchita',  slug: 'magicheskaya-zashchita' },
+    // Тематические страницы
+    '/porcha':              { type: 'topic', seoKey: 'topic-porcha',              pageKey: 'topic-porcha',              slug: 'porcha' },
+    '/proklyatie':          { type: 'topic', seoKey: 'topic-proklyatie',          pageKey: 'topic-proklyatie',          slug: 'proklyatie' },
+    '/sglaz':               { type: 'topic', seoKey: 'topic-sglaz',               pageKey: 'topic-sglaz',               slug: 'sglaz' },
+    '/venets-bezbrachiya':  { type: 'topic', seoKey: 'topic-venets-bezbrachiya',  pageKey: 'topic-venets-bezbrachiya',  slug: 'venets-bezbrachiya' },
+    '/privorot':            { type: 'topic', seoKey: 'topic-privorot',            pageKey: 'topic-privorot',            slug: 'privorot' },
+    '/zaklyatie':           { type: 'topic', seoKey: 'topic-zaklyatie',           pageKey: 'topic-zaklyatie',           slug: 'zaklyatie' },
+  };
+
+  async function resolveRoute(pathname) {
+    // Убираем trailing slash кроме корня для устранения дублей.
+    const p = pathname.length > 1 && pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
+    if (STATIC_ROUTES[p]) return STATIC_ROUTES[p];
+    const partMatch = /^\/uchastniki\/([a-z0-9-]+)$/i.exec(p);
+    if (partMatch) return { type: 'participant', slug: partMatch[1] };
+    // Админка индексироваться не должна, но отдать HTML для React мы обязаны.
+    if (p === '/admin' || p.startsWith('/admin/')) return { type: 'admin' };
+    return { type: 'notfound' };
+  }
+
+  async function loadSeo(seoKey) {
+    if (!seoKey) return null;
     try {
-      const indexPath = path.join(BUILD_DIR, 'index.html');
-      let html = fs.readFileSync(indexPath, 'utf-8');
-      const manifestPath = path.join(BUILD_DIR, 'asset-manifest.json');
-      if (fs.existsSync(manifestPath)) {
-        const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
-        const files = manifest.files || {};
-        const avif = files['static/media/site-bg.avif'];
-        const webp = files['static/media/site-bg.webp'];
-        const preloads = [];
-        if (avif) preloads.push(`<link rel="preload" as="image" type="image/avif" href="${avif}" fetchpriority="high">`);
-        if (webp) preloads.push(`<link rel="preload" as="image" type="image/webp" href="${webp}">`);
-        if (preloads.length) {
-          html = html.replace('</head>', preloads.join('') + '</head>');
+      const [rows] = await db.query(
+        'SELECT title, description, keywords, h1, og_title, og_description FROM seo_settings WHERE page_slug = ?',
+        [seoKey]
+      );
+      return rows[0] || null;
+    } catch (_) { return null; }
+  }
+
+  async function loadPageBlocks(pageKey) {
+    if (!pageKey) return null;
+    try {
+      const [rows] = await db.query('SELECT blocks FROM pages WHERE page_slug = ?', [pageKey]);
+      if (!rows[0] || !rows[0].blocks) return null;
+      return JSON.parse(rows[0].blocks);
+    } catch (_) { return null; }
+  }
+
+  async function loadParticipant(slug) {
+    try {
+      const [rows] = await db.query('SELECT slug, name, title, description, full_description, specializations, photo_url FROM participants WHERE slug = ? AND is_active = 1', [slug]);
+      return rows[0] || null;
+    } catch (_) { return null; }
+  }
+
+  async function loadParticipantsList() {
+    try {
+      const [rows] = await db.query('SELECT slug, name, title FROM participants WHERE is_active = 1 ORDER BY `order` ASC, name ASC');
+      return rows || [];
+    } catch (_) { return []; }
+  }
+
+  async function loadFaqList() {
+    try {
+      const [rows] = await db.query('SELECT question, answer FROM faq ORDER BY `order` ASC, id ASC');
+      return rows || [];
+    } catch (_) { return []; }
+  }
+
+  async function loadVideos() {
+    try {
+      const [rows] = await db.query('SELECT title, url FROM gallery_videos ORDER BY `order` ASC, id ASC');
+      return rows || [];
+    } catch (_) { return []; }
+  }
+
+  app.get('/{*splat}', async (req, res) => {
+    try {
+      const pathname = req.path || '/';
+      const route = await resolveRoute(pathname);
+
+      // Админка: отдаём базовый HTML с noindex, без БД-контента.
+      if (route.type === 'admin') {
+        const html = seoRenderer.injectSeoIntoHtml(
+          INDEX_PATH,
+          MANIFEST_PATH,
+          {
+            title: 'Админ-панель — Битва экстрасенсов',
+            description: '',
+            canonical: null,
+            robots: 'noindex, nofollow',
+            ogTitle: 'Админ-панель',
+            ogDescription: '',
+            ogUrl: null,
+            ogImage: null,
+            bodyHtml: '',
+          },
+          seoRenderer.buildSiteBgPreloads(MANIFEST_PATH)
+        );
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        return res.send(html);
+      }
+
+      const indexingEnabled = !!(await getSeoIndexingEnabled());
+
+      let seo = null, pageData = null, participant = null;
+      let participants = null, faq = null, videos = null;
+
+      if (route.type === 'participant') {
+        participant = await loadParticipant(route.slug);
+        if (!participant) {
+          // Slug не найден → 404.
+          route.type = 'notfound';
+        } else {
+          seo = await loadSeo(`participant-${route.slug}`);
         }
       }
-      cachedIndexHtml = html;
-      console.log('[index.html] preload-enriched HTML cached');
-    } catch (err) {
-      console.warn('[index.html] preload enrichment failed:', err.message);
-      cachedIndexHtml = null;
-    }
-  }
-  buildEnrichedIndexHtml();
 
-  app.get('/{*splat}', (req, res) => {
-    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-    if (cachedIndexHtml) {
+      if (route.type !== 'notfound' && route.type !== 'participant') {
+        seo = await loadSeo(route.seoKey);
+        if (route.pageKey) pageData = await loadPageBlocks(route.pageKey);
+      }
+
+      // Дополнительные данные для конкретных типов страниц.
+      if (route.type === 'home' || route.type === 'gallery' || route.type === 'booking') {
+        participants = await loadParticipantsList();
+      }
+      if (route.type === 'faq') faq = await loadFaqList();
+      if (route.type === 'video') videos = await loadVideos();
+
+      const seoRender = seoRenderer.renderSeo({
+        route,
+        pathname,
+        seo,
+        pageData,
+        participant,
+        participants,
+        faq,
+        videos,
+        indexingEnabled,
+      });
+
+      const html = seoRenderer.injectSeoIntoHtml(
+        INDEX_PATH,
+        MANIFEST_PATH,
+        seoRender,
+        seoRenderer.buildSiteBgPreloads(MANIFEST_PATH)
+      );
+
       res.setHeader('Content-Type', 'text/html; charset=utf-8');
-      return res.send(cachedIndexHtml);
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.status(seoRender.statusCode).send(html);
+    } catch (err) {
+      console.error('[seo-renderer] failed:', err.message);
+      // Fallback: отдать чистый index.html с диска (без инъекций), чтобы сайт не упал.
+      try {
+        const raw = fs.readFileSync(INDEX_PATH, 'utf-8');
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        return res.send(raw);
+      } catch (_) {
+        return res.status(500).send('Internal Server Error');
+      }
     }
-    res.sendFile(path.join(BUILD_DIR, 'index.html'));
   });
 }
 
