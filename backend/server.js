@@ -933,6 +933,30 @@ api.post('/admin/upload', requireAdmin, upload.single('file'), async (req, res) 
   return res.json({ status: 'success', filename, url: `/api/uploads/${filename}` });
 });
 
+// ===== ВРЕМЕННЫЙ ДИАГНОСТИЧЕСКИЙ ENDPOINT (Шаг 0 аудита редиректов) =====
+// Показывает, какие proxy-заголовки реально доходят до Express через
+// BitNinja → Caddy → Plesk/Passenger. Отдаёт ТОЛЬКО заголовки маршрутизации,
+// никаких секретов. УДАЛИТЬ сразу после снятия замеров на production.
+api.get('/debug/proxy', (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  return res.json({
+    host: req.headers.host || null,
+    xForwardedHost: req.headers['x-forwarded-host'] || null,
+    xForwardedProto: req.headers['x-forwarded-proto'] || null,
+    xForwardedSsl: req.headers['x-forwarded-ssl'] || null,
+    xForwardedPort: req.headers['x-forwarded-port'] || null,
+    xForwardedFor: req.headers['x-forwarded-for'] ? 'present' : null,
+    frontEndHttps: req.headers['front-end-https'] || null,
+    xUrlScheme: req.headers['x-url-scheme'] || null,
+    reqProtocol: req.protocol,
+    reqSecure: req.secure,
+    socketEncrypted: !!req.socket.encrypted,
+    reqHostname: req.hostname,
+    originalUrl: req.originalUrl,
+    trustProxySetting: app.get('trust proxy') || false,
+  });
+});
+
 // ===== ADMIN SEED =====
 
 api.post('/admin/seed', requireAdmin, async (req, res) => {
