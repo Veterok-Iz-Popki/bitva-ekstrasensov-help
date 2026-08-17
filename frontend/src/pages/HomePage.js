@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { Shield, Users, HelpCircle, Globe, MessageCircle, UserCheck } from 'lucide-react';
 import api, { setSEO, setJsonLd, getSiteUrl } from '../lib/api';
 import PictureImg from '../components/PictureImg';
-import useInView from '../hooks/useInView';
 
 const PROBLEM_CATEGORIES = [
   { label: 'Порча', path: '/porcha' },
@@ -33,10 +32,6 @@ const SERVICE_LINKS = [
 export default function HomePage() {
   const [page, setPage] = useState(null);
   const [participants, setParticipants] = useState([]);
-
-  // Sentinel-рефы для defer-mount тяжёлых below-the-fold секций.
-  // Секция рендерится только когда пользователь приблизится к ней при скролле.
-  const [participantsRef, participantsInView] = useInView({ rootMargin: '400px' });
 
   // Critical path: только данные, нужные above-the-fold (hero + SEO)
   useEffect(() => {
@@ -68,11 +63,12 @@ export default function HomePage() {
     }).catch(() => {});
   }, []);
 
-  // Deferred: участники подгружаются только когда пользователь приближается к секции
+  // Участники грузятся сразу при монтировании: секция должна попадать в DOM
+  // без скролла, иначе краулеры с JS-рендерингом не видят ссылок /uchastniki/*
+  // и считают личные страницы orphan-страницами.
   useEffect(() => {
-    if (!participantsInView || participants.length) return;
     api.get('/participants').then(res => setParticipants(res.data || [])).catch(() => {});
-  }, [participantsInView, participants.length]);
+  }, []);
 
   const b = page?.blocks || {};
 
@@ -199,7 +195,7 @@ export default function HomePage() {
       </section>
 
       {/* ===== PARTICIPANTS GRID ===== */}
-      <section ref={participantsRef} id="ekstrasensy" className="py-12 px-4" data-testid="participants-section">
+      <section id="ekstrasensy" className="py-12 px-4" data-testid="participants-section">
         {participants.length > 0 && (
           <div className="max-w-6xl mx-auto">
             <h2 className="font-heading text-3xl md:text-5xl font-bold text-white text-center mb-10">
