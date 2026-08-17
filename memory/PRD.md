@@ -503,3 +503,44 @@ node scripts/test-email.js --to=you@mail.com --sender=noreply@yourdomain.ru --ke
 
 ### Commit
 `5fd5fe3 test-email: add --to/--sender/--key CLI flags with priority over ENV`
+
+---
+
+## 2026-08-17 — SEO: диагностика индексации, orphan URLs, дубли домена
+
+### Выполнено и закоммичено
+1. **Восстановление окружения** — `bash /app/scripts/restore-db.sh` (MariaDB отсутствовал в новом поде).
+2. **Fix «Noscript in head contains invalid HTML elements»** — `noscript`-пиксель Яндекс.Метрики перенесён из `<head>` в `<body>` (`frontend/public/index.html`). Скрипт `ym(110304923,'init')` остался в `<head>`. Проверено на 7 типах страниц.
+3. **Fix orphan URLs (Приоритет 1 аудита)** — в `frontend/src/pages/HomePage.js` убран lazy-mount секции участников (`useInView`/`participantsRef`). Причина orphan: React после гидрации затирал SSR-разметку, а секция участников монтировалась только по скроллу → краулеры с JS-рендерингом видели 0 ссылок `/uchastniki/*`. Теперь 8 уникальных ссылок в DOM без скролла (desktop + mobile), `loading="lazy"` у картинок сохранён, console errors = 0.
+4. **Временный диагностический endpoint** `GET /api/debug/proxy` (`backend/server.js`, коммит `94bc09f`) — отдаёт Host, X-Forwarded-*, req.protocol, req.secure, socket.encrypted. **ДОЛЖЕН БЫТЬ УДАЛЁН** после снятия замеров на production.
+
+### Ключевые результаты диагностики production (17.08.2026)
+- Домен создан **27.05.2026** (~2,5 мес) → эффект песочницы, YMYL-тематика.
+- **BitNinja WAF**: ~35% TCP-соединений на 443 с одного IP дропаются (SYN drop, `connect=0`); стабильные **403 Forbidden** с части IP (US, HU) и connect timeout (IN) — проверено через check-host.net, 25 узлов. Порт 80 стабилен.
+- SSR SEO работает на prod: title/description/canonical/robots/H1/текст отдаются Express (`x-powered-by: Express, Phusion Passenger`).
+- **JSON-LD отсутствует в серверном HTML** (добавляется только React-ом).
+- Внутренние ссылки в SSR: на внутренних страницах только 1 ссылка (`/`) — нет меню, услуг, тем. Ссылки на участников есть только в SSR главной, `/zapis-na-priem`, `/foto-galereya` (по 3 входящие на каждого).
+- Thin content: `/video` — 21 слово, `/foto-galereya` — 37 слов в SSR.
+- **Дубли домена (P0)**: редиректов нет вообще (`num_redirects=0` во всех 17 проверках). 200 отдают: `http://`, `https://`, `http://www`, `https://www`, версии со слешем (`/porcha/`) и с любым query. Canonical везде корректный non-www https без слеша. HSTS отсутствует.
+- `robots.txt` и `sitemap.xml` на prod отдаются **статикой** мимо Express (etag/last-modified), `lastmod` заморожен на `2026-05-29`. Все 23 URL — только https non-www.
+- Бинг: 0 страниц в индексе. Google/Яндекс — нужны скриншоты кабинетов от пользователя.
+
+### Архитектура production (выяснено)
+`BitNinja WAF → Caddy (reverse proxy) → Plesk/nginx → Phusion Passenger → Express (Node)`
+- HTTP (порт 80) **доходит до Express** → Express-middleware может перехватить и http, и https.
+- Существующие на диске файлы (`/static/*`, `robots.txt`, `sitemap.xml`, `favicon.svg`, `yandex_*.html`) отдаёт Caddy **мимо Express**.
+- HTML-маршруты идут в Express (следствие постбилд-переименования `index.html` → `index.template.html`).
+- Конфига Caddy/nginx/.htaccess в репозитории **нет** — только панель Plesk у хостера.
+- `app.set('trust proxy')` **не установлен** → `req.protocol` всегда `http` даже при `X-Forwarded-Proto: https` (проверено эмпирически) → редирект на базе `req.protocol` = гарантированный loop.
+
+### СТАТУС: ОЖИДАНИЕ ДЕПЛОЯ ПОЛЬЗОВАТЕЛЕМ
+Шаг 0 (диагностика proxy-заголовков) не завершён: `/api/debug/proxy` на prod → 404, код не задеплоен.
+После сообщения пользователя о деплое выполнить 4 замера:
+`http://` / `https://` / `http://www.` / `https://www.` → показать таблицу (Host, X-Forwarded-Host, X-Forwarded-Proto, X-Forwarded-Ssl, req.protocol, req.secure, socket.encrypted, originalUrl), затем **удалить endpoint**.
+Редиректы внедрять **только после отдельного подтверждения пользователя**.
+
+### Backlog (по приоритетам, ждёт подтверждения пользователя)
+- **P0**: 301 http→https и www→non-www (план готов: Express middleware после `express.json()`, до `app.use('/api', api)`, с исключением `/api`, `/static`, файлов с расширением; протокол читать из `X-Forwarded-Proto`, host — из `X-Forwarded-Host`/`Host`).
+- **P1**: 301 для trailing slash; блок «Другие экстрасенсы» в SSR страниц участников; ссылки на 8 участников в подвале (Приоритет 2 аудита orphan).
+- **P1**: JSON-LD (Organization/WebSite+SearchAction/Person/FAQPage/BreadcrumbList) в серверный HTML.
+- **P2**: HSTS, Clean-param, динамический `lastmod` в sitemap; расширить thin content `/video` и `/foto-galereya`; SEO Hub-страницы (`/magi`, `/vedmy`, `/yasnovidyashchie`); декомпозиция `backend/server.js` (~1370 строк).
