@@ -1259,6 +1259,30 @@ if (fs.existsSync(BUILD_DIR)) {
     } catch (_) { return []; }
   }
 
+  async function loadReviews(slug) {
+    try {
+      const [rows] = await db.query(
+        'SELECT author_name, author_city, text FROM reviews WHERE participant_slug = ? AND is_published = TRUE ORDER BY created_at DESC LIMIT 100',
+        [slug]
+      );
+      return rows || [];
+    } catch (_) { return []; }
+  }
+
+  async function loadPhotos() {
+    try {
+      const [rows] = await db.query('SELECT * FROM gallery_photos WHERE is_published = TRUE ORDER BY `order` ASC LIMIT 200');
+      return rows || [];
+    } catch (_) { return []; }
+  }
+
+  async function loadSiteSettings() {
+    try {
+      const [rows] = await db.query("SELECT copyright_text FROM site_settings WHERE id = 'site_settings'");
+      return rows[0] || null;
+    } catch (_) { return null; }
+  }
+
   async function loadVideos() {
     try {
       const [rows] = await db.query('SELECT title, url FROM gallery_videos ORDER BY `order` ASC, id ASC');
@@ -1305,6 +1329,8 @@ if (fs.existsSync(BUILD_DIR)) {
 
       let seo = null, pageData = null, participant = null;
       let participants = null, faq = null, videos = null;
+      let reviews = null, photos = null;
+      const settings = await loadSiteSettings();
 
       if (route.type === 'participant') {
         participant = await loadParticipant(route.slug);
@@ -1313,6 +1339,9 @@ if (fs.existsSync(BUILD_DIR)) {
           route.type = 'notfound';
         } else {
           seo = await loadSeo(`participant-${route.slug}`);
+          // Отзывы и список коллег — те же источники, что использует React.
+          reviews = await loadReviews(route.slug);
+          participants = await loadParticipantsList();
         }
       }
 
@@ -1327,6 +1356,7 @@ if (fs.existsSync(BUILD_DIR)) {
       }
       if (route.type === 'faq') faq = await loadFaqList();
       if (route.type === 'video') videos = await loadVideos();
+      if (route.type === 'gallery') photos = await loadPhotos();
 
       const seoRender = seoRenderer.renderSeo({
         route,
@@ -1337,6 +1367,9 @@ if (fs.existsSync(BUILD_DIR)) {
         participants,
         faq,
         videos,
+        reviews,
+        photos,
+        settings,
         indexingEnabled,
       });
 

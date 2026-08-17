@@ -13,6 +13,7 @@
  */
 const fs = require('fs');
 const path = require('path');
+const S = require('./shared');
 
 const PROD_ORIGIN = 'https://bitva-ekstrasensov-help.com';
 const DEFAULT_OG_IMAGE = `${PROD_ORIGIN}/favicon.svg`;
@@ -107,28 +108,87 @@ function renderList(lines) {
 
 // ===== Билд контента для разных типов страниц =====
 
-function renderHomeContent(pageData, participants) {
+function renderHomeContent(pageData, participants, settings) {
   const p = pageData || {};
-  const h1 = p.hero_h1 || 'Битва экстрасенсов — официальный сайт помощи';
+  const h1 = p.hero_h1 || 'Битва экстрасенсов — официальный сайт помощи сильнейших экстрасенсов, ясновидящих, магов и целителей России';
+  const cta = () => [
+    p.cta_text ? `<p>${esc(p.cta_text)}</p>` : '<p>Количество заявок на помощь ограничено!</p>',
+    `<p><a href="/zapis-na-priem">${esc(p.cta_button || 'Получить помощь экстрасенса!')}</a></p>`,
+    p.cta_subtext ? `<p>${esc(p.cta_subtext)}</p>` : '<p>Не упустите свой шанс!</p>',
+  ].join('');
+
   const parts = [
     `<h1>${esc(h1)}</h1>`,
-    p.hero_subtitle ? `<p>${esc(p.hero_subtitle)}</p>` : '',
-    p.hero_unique ? `<p><strong>${esc(p.hero_unique)}</strong></p>` : '',
-    p.hero_text1 ? `<p>${esc(p.hero_text1)}</p>` : '',
-    p.hero_text2 ? `<p>${esc(p.hero_text2)}</p>` : '',
+    `<p>${esc(p.hero_subtitle || 'Официальный портал магической помощи от участников проекта «Битва экстрасенсов»')}</p>`,
+    `<p><strong>${esc(p.hero_unique || 'Уникальная возможность получить реальную помощь!')}</strong></p>`,
+    `<p>${esc(p.hero_text1 || 'Обратитесь лично к любому участнику легендарного проекта «Битва экстрасенсов» — победителям, финалистам и сильнейшим экстрасенсам, чьи способности были доказаны перед миллионами зрителей.')}</p>`,
+    `<p>${esc(p.hero_text2 || 'Получите персональную диагностику негатива, консультацию ясновидящей, помощь мага или медиума — онлайн или на личном приёме.')}</p>`,
+    `<h2>${esc(p.hero_subheading || 'магическая помощь и консультация экстрасенса — запись на приём')}</h2>`,
   ];
-  if (p.hero_subheading || p.hero_intro || p.hero_main) {
-    if (p.hero_subheading) parts.push(`<h2>${esc(p.hero_subheading)}</h2>`);
-    if (p.hero_intro) parts.push(`<p>${esc(p.hero_intro)}</p>`);
-    if (p.hero_main) parts.push(`<p>${esc(p.hero_main)}</p>`);
-  }
+  if (p.hero_intro) parts.push(`<p>${esc(p.hero_intro)}</p>`);
+  if (p.hero_main) { for (const para of splitLines(p.hero_main)) parts.push(`<p>${esc(para)}</p>`); }
+  parts.push(cta());
+
+  // Категории проблем (те же ссылки, что в PROBLEM_CATEGORIES на клиенте)
+  parts.push(`<ul>${S.PROBLEM_CATEGORIES.map(c => `<li><a href="${esc(c.path)}">${esc(c.label)}</a></li>`).join('')}</ul>`);
+
+  // Участники
   if (participants && participants.length) {
-    parts.push(`<h2>Участники проекта</h2>`);
-    parts.push(`<ul>${participants.map(pt =>
-      `<li><a href="/uchastniki/${esc(pt.slug)}">${esc(pt.name)}${pt.title ? ' — ' + esc(pt.title) : ''}</a></li>`
-    ).join('')}</ul>`);
+    parts.push(`<h2>${esc(p.participants_title || 'Лучшие экстрасенсы России')}</h2>`);
+    parts.push(participants.map(pt => {
+      const specs = parseSpecs(pt.specializations);
+      return [
+        `<div>`,
+        `<h3><a href="/uchastniki/${esc(pt.slug)}">${esc(pt.name)}</a></h3>`,
+        specs.length ? `<p>${specs.map(esc).join(', ')}</p>` : '',
+        pt.title ? `<p>${esc(pt.title)}</p>` : '',
+        `<p><a href="/uchastniki/${esc(pt.slug)}">Обратиться</a></p>`,
+        `</div>`,
+      ].filter(Boolean).join('');
+    }).join(''));
   }
+
+  // Преимущества (BENEFITS на клиенте — ссылки на запись)
+  parts.push(`<ul>${S.BENEFITS.map(b => `<li><a href="/zapis-na-priem">${esc(b)}</a></li>`).join('')}</ul>`);
+  parts.push(cta());
+
+  // Услуги: те же 4 категории из pages.blocks (service_cat_1..4) + ссылки «Подробнее»
+  const cats = [];
+  for (let i = 1; i <= 4; i++) {
+    const raw = p[`service_cat_${i}`] || p[`service_category_${i}`] || p[`service_${i}`];
+    if (!raw) continue;
+    const lines = splitLines(raw);
+    if (!lines.length) continue;
+    cats.push({ head: lines[0], items: lines.slice(1), link: S.SERVICE_LINKS[i - 1] });
+  }
+  if (cats.length) {
+    parts.push(`<h2>${esc(p.services_title || 'Услуги экстрасенсов')}</h2>`);
+    parts.push(cats.map(c => [
+      `<div>`,
+      `<h3>${esc(c.head)}</h3>`,
+      renderList(c.items),
+      `<p><a href="${esc(c.link || '/zapis-na-priem')}">Подробнее</a></p>`,
+      `</div>`,
+    ].join('')).join(''));
+  }
+
+  // Большой SEO-текст
+  if (p.seo_text) {
+    parts.push(`<h2>${esc(p.seo_text_title || 'Экстрасенс онлайн — возможность изменить вашу жизнь!')}</h2>`);
+    for (const para of splitLines(p.seo_text)) parts.push(`<p>${esc(para)}</p>`);
+    parts.push(cta());
+  }
+
   return { h1, body: parts.filter(Boolean).join('\n') };
+}
+
+// specializations хранится JSON-строкой
+function parseSpecs(value) {
+  try {
+    if (!value) return [];
+    const parsed = typeof value === 'string' ? JSON.parse(value) : value;
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (_) { return []; }
 }
 
 function renderBookingContent(pageData, seo, participants) {
@@ -160,10 +220,15 @@ function renderFaqContent(seo, faqList) {
   return { h1, body: parts.filter(Boolean).join('\n') };
 }
 
-function renderGalleryContent(seo, participants) {
-  const h1 = seo?.h1 || 'Фотогалерея экстрасенсов';
+function renderGalleryContent(seo, participants, photos) {
+  const h1 = 'Фотогалерея экстрасенсов';
   const parts = [`<h1>${esc(h1)}</h1>`];
   if (seo?.description) parts.push(`<p>${esc(seo.description)}</p>`);
+  if (photos && photos.length) {
+    parts.push(`<ul>${photos.map(ph =>
+      `<li>${esc(ph.title || ph.caption || ph.alt_text || '')}</li>`
+    ).filter(x => x !== '<li></li>').join('')}</ul>`);
+  }
   if (participants && participants.length) {
     parts.push(`<ul>${participants.map(pt =>
       `<li><a href="/uchastniki/${esc(pt.slug)}">${esc(pt.name)}</a></li>`
@@ -173,53 +238,83 @@ function renderGalleryContent(seo, participants) {
 }
 
 function renderVideoContent(seo, videos) {
-  const h1 = seo?.h1 || 'Видео';
+  const h1 = 'Видео экстрасенсов';
   const parts = [`<h1>${esc(h1)}</h1>`];
   if (seo?.description) parts.push(`<p>${esc(seo.description)}</p>`);
   if (videos && videos.length) {
-    parts.push(`<ul>${videos.map(v =>
-      `<li>${v.url ? `<a href="${esc(v.url)}" rel="noopener">${esc(v.title || v.url)}</a>` : esc(v.title || '')}</li>`
+    parts.push(videos.map(v => `<h3>${esc(v.title || '')}</h3>${v.description ? `<p>${esc(v.description)}</p>` : ''}`).join(''));
+  }
+  return { h1, body: parts.filter(Boolean).join('\n') };
+}
+
+function renderParticipantContent(seo, participant, reviews, allParticipants) {
+  const p = participant || {};
+  const genName = S.toGenitive(p.name);
+  const datName = S.toDative(p.name);
+  const h1 = `Официальная страница помощи ${genName}`;
+  const bookingUrl = `/zapis-na-priem?psychic=${p.slug || ''}`;
+  const parts = [
+    `<p><a href="/#ekstrasensy">Все участники</a></p>`,
+    `<h1>${esc(h1)}</h1>`,
+  ];
+  if (p.title) {
+    parts.push(`<h2>Статус</h2>`);
+    parts.push(`<p>${esc(p.name)} — ${esc(p.title)}.</p>`);
+  }
+  const specs = parseSpecs(p.specializations);
+  if (specs.length) {
+    parts.push(`<h2>Специализация</h2>`);
+    parts.push(renderList(specs));
+  }
+  parts.push(`<p>Помощь ${esc(genName)}.</p>`);
+  parts.push(`<p>Консультация ${esc(genName)}.</p>`);
+  parts.push(`<p>Записаться на Личный Приём к ${esc(datName)}.</p>`);
+  parts.push(`<h2>Не упустите свой шанс</h2>`);
+  parts.push(`<p><a href="${esc(bookingUrl)}">Обратиться</a></p>`);
+  parts.push(`<p>Количество обращений ограниченно!</p>`);
+  if (p.description) parts.push(`<p>${esc(p.description)}</p>`);
+  if (p.full_description) {
+    for (const para of splitLines(p.full_description)) parts.push(`<p>${esc(para)}</p>`);
+  }
+
+  // Отзывы — тот же источник, что у React (/api/participants/:slug/reviews)
+  if (reviews && reviews.length) {
+    parts.push(`<h2>Отзывы</h2>`);
+    parts.push(reviews.map(r => [
+      `<div>`,
+      `<p><strong>${esc(r.author_name || '')}${r.author_city ? ', ' + esc(r.author_city) : ''}</strong></p>`,
+      `<p>${esc(r.text || '')}</p>`,
+      `</div>`,
+    ].join('')).join(''));
+    parts.push(`<p>${esc(S.PARTICIPANT_REVIEWS_DISCLAIMER)}</p>`);
+  }
+
+  // Другие экстрасенсы — та же перелинковка, что в клиентской версии
+  const others = (allParticipants || []).filter(x => x.slug !== p.slug);
+  if (others.length) {
+    parts.push(`<h2>Другие экстрасенсы</h2>`);
+    parts.push(`<ul>${others.map(o =>
+      `<li><a href="/uchastniki/${esc(o.slug)}">${esc(o.name)}</a></li>`
     ).join('')}</ul>`);
   }
   return { h1, body: parts.filter(Boolean).join('\n') };
 }
 
-function renderParticipantContent(seo, participant) {
-  const p = participant || {};
-  const h1 = seo?.h1 || p.name || '';
-  const parts = [`<h1>${esc(h1)}</h1>`];
-  if (p.title) parts.push(`<p><strong>${esc(p.title)}</strong></p>`);
-  if (p.description) parts.push(`<p>${esc(p.description)}</p>`);
-  // full_description может содержать переносы — сохраняем как параграфы.
-  if (p.full_description) {
-    for (const para of splitLines(p.full_description)) {
-      parts.push(`<p>${esc(para)}</p>`);
-    }
-  }
-  // specializations — JSON array
-  let specs = [];
-  try {
-    if (p.specializations) {
-      const parsed = typeof p.specializations === 'string' ? JSON.parse(p.specializations) : p.specializations;
-      if (Array.isArray(parsed)) specs = parsed;
-    }
-  } catch (_) { /* ignore */ }
-  if (specs.length) {
-    parts.push(`<h2>Специализации</h2>`);
-    parts.push(renderList(specs));
-  }
-  return { h1, body: parts.filter(Boolean).join('\n') };
-}
-
 // Общий рендер для service/topic — они имеют одинаковую структуру blocks.
-function renderPageBlocks(seo, pageData, fallbackH1) {
+function renderPageBlocks(seo, pageData, kind, slug) {
   const p = pageData || {};
-  const h1 = seo?.h1 || p.title || fallbackH1 || '';
+  const isTopic = kind === 'topic';
+  const nameMap = isTopic ? S.TOPIC_NAMES : S.SERVICE_NAMES;
+  const h1Map = isTopic ? S.TOPIC_H1 : S.SERVICE_H1;
+  const relatedMap = isTopic ? S.TOPIC_RELATED : S.SERVICE_RELATED;
+  const title = p.title || nameMap[slug] || (isTopic ? 'Тема' : 'Услуга');
+  // Тот же приоритет, что в ServicePage/TopicPage: blocks.h1 → константа → title
+  const h1 = p.h1 || h1Map[slug] || title;
   const parts = [`<h1>${esc(h1)}</h1>`];
-  if (p.description) parts.push(`<p>${esc(p.description)}</p>`);
+  if (p.description) {
+    for (const para of splitLines(p.description)) parts.push(`<p>${esc(para)}</p>`);
+  }
 
-  // Все возможные секции — рендерим только те, которые есть в конкретной странице.
-  // Порядок соответствует ServicePage/TopicPage.
   const sections = [
     ['directions_title', 'directions'],
     ['symptoms_title', 'symptoms'],
@@ -235,19 +330,50 @@ function renderPageBlocks(seo, pageData, fallbackH1) {
       parts.push(renderList(splitLines(p[listKey])));
     }
   }
-  if (p.cta_title || p.cta_text) {
+  if (p.cta_title || p.cta_text || p.cta_button) {
     if (p.cta_title) parts.push(`<h2>${esc(p.cta_title)}</h2>`);
     if (p.cta_text) parts.push(`<p>${esc(p.cta_text)}</p>`);
+    if (p.cta_button) parts.push(`<p><a href="/zapis-na-priem">${esc(p.cta_button)}</a></p>`);
   }
   if (p.additional_title || p.additional_text) {
     if (p.additional_title) parts.push(`<h2>${esc(p.additional_title)}</h2>`);
     if (p.additional_text) {
-      for (const para of splitLines(p.additional_text)) {
-        parts.push(`<p>${esc(para)}</p>`);
-      }
+      for (const para of splitLines(p.additional_text)) parts.push(`<p>${esc(para)}</p>`);
     }
   }
+
+  // «Похожие услуги» — та же перелинковка, что в клиентской версии
+  const related = relatedMap[slug] || [];
+  if (related.length) {
+    parts.push(`<h2>Похожие услуги</h2>`);
+    parts.push(`<ul>${related.map(r =>
+      `<li><a href="/${esc(r.slug)}">${esc(r.name)} →</a></li>`
+    ).join('')}</ul>`);
+  }
   return { h1, body: parts.filter(Boolean).join('\n') };
+}
+
+// Header-навигация и footer — те же ссылки и тексты, что видит пользователь (Layout.js)
+function renderHeaderNav() {
+  return `<nav>${S.NAV_ITEMS.map(n => `<a href="${esc(n.path)}">${esc(n.label)}</a>`).join(' ')}` +
+    ` <a href="/zapis-na-priem">Заказать звонок</a></nav>`;
+}
+
+function renderFooter(settings) {
+  const year = new Date().getFullYear();
+  const copyright = settings?.copyright_text || 'Битва экстрасенсов — официальный сайт помощи';
+  return [
+    '<footer>',
+    `<p>Официальный сайт помощи участников проекта «Битва Экстрасенсов»</p>`,
+    `<h3>Навигация</h3>`,
+    `<ul>${S.NAV_ITEMS.map(n => `<li><a href="${esc(n.path)}">${esc(n.label)}</a></li>`).join('')}` +
+      `<li><a href="/zapis-na-priem">Записаться на приём</a></li></ul>`,
+    `<h3>Информация</h3>`,
+    `<p>${esc(S.FOOTER_DISCLAIMER)}</p>`,
+    `<p>${esc(copyright)} © ${year}</p>`,
+    `<p>Все права защищены</p>`,
+    '</footer>',
+  ].join('');
 }
 
 function renderNotFoundContent() {
@@ -276,14 +402,15 @@ function renderNotFoundContent() {
  * @returns { title, description, canonical, robots, ogTitle, ogDescription, ogUrl, ogImage, h1, bodyHtml, statusCode }
  */
 function renderSeo(args) {
-  const { route, pathname, seo, pageData, participant, participants, faq, videos, indexingEnabled } = args;
+  const { route, pathname, seo, pageData, participant, participants, faq, videos,
+    reviews, photos, settings, indexingEnabled } = args;
 
   let content;
   let effectiveSeo = seo || {};
 
   switch (route.type) {
     case 'home':
-      content = renderHomeContent(pageData, participants);
+      content = renderHomeContent(pageData, participants, settings);
       break;
     case 'booking':
       content = renderBookingContent(pageData, effectiveSeo, participants);
@@ -292,7 +419,7 @@ function renderSeo(args) {
       content = renderFaqContent(effectiveSeo, faq);
       break;
     case 'gallery':
-      content = renderGalleryContent(effectiveSeo, participants);
+      content = renderGalleryContent(effectiveSeo, participants, photos);
       break;
     case 'video':
       content = renderVideoContent(effectiveSeo, videos);
@@ -302,14 +429,14 @@ function renderSeo(args) {
       if (!seo || !seo.title) {
         effectiveSeo = { ...buildParticipantFallbackSeo(participant), ...(seo || {}) };
       }
-      content = renderParticipantContent(effectiveSeo, participant);
+      content = renderParticipantContent(effectiveSeo, participant, reviews, participants);
       break;
     }
     case 'service':
-      content = renderPageBlocks(effectiveSeo, pageData, effectiveSeo.h1 || '');
+      content = renderPageBlocks(effectiveSeo, pageData, 'service', route.slug);
       break;
     case 'topic':
-      content = renderPageBlocks(effectiveSeo, pageData, effectiveSeo.h1 || '');
+      content = renderPageBlocks(effectiveSeo, pageData, 'topic', route.slug);
       break;
     case 'notfound':
     default:
@@ -348,7 +475,12 @@ function renderSeo(args) {
     ogUrl,
     ogImage: DEFAULT_OG_IMAGE,
     h1: content.h1,
-    bodyHtml: `${breadcrumbsHtml}\n${content.body}`,
+    bodyHtml: [
+      renderHeaderNav(),
+      breadcrumbsHtml,
+      content.body,
+      renderFooter(args.settings),
+    ].filter(Boolean).join('\n'),
     statusCode,
   };
 }
