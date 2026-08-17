@@ -1016,56 +1016,104 @@ app.get('/robots.txt', async (req, res) => {
   );
 });
 
+// ===== LASTMOD =====
+// lastmod = дата последнего СУЩЕСТВЕННОГО изменения контента конкретной страницы.
+// Источники (берётся максимум): baseline из seo/lastmod.json (реальные даты, вычисленные
+// по git-истории dump.sql) + доступные БД-таймстемпы (pages.updated_at обновляется при
+// сохранении блоков через админку, participants.created_at, MAX(created_at) галерей).
+// Ни один источник не зависит от времени запроса/рестарта/сборки, поэтому повторный
+// запрос sitemap.xml и деплой сами по себе lastmod не меняют.
+const LASTMOD_BASELINE = require('./seo/lastmod.json');
+
+function toDay(v) {
+  if (!v) return null;
+  const d = v instanceof Date ? v : new Date(v);
+  if (isNaN(d.getTime())) return null;
+  return d.toISOString().slice(0, 10);
+}
+
+// Максимальная из дат, но не в будущем относительно сегодняшнего дня.
+function maxDay(...vals) {
+  const today = new Date().toISOString().slice(0, 10);
+  const days = vals.map(toDay).filter(Boolean).filter((d) => d <= today);
+  return days.length ? days.sort().pop() : null;
+}
+
 app.get('/sitemap.xml', async (req, res) => {
   try {
-    // Static public routes
+    const B = LASTMOD_BASELINE;
+
+    // Динамические источники дат из БД (каждый в своём try — отсутствие таблицы/поля
+    // не должно ломать sitemap, тогда используется только baseline).
+    const dbPages = {};
+    try {
+      const [rows] = await db.query('SELECT page_slug, updated_at FROM pages');
+      (rows || []).forEach((r) => { dbPages[r.page_slug] = r.updated_at; });
+    } catch (_) {}
+
+    let participants = [];
+    try {
+      const [rows] = await db.query('SELECT slug, created_at FROM participants ORDER BY `order` ASC, id ASC');
+      participants = rows || [];
+    } catch (_) {}
+
+    let photosMax = null, videosMax = null;
+    try {
+      const [r] = await db.query('SELECT MAX(created_at) AS mx FROM gallery_photos');
+      photosMax = r?.[0]?.mx || null;
+    } catch (_) {}
+    try {
+      const [r] = await db.query('SELECT MAX(created_at) AS mx FROM gallery_videos');
+      videosMax = r?.[0]?.mx || null;
+    } catch (_) {}
+
+    // Дата последнего изменения состава/данных участников — влияет на страницы,
+    // где список участников входит в индексируемый контент (главная, запись, фотогалерея).
+    const participantsMax = maxDay(
+      ...participants.map((p) => p.created_at),
+      ...Object.values(B.participants || {})
+    );
+
+    // lastmod для страницы «услуга»/«тема»: контент-блоки + SEO-запись этой же страницы.
+    const pageDay = (key) => maxDay(B.pages?.[key], B.seo?.[key], dbPages[key]);
+
     const staticUrls = [
-      { loc: '/', changefreq: 'daily', priority: '1.0' },
-      { loc: '/zapis-na-priem', changefreq: 'monthly', priority: '0.8' },
-      { loc: '/voprosy-i-otvety', changefreq: 'monthly', priority: '0.7' },
-      { loc: '/foto-galereya', changefreq: 'weekly', priority: '0.6' },
-      { loc: '/video', changefreq: 'weekly', priority: '0.6' },
+      { loc: '/', changefreq: 'daily', priority: '1.0', lastmod: maxDay(pageDay('home'), participantsMax) },
+      { loc: '/zapis-na-priem', changefreq: 'monthly', priority: '0.8', lastmod: maxDay(pageDay('booking'), participantsMax) },
+      { loc: '/voprosy-i-otvety', changefreq: 'monthly', priority: '0.7', lastmod: pageDay('faq') },
+      { loc: '/foto-galereya', changefreq: 'weekly', priority: '0.6', lastmod: maxDay(B.seo?.['foto-galereya'], photosMax, participantsMax) },
+      { loc: '/video', changefreq: 'weekly', priority: '0.6', lastmod: maxDay(B.seo?.video, videosMax) },
       // Services
-      { loc: '/finansovaya-magiya', changefreq: 'monthly', priority: '0.8' },
-      { loc: '/lyubovnaya-magiya', changefreq: 'monthly', priority: '0.8' },
-      { loc: '/magiya-zhizni', changefreq: 'monthly', priority: '0.8' },
-      { loc: '/magicheskaya-zashchita', changefreq: 'monthly', priority: '0.8' },
+      { loc: '/finansovaya-magiya', changefreq: 'monthly', priority: '0.8', lastmod: pageDay('service-finansovaya-magiya') },
+      { loc: '/lyubovnaya-magiya', changefreq: 'monthly', priority: '0.8', lastmod: pageDay('service-lyubovnaya-magiya') },
+      { loc: '/magiya-zhizni', changefreq: 'monthly', priority: '0.8', lastmod: pageDay('service-magiya-zhizni') },
+      { loc: '/magicheskaya-zashchita', changefreq: 'monthly', priority: '0.8', lastmod: pageDay('service-magicheskaya-zashchita') },
       // Topics
-      { loc: '/porcha', changefreq: 'monthly', priority: '0.8' },
-      { loc: '/proklyatie', changefreq: 'monthly', priority: '0.8' },
-      { loc: '/sglaz', changefreq: 'monthly', priority: '0.8' },
-      { loc: '/venets-bezbrachiya', changefreq: 'monthly', priority: '0.8' },
-      { loc: '/privorot', changefreq: 'monthly', priority: '0.8' },
-      { loc: '/zaklyatie', changefreq: 'monthly', priority: '0.8' },
+      { loc: '/porcha', changefreq: 'monthly', priority: '0.8', lastmod: pageDay('topic-porcha') },
+      { loc: '/proklyatie', changefreq: 'monthly', priority: '0.8', lastmod: pageDay('topic-proklyatie') },
+      { loc: '/sglaz', changefreq: 'monthly', priority: '0.8', lastmod: pageDay('topic-sglaz') },
+      { loc: '/venets-bezbrachiya', changefreq: 'monthly', priority: '0.8', lastmod: pageDay('topic-venets-bezbrachiya') },
+      { loc: '/privorot', changefreq: 'monthly', priority: '0.8', lastmod: pageDay('topic-privorot') },
+      { loc: '/zaklyatie', changefreq: 'monthly', priority: '0.8', lastmod: pageDay('topic-zaklyatie') },
     ];
 
-    // Dynamic: participants
-    let participantUrls = [];
-    try {
-      const [parts] = await db.query('SELECT slug, COALESCE(updated_at, created_at) AS lastmod FROM participants ORDER BY id');
-      participantUrls = (parts || []).map((p) => ({
-        loc: `/uchastniki/${p.slug}`,
-        changefreq: 'weekly',
-        priority: '0.9',
-        lastmod: p.lastmod ? new Date(p.lastmod).toISOString().slice(0, 10) : null,
-      }));
-    } catch (_) {
-      // Если updated_at нет — fallback на простой SELECT slug
-      try {
-        const [parts] = await db.query('SELECT slug FROM participants ORDER BY id');
-        participantUrls = (parts || []).map((p) => ({
-          loc: `/uchastniki/${p.slug}`,
-          changefreq: 'weekly',
-          priority: '0.9',
-          lastmod: null,
-        }));
-      } catch (__) {}
-    }
+    const participantUrls = participants.map((p) => ({
+      loc: `/uchastniki/${p.slug}`,
+      changefreq: 'weekly',
+      priority: '0.9',
+      lastmod: maxDay(B.participants?.[p.slug], p.created_at),
+    }));
 
-    const today = new Date().toISOString().slice(0, 10);
+    // Fallback для страницы без единого известного источника: самая свежая известная
+    // дата контента сайта (НЕ today — чтобы не помечать неизменённые страницы свежими).
+    const siteFallback = maxDay(
+      ...Object.values(B.pages || {}),
+      ...Object.values(B.seo || {}),
+      ...Object.values(B.participants || {})
+    );
     const all = [...staticUrls, ...participantUrls].map((u) => ({
       ...u,
-      lastmod: u.lastmod || today,
+      lastmod: u.lastmod || siteFallback,
     }));
 
     const xml =

@@ -11,8 +11,9 @@
  * index.template.html и инжектится SEO-контентом.
  *
  * Побочный эффект: static-файлы (/static/*, /favicon.svg, /robots.txt,
- * /sitemap.xml, /manifest.json) продолжают отдаваться напрямую — они на месте.
- * Только index.html убирается.
+ * /manifest.json) продолжают отдаваться напрямую — они на месте.
+ * index.html убирается; sitemap.xml тоже удаляется из build, так как он должен
+ * генерироваться Express (актуальный lastmod), а не отдаваться статикой.
  *
  * Идемпотентно: если index.html отсутствует, скрипт молча выходит.
  * Если index.template.html уже есть — перезаписывается свежей копией.
@@ -27,6 +28,14 @@ const BUILD_DIR = process.env.BUILD_PATH
 
 const SRC = path.join(BUILD_DIR, 'index.html');
 const DST = path.join(BUILD_DIR, 'index.template.html');
+const SITEMAP = path.join(BUILD_DIR, 'sitemap.xml');
+
+// sitemap.xml обязан отдаваться Express (динамический lastmod). Если статическая
+// копия окажется в build, Caddy отдаст её мимо Express — удаляем.
+if (fs.existsSync(SITEMAP)) {
+  fs.unlinkSync(SITEMAP);
+  console.log('[postbuild] Removed static build/sitemap.xml → served by Express instead.');
+}
 
 if (!fs.existsSync(SRC)) {
   if (fs.existsSync(DST)) {

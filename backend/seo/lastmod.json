@@ -1,0 +1,58 @@
+{
+  "_comment": [
+    "Baseline дат последнего СУЩЕСТВЕННОГО изменения контента каждой сущности.",
+    "Даты не выдуманы: вычислены по git-истории backend/dump.sql — для каждой записи",
+    "(pages.blocks / seo_settings / participants) взята дата коммита, в котором её",
+    "содержимое изменилось последний раз (скрипт сравнения хешей записей по 63 ревизиям",
+    "dump.sql, 2026-03-06 … 2026-07-31).",
+    "Причина существования файла: pages.updated_at в БД содержит дату seed/восстановления",
+    "(2026-03-06), а seo_settings и faq не имеют полей created_at/updated_at вообще,",
+    "поэтому достоверный lastmod из одной БД получить нельзя.",
+    "Как поддерживать: при существенном изменении контента страницы через админку",
+    "pages.updated_at обновляется автоматически и перекрывает baseline (берётся максимум).",
+    "Правки только SEO-полей (title/description/h1) БД-таймстемпа не имеют — в этом случае",
+    "дату нужно поднять здесь вручную либо добавить updated_at в seo_settings (см. PRD)."
+  ],
+  "pages": {
+    "home": "2026-06-01",
+    "booking": "2026-06-01",
+    "faq": "2026-06-01",
+    "service-finansovaya-magiya": "2026-06-01",
+    "service-lyubovnaya-magiya": "2026-06-01",
+    "service-magiya-zhizni": "2026-06-01",
+    "service-magicheskaya-zashchita": "2026-06-01",
+    "topic-porcha": "2026-06-01",
+    "topic-proklyatie": "2026-06-01",
+    "topic-sglaz": "2026-06-01",
+    "topic-venets-bezbrachiya": "2026-06-01",
+    "topic-privorot": "2026-06-01",
+    "topic-zaklyatie": "2026-06-01"
+  },
+  "seo": {
+    "home": "2026-07-12",
+    "booking": "2026-07-12",
+    "faq": "2026-07-12",
+    "foto-galereya": "2026-07-12",
+    "video": "2026-07-12",
+    "service-finansovaya-magiya": "2026-07-12",
+    "service-lyubovnaya-magiya": "2026-07-12",
+    "service-magiya-zhizni": "2026-07-12",
+    "service-magicheskaya-zashchita": "2026-07-12",
+    "topic-porcha": "2026-07-12",
+    "topic-proklyatie": "2026-07-12",
+    "topic-sglaz": "2026-07-12",
+    "topic-venets-bezbrachiya": "2026-07-12",
+    "topic-privorot": "2026-07-12",
+    "topic-zaklyatie": "2026-07-12"
+  },
+  "participants": {
+    "elena-golunova": "2026-07-16",
+    "angelina-izosimova": "2026-07-16",
+    "viktoriya-raidos": "2026-07-16",
+    "nadezhda-shevchenko": "2026-07-16",
+    "aleksandr-sheps": "2026-07-16",
+    "oleg-sheps": "2026-07-16",
+    "zuliya-radzhabova": "2026-07-16",
+    "vlad-cherevatyy": "2026-07-16"
+  }
+}
