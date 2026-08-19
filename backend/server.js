@@ -1285,8 +1285,8 @@ if (fs.existsSync(BUILD_DIR)) {
 
   async function loadVideos() {
     try {
-      // Тот же источник и та же фильтрация, что в API /api/gallery/videos (React)
-      const [rows] = await db.query('SELECT title, description FROM gallery_videos WHERE is_published = TRUE ORDER BY `order` ASC LIMIT 200');
+      // Те же поля, что использует React для VideoObject в JSON-LD
+      const [rows] = await db.query('SELECT title, description, video_url, thumbnail_url, created_at FROM gallery_videos WHERE is_published = TRUE ORDER BY `order` ASC LIMIT 200');
       return rows || [];
     } catch (_) { return []; }
   }

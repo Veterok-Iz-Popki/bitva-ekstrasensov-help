@@ -43,6 +43,176 @@ function absoluteUrl(pathname) {
   return buildCanonical(pathname);
 }
 
+// Безопасная сериализация JSON внутри <script>: экранируем символы, которыми
+// можно было бы закрыть тег или сломать HTML. JSON.parse остаётся валидным.
+function jsonForScript(obj) {
+  return JSON.stringify(obj)
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/&/g, '\\u0026')
+    .replace(/\u2028/g, '\\u2028')
+    .replace(/\u2029/g, '\\u2029');
+}
+
+// Зеркало клиентского setBreadcrumbJsonLd() из frontend/src/lib/api.js
+function breadcrumbJsonLd(items) {
+  if (!Array.isArray(items) || items.length === 0) return null;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((item, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: item.name,
+      item: `${PROD_ORIGIN}${item.path}`,
+    })),
+  };
+}
+
+// Те же schema-объекты, что строят страницы React (setJsonLd/setBreadcrumbJsonLd).
+// Ничего нового не добавляется — только перенос существующей разметки в SSR.
+function buildJsonLd({ route, seo, participant, faq, videos }) {
+  const slug = route.slug;
+  switch (route.type) {
+    case 'home':
+      return {
+        main: {
+          '@context': 'https://schema.org',
+          '@type': 'ProfessionalService',
+          name: 'Битва экстрасенсов — официальный сайт помощи',
+          description: seo?.description || '',
+          url: PROD_ORIGIN,
+        },
+        breadcrumb: null,
+      };
+    case 'booking':
+      return {
+        main: null,
+        breadcrumb: breadcrumbJsonLd([
+          { name: 'Главная', path: '/' },
+          { name: 'Запись на приём', path: '/zapis-na-priem' },
+        ]),
+      };
+    case 'faq':
+      return {
+        main: (faq && faq.length) ? {
+          '@context': 'https://schema.org',
+          '@type': 'FAQPage',
+          mainEntity: faq.map(it => ({
+            '@type': 'Question',
+            name: it.question,
+            acceptedAnswer: { '@type': 'Answer', text: it.answer },
+          })),
+        } : null,
+        breadcrumb: breadcrumbJsonLd([
+          { name: 'Главная', path: '/' },
+          { name: 'Вопросы-Ответы', path: '/voprosy-i-otvety' },
+        ]),
+      };
+    case 'gallery':
+      return {
+        main: {
+          '@context': 'https://schema.org',
+          '@type': 'ImageGallery',
+          name: seo?.title || 'Фотогалерея',
+          url: `${PROD_ORIGIN}/foto-galereya`,
+        },
+        breadcrumb: breadcrumbJsonLd([
+          { name: 'Главная', path: '/' },
+          { name: 'Фотогалерея', path: '/foto-galereya' },
+        ]),
+      };
+    case 'video': {
+      const toAbs = (u) => {
+        if (!u) return undefined;
+        if (/^https?:\/\//i.test(u)) return u;
+        return `${PROD_ORIGIN}${u.startsWith('/') ? '' : '/'}${u}`;
+      };
+      const list = videos || [];
+      return {
+        main: {
+          '@context': 'https://schema.org',
+          '@type': 'CollectionPage',
+          name: seo?.title || 'Видео',
+          url: `${PROD_ORIGIN}/video`,
+          mainEntity: {
+            '@type': 'ItemList',
+            numberOfItems: list.length,
+            itemListElement: list.map((v, i) => {
+              const videoObject = {
+                '@type': 'VideoObject',
+                name: v.title || 'Видео экстрасенсов',
+                description: v.description || v.title || 'Видео экстрасенсов «Битва экстрасенсов»',
+                thumbnailUrl: toAbs(v.thumbnail_url) || toAbs(v.video_url),
+                contentUrl: toAbs(v.video_url),
+                uploadDate: (() => {
+                  const raw = v.created_at || v.upload_date;
+                  if (!raw) return undefined;
+                  const d = new Date(typeof raw === 'string' && !raw.endsWith('Z') ? String(raw).replace(' ', 'T') + 'Z' : raw);
+                  return isNaN(d.getTime()) ? undefined : d.toISOString();
+                })(),
+              };
+              Object.keys(videoObject).forEach(k => videoObject[k] === undefined && delete videoObject[k]);
+              return { '@type': 'ListItem', position: i + 1, item: videoObject };
+            }),
+          },
+        },
+        breadcrumb: breadcrumbJsonLd([
+          { name: 'Главная', path: '/' },
+          { name: 'Видео', path: '/video' },
+        ]),
+      };
+    }
+    case 'participant':
+      return {
+        main: {
+          '@context': 'https://schema.org',
+          '@type': 'Person',
+          name: participant?.name,
+          description: participant?.description,
+          image: participant?.photo_url,
+          jobTitle: participant?.title,
+          url: `${PROD_ORIGIN}/uchastniki/${slug}`,
+        },
+        breadcrumb: breadcrumbJsonLd([
+          { name: 'Главная', path: '/' },
+          { name: 'Экстрасенсы', path: '/#ekstrasensy' },
+          { name: participant?.name, path: `/uchastniki/${slug}` },
+        ]),
+      };
+    case 'service':
+      return {
+        main: {
+          '@context': 'https://schema.org',
+          '@type': 'Service',
+          name: seo?.title || S.SERVICE_NAMES[slug],
+          description: seo?.description || '',
+          url: `${PROD_ORIGIN}/${slug}`,
+        },
+        breadcrumb: breadcrumbJsonLd([
+          { name: 'Главная', path: '/' },
+          { name: S.SERVICE_NAMES[slug] || 'Услуга', path: `/${slug}` },
+        ]),
+      };
+    case 'topic':
+      return {
+        main: {
+          '@context': 'https://schema.org',
+          '@type': 'WebPage',
+          name: seo?.title || S.TOPIC_NAMES[slug],
+          description: seo?.description || '',
+          url: `${PROD_ORIGIN}/${slug}`,
+        },
+        breadcrumb: breadcrumbJsonLd([
+          { name: 'Главная', path: '/' },
+          { name: S.TOPIC_NAMES[slug] || 'Тема', path: `/${slug}` },
+        ]),
+      };
+    default:
+      return { main: null, breadcrumb: null };
+  }
+}
+
 // Разбиение многострочного текста из pages.blocks на массив строк, отбрасывая пустые.
 function splitLines(raw) {
   if (!raw) return [];
@@ -470,6 +640,7 @@ function renderSeo(args) {
   const breadcrumbsHtml = renderBreadcrumbs(crumbs);
 
   const statusCode = isNotFound ? 404 : 200;
+  const jsonLd = buildJsonLd({ route, seo: effectiveSeo, participant, faq, videos });
 
   return {
     title,
@@ -481,6 +652,8 @@ function renderSeo(args) {
     ogUrl,
     ogImage: DEFAULT_OG_IMAGE,
     h1: content.h1,
+    jsonLd: isNotFound ? null : jsonLd.main,
+    jsonLdBreadcrumb: isNotFound ? null : jsonLd.breadcrumb,
     bodyHtml: [
       renderHeaderNav(),
       breadcrumbsHtml,
@@ -519,6 +692,16 @@ function injectSeoIntoHtml(indexHtmlPath, manifestPath, seo, siteBgPreloads) {
   if (seo.ogImage) seoTags.push(`<meta property="og:image" content="${esc(seo.ogImage)}"/>`);
   seoTags.push(`<meta property="og:locale" content="ru_RU"/>`);
   seoTags.push(`<meta property="og:site_name" content="Битва экстрасенсов"/>`);
+
+  // JSON-LD: те же id, что использует React (#json-ld, #json-ld-breadcrumb).
+  // React находит существующий элемент и только перезаписывает textContent —
+  // второй копии после hydration не появляется.
+  if (seo.jsonLd) {
+    seoTags.push(`<script id="json-ld" type="application/ld+json">${jsonForScript(seo.jsonLd)}</script>`);
+  }
+  if (seo.jsonLdBreadcrumb) {
+    seoTags.push(`<script id="json-ld-breadcrumb" type="application/ld+json">${jsonForScript(seo.jsonLdBreadcrumb)}</script>`);
+  }
 
   // Preload картинок фона (тот же паттерн, что и в старом buildEnrichedIndexHtml)
   const preloads = siteBgPreloads || '';
