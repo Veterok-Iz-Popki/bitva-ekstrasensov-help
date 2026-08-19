@@ -44,7 +44,7 @@
 - `/zapis-na-priem`: 2 текста формы («Данные не будут передаваться третьим лицам») есть только в DOM — потребовало бы дублирования формы в SSR.
 - **2026-06-19 (`5e66488`)**: устранён двойной рендер отзывов. Было: `ReviewsBlock` вызывался дважды (`hidden md:block` в левой колонке + `md:hidden` после layout) → 50 карточек в DOM, каждый отзыв 2 раза в HTML. Стало: один экземпляр с классом `profile-reviews`; на мобиле `.profile-left { display: contents }` + `order` в `App.css` переносят блок в прежнее визуальное место. DOM: 25 карточек, 1 копия каждого отзыва; SSR не менялся (25 отзывов). Верстка desktop/mobile идентична прежней (координаты блоков совпали).
 - Футер: «2024 Битва экстрасенсов. Все права защищены. © 2026» + «Все права защищены» (данные `site_settings`).
-- JSON-LD только в клиентском DOM (в SSR 0 блоков).
+- **2026-06-19 (`b9e0288`)**: существующий JSON-LD теперь отдаётся сервером. `renderer.js` строит те же объекты, что React (`ProfessionalService`, `Person`, `Service`, `WebPage`, `FAQPage`, `ImageGallery`, `CollectionPage`, `BreadcrumbList`) и вставляет их в `<head>` с теми же id `json-ld` / `json-ld-breadcrumb`; React в `setJsonLd`/`setBreadcrumbJsonLd` находит существующий тег и только перезаписывает `textContent` → дублей нет. `loadVideos()` расширен полями `video_url`, `thumbnail_url`, `created_at` для идентичности VideoObject. 23/23 структурное совпадение SSR↔DOM.
 
 ## Инфраструктурные факты
 - WAF BitNinja блокирует IP по объёму запросов: наш egress `104.198.214.223` отрезан (TCP timeout на 80/443) с ~15:00 19.08.2026 после аудиторской серии. Для production-проверок нужен whitelist.
@@ -52,7 +52,7 @@
 
 ## Бэклог
 - P0: production deploy `94bc09f`, `bb7d984`, `71d2e01`, `6f629e9`, `56f4c82`, `d817dba` + рестарт Node; затем 4 проверки `/api/debug/proxy` и отдельное согласование 301-редиректов.
-- P1: HSTS; JSON-LD в SSR; whitelist наших/ботовых IP в BitNinja.
+- P1: HSTS; whitelist наших/ботовых IP в BitNinja.
 - P1 (не согласовано): миграция `updated_at` для `seo_settings`, `participants`, `faq`.
 - P2: остальные расхождения из списка выше; чистка тонкого контента `/video`, `/foto-galereya`; `/api/*` в robots.txt.
 - P2: JSON-LD `WebSite`+`SearchAction`, `ContactPage`; SEO-хабы `/magi`, `/vedmy`, `/yasnovidyashchie`.
