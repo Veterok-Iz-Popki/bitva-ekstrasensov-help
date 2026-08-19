@@ -202,16 +202,11 @@ function parseSpecs(value) {
 
 function renderBookingContent(pageData, seo, participants) {
   const h1 = seo?.h1 || pageData?.page_title || 'Запись на приём к экстрасенсу';
-  const parts = [
-    `<h1>${esc(h1)}</h1>`,
-    pageData?.page_subtitle ? `<p>${esc(pageData.page_subtitle)}</p>` : '',
-  ];
-  if (participants && participants.length) {
-    parts.push(`<h2>Выберите экстрасенса</h2>`);
-    parts.push(`<ul>${participants.map(pt =>
-      `<li><a href="/uchastniki/${esc(pt.slug)}">${esc(pt.name)}${pt.title ? ' — ' + esc(pt.title) : ''}</a></li>`
-    ).join('')}</ul>`);
-  }
+  // BookingPage.js выводит только page_title — page_subtitle пользователю не показывается,
+  // поэтому в SSR его тоже не выводим.
+  const parts = [`<h1>${esc(h1)}</h1>`];
+  // Список участников намеренно не рендерится: в React это <select> формы,
+  // отдельного видимого блока и ссылок на участников на странице нет.
   return { h1, body: parts.filter(Boolean).join('\n') };
 }
 
@@ -236,15 +231,12 @@ function renderFaqContent(pageData, seo, faqList) {
 function renderGalleryContent(seo, participants, photos) {
   const h1 = 'Фотогалерея экстрасенсов';
   const parts = [`<h1>${esc(h1)}</h1>`];
+  // Те же gallery_photos и та же сортировка, что в API/React; подпись — <p>, как в GalleryPage.js
   if (photos && photos.length) {
-    parts.push(`<ul>${photos.map(ph =>
-      `<li>${esc(ph.title || ph.caption || ph.alt_text || '')}</li>`
-    ).filter(x => x !== '<li></li>').join('')}</ul>`);
-  }
-  if (participants && participants.length) {
-    parts.push(`<ul>${participants.map(pt =>
-      `<li><a href="/uchastniki/${esc(pt.slug)}">${esc(pt.name)}</a></li>`
-    ).join('')}</ul>`);
+    for (const ph of photos) {
+      const caption = ph.title || '';
+      if (caption) parts.push(`<p>${esc(caption)}</p>`);
+    }
   }
   return { h1, body: parts.filter(Boolean).join('\n') };
 }
@@ -268,29 +260,30 @@ function renderParticipantContent(seo, participant, reviews, allParticipants) {
     `<p><a href="/#ekstrasensy">Все участники</a></p>`,
     `<h1>${esc(h1)}</h1>`,
   ];
+  // Заголовки секций в React — <div>, не заголовки (ParticipantDetailPage.js)
   if (p.title) {
-    parts.push(`<h2>Статус</h2>`);
+    parts.push(`<div>Статус</div>`);
     parts.push(`<p>${esc(p.name)} — ${esc(p.title)}.</p>`);
   }
   const specs = parseSpecs(p.specializations);
   if (specs.length) {
-    parts.push(`<h2>Специализация</h2>`);
+    parts.push(`<div>Специализация</div>`);
     parts.push(renderList(specs));
   }
   parts.push(`<p>Помощь ${esc(genName)}.</p>`);
   parts.push(`<p>Консультация ${esc(genName)}.</p>`);
   parts.push(`<p>Записаться на Личный Приём к ${esc(datName)}.</p>`);
-  parts.push(`<h2>Не упустите свой шанс</h2>`);
+  parts.push(`<p>Не упустите свой шанс</p>`);
   parts.push(`<p><a href="${esc(bookingUrl)}">Обратиться</a></p>`);
   parts.push(`<p>Количество обращений ограниченно!</p>`);
-  if (p.description) parts.push(`<p>${esc(p.description)}</p>`);
+  // participants.description React не выводит — в SSR тоже не выводим
   if (p.full_description) {
     for (const para of splitLines(p.full_description)) parts.push(`<p>${esc(para)}</p>`);
   }
 
   // Отзывы — тот же источник, что у React (/api/participants/:slug/reviews)
   if (reviews && reviews.length) {
-    parts.push(`<h2>Отзывы</h2>`);
+    parts.push(`<div>Отзывы</div>`);
     parts.push(reviews.map(r => [
       `<div>`,
       `<p><strong>${esc(r.author_name || '')}${r.author_city ? ', ' + esc(r.author_city) : ''}</strong></p>`,
@@ -341,16 +334,19 @@ function renderPageBlocks(seo, pageData, kind, slug) {
       parts.push(renderList(splitLines(p[listKey])));
     }
   }
+  // Порядок как в ServicePage/TopicPage: доп. блок → CTA → похожие
+  // Уровень заголовка доп. блока: h3 в ServicePage, h2 в TopicPage
+  if (p.additional_title || p.additional_text) {
+    const tag = isTopic ? 'h2' : 'h3';
+    if (p.additional_title) parts.push(`<${tag}>${esc(p.additional_title)}</${tag}>`);
+    if (p.additional_text) {
+      for (const para of splitLines(p.additional_text)) parts.push(`<p>${esc(para)}</p>`);
+    }
+  }
   if (p.cta_title || p.cta_text || p.cta_button) {
     if (p.cta_title) parts.push(`<h2>${esc(p.cta_title)}</h2>`);
     if (p.cta_text) parts.push(`<p>${esc(p.cta_text)}</p>`);
     if (p.cta_button) parts.push(`<p><a href="/zapis-na-priem">${esc(p.cta_button)}</a></p>`);
-  }
-  if (p.additional_title || p.additional_text) {
-    if (p.additional_title) parts.push(`<h2>${esc(p.additional_title)}</h2>`);
-    if (p.additional_text) {
-      for (const para of splitLines(p.additional_text)) parts.push(`<p>${esc(para)}</p>`);
-    }
   }
 
   // «Похожие услуги» — та же перелинковка, что в клиентской версии
