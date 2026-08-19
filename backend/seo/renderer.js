@@ -205,7 +205,6 @@ function renderBookingContent(pageData, seo, participants) {
   const parts = [
     `<h1>${esc(h1)}</h1>`,
     pageData?.page_subtitle ? `<p>${esc(pageData.page_subtitle)}</p>` : '',
-    seo?.description ? `<p>${esc(seo.description)}</p>` : '',
   ];
   if (participants && participants.length) {
     parts.push(`<h2>Выберите экстрасенса</h2>`);
@@ -216,23 +215,27 @@ function renderBookingContent(pageData, seo, participants) {
   return { h1, body: parts.filter(Boolean).join('\n') };
 }
 
-function renderFaqContent(seo, faqList) {
+function renderFaqContent(pageData, seo, faqList) {
   const h1 = seo?.h1 || 'Частые вопросы';
-  const parts = [`<h1>${esc(h1)}</h1>`];
-  if (seo?.description) parts.push(`<p>${esc(seo.description)}</p>`);
+  const parts = [
+    `<h1>${esc(h1)}</h1>`,
+    // Тот же источник и тот же fallback, что в FAQPage.js
+    `<p>${esc(pageData?.page_subtitle || 'Ответы на самые популярные вопросы о консультациях')}</p>`,
+  ];
   if (faqList && faqList.length) {
     for (const q of faqList) {
       parts.push(`<h3>${esc(q.question || '')}</h3>`);
       if (q.answer) parts.push(`<p>${esc(q.answer)}</p>`);
     }
   }
+  parts.push(`<p>Не нашли ответ на свой вопрос?</p>`);
+  parts.push(`<p><a href="/zapis-na-priem">Связаться с нами</a></p>`);
   return { h1, body: parts.filter(Boolean).join('\n') };
 }
 
 function renderGalleryContent(seo, participants, photos) {
   const h1 = 'Фотогалерея экстрасенсов';
   const parts = [`<h1>${esc(h1)}</h1>`];
-  if (seo?.description) parts.push(`<p>${esc(seo.description)}</p>`);
   if (photos && photos.length) {
     parts.push(`<ul>${photos.map(ph =>
       `<li>${esc(ph.title || ph.caption || ph.alt_text || '')}</li>`
@@ -249,7 +252,6 @@ function renderGalleryContent(seo, participants, photos) {
 function renderVideoContent(seo, videos) {
   const h1 = 'Видео экстрасенсов';
   const parts = [`<h1>${esc(h1)}</h1>`];
-  if (seo?.description) parts.push(`<p>${esc(seo.description)}</p>`);
   if (videos && videos.length) {
     parts.push(videos.map(v => `<h3>${esc(v.title || '')}</h3>${v.description ? `<p>${esc(v.description)}</p>` : ''}`).join(''));
   }
@@ -425,7 +427,7 @@ function renderSeo(args) {
       content = renderBookingContent(pageData, effectiveSeo, participants);
       break;
     case 'faq':
-      content = renderFaqContent(effectiveSeo, faq);
+      content = renderFaqContent(pageData, effectiveSeo, faq);
       break;
     case 'gallery':
       content = renderGalleryContent(effectiveSeo, participants, photos);
