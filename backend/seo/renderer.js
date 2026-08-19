@@ -368,7 +368,7 @@ function renderHeaderNav() {
 
 function renderFooter(settings) {
   const year = new Date().getFullYear();
-  const copyright = settings?.copyright_text || 'Битва экстрасенсов — официальный сайт помощи';
+  const copyright = settings?.copyright_text || 'Битва экстрасенсов. Все права защищены.';
   return [
     '<footer>',
     `<p>Официальный сайт помощи участников проекта «Битва Экстрасенсов»</p>`,
@@ -377,8 +377,7 @@ function renderFooter(settings) {
       `<li><a href="/zapis-na-priem">Записаться на приём</a></li></ul>`,
     `<h3>Информация</h3>`,
     `<p>${esc(S.FOOTER_DISCLAIMER)}</p>`,
-    `<p>${esc(copyright)} © ${year}</p>`,
-    `<p>Все права защищены</p>`,
+    `<p>© ${year} ${esc(copyright)}</p>`,
     '</footer>',
   ].join('');
 }

@@ -8,7 +8,7 @@ CREATE TABLE `admin_users` (
   UNIQUE KEY `username` (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 INSERT INTO `admin_users` VALUES
-('097fd181-0ddf-4527-a561-76ffffd12312','nikoa2020@gmail.com','$2b$10$ArJTpCCTPHhB9cZfRuXZIOA9OIqGt35oGikEwZiS/Dr.vV3bqOpjm','2026-03-06 17:33:19');
+('097fd181-0ddf-4527-a561-76ffffd12312','nikoa2020@gmail.com','$2b$10$27RvbNl4Ili86tkPI1UBC.lOIzpTJju/e3tnn8hCxkURVz45qY4P6','2026-03-06 17:33:19');
 DROP TABLE IF EXISTS `applications`;
 CREATE TABLE `applications` (
   `id` varchar(36) NOT NULL,
@@ -414,4 +414,4 @@ CREATE TABLE `site_settings` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 INSERT INTO `site_settings` VALUES
-('site_settings','info@example.com','+7 (800) 123-45-67','+7 911 555-66-66','Москва, Россия','krzysztofjankowski510@gmail.com','Пн-Вс: 9:00 — 21:00','2024 Битва экстрасенсов. Все права защищены.',1,'','Битва Экстрасенсов',56,48,1);
+('site_settings','info@example.com','+7 (800) 123-45-67','+7 911 555-66-66','Москва, Россия','krzysztofjankowski510@gmail.com','Пн-Вс: 9:00 — 21:00','Битва экстрасенсов. Все права защищены.',1,'','Битва Экстрасенсов',56,48,1);

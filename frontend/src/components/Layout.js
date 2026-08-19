@@ -366,10 +366,7 @@ function Footer() {
 
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-xs text-white/30 font-body">
-            {settings.copyright_text || 'Битва экстрасенсов — официальный сайт помощи'} © {new Date().getFullYear()}
-          </p>
-          <p className="text-xs text-white/20 font-body">
-            Все права защищены
+            © {new Date().getFullYear()} {settings.copyright_text || 'Битва экстрасенсов. Все права защищены.'}
           </p>
         </div>
       </div>
