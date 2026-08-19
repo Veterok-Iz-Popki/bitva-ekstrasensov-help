@@ -1247,7 +1247,7 @@ if (fs.existsSync(BUILD_DIR)) {
 
   async function loadParticipantsList() {
     try {
-      const [rows] = await db.query('SELECT slug, name, title FROM participants WHERE is_active = 1 ORDER BY `order` ASC, name ASC');
+      const [rows] = await db.query('SELECT slug, name, title, specializations FROM participants WHERE is_active = 1 ORDER BY `order` ASC, name ASC');
       return rows || [];
     } catch (_) { return []; }
   }

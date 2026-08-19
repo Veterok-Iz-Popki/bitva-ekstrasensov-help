@@ -119,14 +119,14 @@ function renderHomeContent(pageData, participants, settings) {
 
   const parts = [
     `<h1>${esc(h1)}</h1>`,
-    `<p>${esc(p.hero_subtitle || 'Официальный портал магической помощи от участников проекта «Битва экстрасенсов»')}</p>`,
+    `<h2>${esc(p.hero_subtitle || 'Официальный портал магической помощи от участников проекта «Битва экстрасенсов»')}</h2>`,
     `<p><strong>${esc(p.hero_unique || 'Уникальная возможность получить реальную помощь!')}</strong></p>`,
     `<p>${esc(p.hero_text1 || 'Обратитесь лично к любому участнику легендарного проекта «Битва экстрасенсов» — победителям, финалистам и сильнейшим экстрасенсам, чьи способности были доказаны перед миллионами зрителей.')}</p>`,
     `<p>${esc(p.hero_text2 || 'Получите персональную диагностику негатива, консультацию ясновидящей, помощь мага или медиума — онлайн или на личном приёме.')}</p>`,
-    `<h2>${esc(p.hero_subheading || 'магическая помощь и консультация экстрасенса — запись на приём')}</h2>`,
+    `<h3>${esc(p.hero_subheading || 'магическая помощь и консультация экстрасенса — запись на приём')}</h3>`,
+    // Тот же ключ и тот же fallback, что в HomePage.js → about_text
+    `<p>${esc(p.about_text || 'Вам лично помогут сильнейшие и самые лучшие экстрасенсы России решить ваши проблемы и получить ответы на ваши вопросы.')}</p>`,
   ];
-  if (p.hero_intro) parts.push(`<p>${esc(p.hero_intro)}</p>`);
-  if (p.hero_main) { for (const para of splitLines(p.hero_main)) parts.push(`<p>${esc(para)}</p>`); }
   parts.push(cta());
 
   // Категории проблем (те же ссылки, что в PROBLEM_CATEGORIES на клиенте)
@@ -136,11 +136,12 @@ function renderHomeContent(pageData, participants, settings) {
   if (participants && participants.length) {
     parts.push(`<h2>${esc(p.participants_title || 'Лучшие экстрасенсы России')}</h2>`);
     parts.push(participants.map(pt => {
-      const specs = parseSpecs(pt.specializations);
+      // Как в HomePage.js: на карточке показываются первые две специализации
+      const specs = parseSpecs(pt.specializations).slice(0, 2);
       return [
         `<div>`,
         `<h3><a href="/uchastniki/${esc(pt.slug)}">${esc(pt.name)}</a></h3>`,
-        specs.length ? `<p>${specs.map(esc).join(', ')}</p>` : '',
+        specs.length ? `<p>${specs.map(esc).join(' ')}</p>` : '',
         pt.title ? `<p>${esc(pt.title)}</p>` : '',
         `<p><a href="/uchastniki/${esc(pt.slug)}">Обратиться</a></p>`,
         `</div>`,
@@ -159,13 +160,21 @@ function renderHomeContent(pageData, participants, settings) {
     if (!raw) continue;
     const lines = splitLines(raw);
     if (!lines.length) continue;
-    cats.push({ head: lines[0], items: lines.slice(1), link: S.SERVICE_LINKS[i - 1] });
+    // Тот же разбор первой строки, что в HomePage.js: первое слово — заголовок, остаток — подзаголовок
+    const words = lines[0].split(/\s+/).filter(Boolean);
+    cats.push({
+      head: words[0] || '',
+      sub: words.slice(1).join(' '),
+      items: lines.slice(1),
+      link: S.SERVICE_LINKS[i - 1],
+    });
   }
   if (cats.length) {
     parts.push(`<h2>${esc(p.services_title || 'Услуги экстрасенсов')}</h2>`);
     parts.push(cats.map(c => [
       `<div>`,
       `<h3>${esc(c.head)}</h3>`,
+      c.sub ? `<p>${esc(c.sub)}</p>` : '',
       renderList(c.items),
       `<p><a href="${esc(c.link || '/zapis-na-priem')}">Подробнее</a></p>`,
       `</div>`,
