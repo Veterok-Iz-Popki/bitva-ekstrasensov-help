@@ -22,7 +22,7 @@
 LOCK TABLES `admin_users` WRITE;
 /*!40000 ALTER TABLE `admin_users` DISABLE KEYS */;
 INSERT INTO `admin_users` VALUES
-('097fd181-0ddf-4527-a561-76ffffd12312','nikoa2020@gmail.com','$2b$10$nRWwIOK.wR4t24/gM1m1qex4/7DXsLROqeUxTFuU5TUUaIAHEe/xe','2026-03-06 17:33:19');
+('097fd181-0ddf-4527-a561-76ffffd12312','nikoa2020@gmail.com','$2b$10$ArJTpCCTPHhB9cZfRuXZIOA9OIqGt35oGikEwZiS/Dr.vV3bqOpjm','2026-03-06 17:33:19');
 /*!40000 ALTER TABLE `admin_users` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -76,8 +76,10 @@ UNLOCK TABLES;
 LOCK TABLES `gallery_photos` WRITE;
 /*!40000 ALTER TABLE `gallery_photos` DISABLE KEYS */;
 INSERT INTO `gallery_photos` VALUES
-('77e563cd-3db5-4fc2-b05f-4bfa08f0b305','/api/uploads/c1372869-442f-4944-a824-1a0087ad4499.jpg','asdasd','asdasd','',0,1,'2026-05-28 09:16:01'),
-('8c29798a-1675-4d7e-942b-a0d6c1936cc1','/api/uploads/4e8f0d24-9802-45f7-8813-cc0fe335888f.jpg','dasd','asdasd','',1,1,'2026-05-28 09:36:09');
+('3aad0d91-f91b-4ca7-95d8-f8d98ee265a3','/api/uploads/bbf38236-2062-4a85-97d8-a9a7693d3860.jpg','Елена Голунова','Елена Голунова\n','',3,1,'2026-08-19 10:40:55'),
+('74758aeb-e1b0-4637-b1fd-7ea5f33afc58','/api/uploads/1f7b689e-c6fd-4e98-abc8-abd6e767c160.jpg','Елена Голунова','Елена Голунова\n','',2,1,'2026-08-19 10:40:41'),
+('77e563cd-3db5-4fc2-b05f-4bfa08f0b305','/api/uploads/5f5ad717-6ca3-4230-a36e-70b889f3ef17.webp','Елена Голунова','Елена Голунова\n','',0,1,'2026-05-28 09:16:01'),
+('8c29798a-1675-4d7e-942b-a0d6c1936cc1','/api/uploads/8ccb4113-88d5-4ad8-85f8-cda0ed2999a1.jpg','Елена Голунова','Елена Голунова\n','',1,1,'2026-05-28 09:36:09');
 /*!40000 ALTER TABLE `gallery_photos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -88,9 +90,9 @@ UNLOCK TABLES;
 LOCK TABLES `gallery_videos` WRITE;
 /*!40000 ALTER TABLE `gallery_videos` DISABLE KEYS */;
 INSERT INTO `gallery_videos` VALUES
-('34b3af38-2f28-4734-9ff3-a4af32c84be5','/api/uploads/4ff52676-9a68-45c6-9ce3-a33da092850e_opt.mp4','asdasd','asdasd','/api/uploads/314e6487-03e5-4035-95ee-13eccec26692.jpg',2,1,'2026-05-28 10:35:26','done'),
-('448aca45-04b9-48e3-aa03-e0ad988af5b6','/api/uploads/f45b3a06-abc2-472b-92a5-964b3a7cd281_opt.mp4','adasd','asdasd','/api/uploads/90306a2c-af63-448c-8950-f7ab3e518a88.png',0,1,'2026-05-28 10:34:38','done'),
-('f105e41d-d85e-4801-8569-afe8ece699c4','/api/uploads/0568b80f-8b10-49fb-bde6-fc4df137601f_opt.mp4','fsdfs','dfsdf','/api/uploads/e4cac4c9-c734-4d59-ab82-4a21340bf7e2.jpg',1,1,'2026-05-28 10:34:59','done');
+('34b3af38-2f28-4734-9ff3-a4af32c84be5','/api/uploads/4ff52676-9a68-45c6-9ce3-a33da092850e_opt.mp4','Елена Голунова','Елена Голунова\n','/api/uploads/c5403e87-7274-4eea-a56a-8edee37f10e2.jpg',2,1,'2026-05-28 10:35:26','done'),
+('448aca45-04b9-48e3-aa03-e0ad988af5b6','/api/uploads/f45b3a06-abc2-472b-92a5-964b3a7cd281_opt.mp4','Елена Голунова','Елена Голунова\n','/api/uploads/18215a79-f908-4d82-b0d7-eab176cae355.jpg',0,1,'2026-05-28 10:34:38','done'),
+('f105e41d-d85e-4801-8569-afe8ece699c4','/api/uploads/0568b80f-8b10-49fb-bde6-fc4df137601f_opt.mp4','Елена Голунова','Елена Голунова\n','/api/uploads/a9df9f9e-cfaa-4219-a841-8c62fc823e5c.jpg',1,1,'2026-05-28 10:34:59','done');
 /*!40000 ALTER TABLE `gallery_videos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -396,4 +398,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-07-31 11:38:41
+-- Dump completed on 2026-08-19 11:12:13
