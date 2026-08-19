@@ -196,7 +196,7 @@ export default function ParticipantDetailPage() {
             </div>
 
             {reviews.length > 0 && (
-              <div className="hidden md:block mt-8" data-testid="reviews-desktop">
+              <div className="profile-reviews mt-8" data-testid="reviews-desktop">
                 <ReviewsBlock testIdPrefix="review" />
               </div>
             )}
@@ -296,13 +296,6 @@ export default function ParticipantDetailPage() {
             </div>
           </div>
         </div>
-
-        {/* Mobile Reviews */}
-        {reviews.length > 0 && (
-          <div className="md:hidden mt-10" data-testid="reviews-mobile">
-            <ReviewsBlock testIdPrefix="review-mobile" />
-          </div>
-        )}
 
         {/* Другие экстрасенсы — internal cross-linking для SEO */}
         {allParticipants.filter(p => p.slug !== slug).length > 0 && (

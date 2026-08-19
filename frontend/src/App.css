@@ -199,6 +199,25 @@
     }
 }
 
+/* Единственный блок отзывов. На мобиле .profile-left раскрывается (display: contents),
+   поэтому фото, правая колонка и отзывы становятся элементами одной колонки и
+   переставляются через order — визуальное место отзывов остаётся прежним. */
+@media (max-width: 767px) {
+    .profile-left {
+        display: contents;
+    }
+    .profile-photo-wrapper {
+        order: 1;
+    }
+    .profile-right {
+        order: 2;
+    }
+    .profile-reviews {
+        order: 3;
+        margin-top: 0.5rem;
+    }
+}
+
 /* Photo wrapper */
 .profile-photo-wrapper {
     border: 3px solid rgba(212, 166, 55, 0.35);
