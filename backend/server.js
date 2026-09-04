@@ -28,6 +28,25 @@ const SMTP_PASSWORD = process.env.SMTP_PASSWORD || '';
 const UPLOADS_DIR = path.join(__dirname, 'uploads');
 if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 
+// ===== CANONICAL ORIGIN 301 REDIRECT =====
+// Единственный canonical origin: https://bitva-ekstrasensov-help.com
+// HTTPS определяется ТОЛЬКО по x-forwarded-proto (за прокси req.protocol/req.secure всегда http/false).
+// На production заголовок приходит как "https, https" — берём первое значение.
+// Срабатывает исключительно для production-хостов, поэтому preview/localhost не затрагиваются.
+const CANONICAL_HOST = 'bitva-ekstrasensov-help.com';
+const REDIRECT_HOSTS = new Set([CANONICAL_HOST, `www.${CANONICAL_HOST}`]);
+
+app.use((req, res, next) => {
+  if (req.method === 'OPTIONS') return next();
+  const hostname = String(req.headers.host || '').split(':')[0].trim().toLowerCase();
+  if (!REDIRECT_HOSTS.has(hostname)) return next();
+  const proto = String(req.headers['x-forwarded-proto'] || '').split(',')[0].trim().toLowerCase();
+  const isHttps = proto === 'https';
+  if (isHttps && hostname === CANONICAL_HOST) return next();
+  res.setHeader('Cache-Control', 'no-store');
+  return res.redirect(301, `https://${CANONICAL_HOST}${req.originalUrl}`);
+});
+
 // Middleware
 app.use(cors({ origin: true, credentials: true }));
 // Gzip compression для всех текстовых ресурсов (JS/CSS/HTML/JSON).
@@ -931,30 +950,6 @@ api.post('/admin/upload', requireAdmin, upload.single('file'), async (req, res) 
   }
 
   return res.json({ status: 'success', filename, url: `/api/uploads/${filename}` });
-});
-
-// ===== ВРЕМЕННЫЙ ДИАГНОСТИЧЕСКИЙ ENDPOINT (Шаг 0 аудита редиректов) =====
-// Показывает, какие proxy-заголовки реально доходят до Express через
-// BitNinja → Caddy → Plesk/Passenger. Отдаёт ТОЛЬКО заголовки маршрутизации,
-// никаких секретов. УДАЛИТЬ сразу после снятия замеров на production.
-api.get('/debug/proxy', (req, res) => {
-  res.setHeader('Cache-Control', 'no-store');
-  return res.json({
-    host: req.headers.host || null,
-    xForwardedHost: req.headers['x-forwarded-host'] || null,
-    xForwardedProto: req.headers['x-forwarded-proto'] || null,
-    xForwardedSsl: req.headers['x-forwarded-ssl'] || null,
-    xForwardedPort: req.headers['x-forwarded-port'] || null,
-    xForwardedFor: req.headers['x-forwarded-for'] ? 'present' : null,
-    frontEndHttps: req.headers['front-end-https'] || null,
-    xUrlScheme: req.headers['x-url-scheme'] || null,
-    reqProtocol: req.protocol,
-    reqSecure: req.secure,
-    socketEncrypted: !!req.socket.encrypted,
-    reqHostname: req.hostname,
-    originalUrl: req.originalUrl,
-    trustProxySetting: app.get('trust proxy') || false,
-  });
 });
 
 // ===== ADMIN SEED =====

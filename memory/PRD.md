@@ -71,3 +71,10 @@
 - Код не менялся, frontend не пересобирался. `backend/dump.sql` и `backend/data.sql` синхронизированы (27 строк seo_settings), restore-проверка пройдена.
 - Проверено: title 23/23, description 23/23, уникальны 23/23, SSR=DOM 23/23, по одному тегу на страницу; регрессий нет (words/links/H1-H3/отзывы 25/JSON-LD 44/canonical/robots/OG без изменений).
 - Production не деплоился.
+
+## 2026-06 — Canonical 301 redirects + удаление debug endpoint
+- `backend/server.js`: глобальный middleware до CORS/compression/API/SSR/static. HTTPS определяется только по `x-forwarded-proto` (первое значение через `split(",")[0]`), host — по `req.headers.host` без порта, lowercase.
+- Редирект 301 на `https://bitva-ekstrasensov-help.com${req.originalUrl}` при не-HTTPS или host `www.*`. Срабатывает только для production-хостов (whitelist), preview/localhost не затрагиваются. OPTIONS пропускается (CORS preflight). `trust proxy` не включался, HSTS не добавлялся, trailing slash не менялся.
+- Удалён временный `GET /api/debug/proxy` (теперь 404).
+- Тесты A–G пройдены; регрессий нет: SSR-снимок 23 URL идентичен baseline (words/links/H1-H3/отзывы/JSON-LD 44/canonical/robots/OG), sitemap 200 xml, robots 200, 404 остаётся 404.
+- Frontend не менялся, rebuild не требовался. Production не деплоился.
