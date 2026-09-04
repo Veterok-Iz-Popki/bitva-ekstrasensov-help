@@ -64,3 +64,10 @@
 - Проверено: SSR `/` (632 слова, 1 H1, 1 JSON-LD), `/porcha`, `/uchastniki/elena-golunova` (4757 слов), `/voprosy-i-otvety`, `/video`, sitemap `application/xml; charset=utf-8`.
 - Playwright: главная — 1 H1, 67 ссылок, один копирайт; страница участника — 1 H1, 2 JSON-LD, отзывы, без horizontal overflow.
 - Код не менялся. `git status` чистый, HEAD `9e8a8f6`. Production не деплоился.
+
+## 2026-06 — Обновление SEO Title и Meta Description (23 публичных URL)
+- Изменены только `seo_settings.title` и `seo_settings.description`: 15 существующих записей (home, booking, faq, foto-galereya, video, 4 service-*, 6 topic-*) обновлены; добавлено 8 записей `participant-{slug}` (механизм CMS, ранее эти страницы использовали код-fallback).
+- В новых записях `og_title`, `og_description`, `keywords`, `h1` заданы равными текущему fallback → OG и keywords не изменились, SSR=DOM сохранён.
+- Код не менялся, frontend не пересобирался. `backend/dump.sql` и `backend/data.sql` синхронизированы (27 строк seo_settings), restore-проверка пройдена.
+- Проверено: title 23/23, description 23/23, уникальны 23/23, SSR=DOM 23/23, по одному тегу на страницу; регрессий нет (words/links/H1-H3/отзывы 25/JSON-LD 44/canonical/robots/OG без изменений).
+- Production не деплоился.
