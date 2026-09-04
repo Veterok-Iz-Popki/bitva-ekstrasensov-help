@@ -57,3 +57,10 @@
 - P2: остальные расхождения из списка выше; чистка тонкого контента `/video`, `/foto-galereya`; `/api/*` в robots.txt.
 - P2: JSON-LD `WebSite`+`SearchAction`, `ContactPage`; SEO-хабы `/magi`, `/vedmy`, `/yasnovidyashchie`.
 - P2: сохранение заявок в БД до отправки SMTP; декомпозиция `backend/server.js`.
+
+## 2026-06 — Восстановление preview (новый pod)
+- MariaDB отсутствовала в новом pod (`mariadb FATAL`, backend FATAL, API 000, frontend 502). Восстановлено через `bash scripts/restore-db.sh`.
+- Данные восстановлены из `backend/dump.sql`: 8 участников, 16 страниц, 200 отзывов. Backend и frontend — HTTP 200.
+- Проверено: SSR `/` (632 слова, 1 H1, 1 JSON-LD), `/porcha`, `/uchastniki/elena-golunova` (4757 слов), `/voprosy-i-otvety`, `/video`, sitemap `application/xml; charset=utf-8`.
+- Playwright: главная — 1 H1, 67 ссылок, один копирайт; страница участника — 1 H1, 2 JSON-LD, отзывы, без horizontal overflow.
+- Код не менялся. `git status` чистый, HEAD `9e8a8f6`. Production не деплоился.
