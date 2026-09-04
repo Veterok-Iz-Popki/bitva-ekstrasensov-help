@@ -1,5 +1,5 @@
 INSERT INTO `admin_users` VALUES
-('097fd181-0ddf-4527-a561-76ffffd12312','nikoa2020@gmail.com','$2b$10$27RvbNl4Ili86tkPI1UBC.lOIzpTJju/e3tnn8hCxkURVz45qY4P6','2026-03-06 17:33:19');
+('097fd181-0ddf-4527-a561-76ffffd12312','nikoa2020@gmail.com','$2b$10$/A9tawyUjkACVea44sofgerctm0H.y2XjuW2X3nkiLqnk/X7Q3rYO','2026-03-06 17:33:19');
 INSERT INTO `contact_messages` VALUES
 ('3ff6357d-7941-4043-95b7-d89fce530961','Тест Контакт','+7 999 888 77 66','Тестовое сообщение для проверки contact email','new','2026-05-27 12:57:39'),
 ('577b5268-18f6-4edf-8b0f-a69762c3063e','Test User','test@example.com','E2E contact test','new','2026-07-20 10:50:21'),
