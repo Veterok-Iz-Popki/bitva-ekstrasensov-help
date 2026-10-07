@@ -71,7 +71,7 @@ CREATE TABLE `gallery_photos` (
 LOCK TABLES `gallery_photos` WRITE;
 INSERT INTO `gallery_photos` VALUES
 ('3aad0d91-f91b-4ca7-95d8-f8d98ee265a3','/api/uploads/bbf38236-2062-4a85-97d8-a9a7693d3860.jpg','Елена Голунова','Елена Голунова с цветами','',3,1,'2026-08-19 10:40:55'),
-('74758aeb-e1b0-4637-b1fd-7ea5f33afc58','/api/uploads/1f7b689e-c6fd-4e98-abc8-abd6e767c160.jpg','Елена Голунова','Елена Голунова\n','',2,1,'2026-08-19 10:40:41'),
+('74758aeb-e1b0-4637-b1fd-7ea5f33afc58','/api/uploads/1f7b689e-c6fd-4e98-abc8-abd6e767c160.jpg','Елена Голунова','Елена Голунова на кожаном чёрном кресле','',2,1,'2026-08-19 10:40:41'),
 ('77e563cd-3db5-4fc2-b05f-4bfa08f0b305','/api/uploads/5f5ad717-6ca3-4230-a36e-70b889f3ef17.webp','Елена Голунова','Елена Голунова\n','',0,1,'2026-05-28 09:16:01'),
 ('8c29798a-1675-4d7e-942b-a0d6c1936cc1','/api/uploads/8ccb4113-88d5-4ad8-85f8-cda0ed2999a1.jpg','Елена Голунова','Елена Голунова\n','',1,1,'2026-05-28 09:36:09');
 UNLOCK TABLES;

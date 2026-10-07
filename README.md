@@ -1,5 +1,7 @@
 # bitva-ekstrasensov-help
 
+Пошаговый процесс обновления production через Hoster.kz и Plesk описан в [DEPLOY.md](DEPLOY.md).
+
 ## Структура проекта
 
 - `frontend/` — клиентская часть на React.
