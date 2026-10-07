@@ -5,6 +5,7 @@
 .vscode/
 
 # Dependencies
+/.local/
 node_modules/
 /node_modules
 /.pnp
