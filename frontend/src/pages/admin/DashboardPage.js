@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ClipboardList, Users, MessageSquare, HelpCircle, Mail, ArrowRight } from 'lucide-react';
+import { ClipboardList, Users, MessageSquare, HelpCircle, ArrowRight } from 'lucide-react';
 import api from '../../lib/api';
 
 export default function DashboardPage() {
@@ -16,7 +16,6 @@ export default function DashboardPage() {
     { label: 'Заявок сегодня', value: stats?.today_applications || 0, icon: ClipboardList, link: '/admin/applications', color: 'text-green-400' },
     { label: 'Участников', value: stats?.total_participants || 0, icon: Users, link: '/admin/participants', color: 'text-gold' },
     { label: 'Отзывов', value: stats?.total_reviews || 0, icon: MessageSquare, link: '/admin/reviews', color: 'text-gold' },
-    { label: 'Сообщений', value: stats?.total_contacts || 0, icon: Mail, link: '/admin/contacts', color: 'text-gold' },
   ];
 
   return (

@@ -398,18 +398,12 @@ api.post('/contact', async (req, res) => {
   const clientIp = req.ip || 'unknown';
   if (!checkRateLimit(clientIp, 3, 120)) return res.status(429).json({ detail: 'Слишком много запросов. Попробуйте позже.' });
 
-  const id = uuidv4();
   const now = dbNow();
-  await db.query(
-    'INSERT INTO contact_messages (id, name, email, message, status, created_at) VALUES (?,?,?,?,?,?)',
-    [id, data.name, data.email, data.message, 'new', now]
-  );
-  // Сообщение уже сохранено в contact_messages. Если письмо не ушло — 500.
   const emailResult = await sendContactNotification({ ...data, created_at: now });
   if (!emailResult.ok) {
     return res.status(500).json({
       status: 'error',
-      detail: 'Сообщение сохранено, но письмо-уведомление не отправлено. Попробуйте позже.',
+      detail: 'Не удалось отправить сообщение на почту. Попробуйте позже.',
     });
   }
   return res.json({ status: 'success', message: 'Сообщение отправлено' });
@@ -868,17 +862,6 @@ api.put('/admin/settings', requireAdmin, async (req, res) => {
 
 // ===== ADMIN CONTACTS =====
 
-api.get('/admin/contacts', requireAdmin, async (req, res) => {
-  const [rows] = await db.query('SELECT * FROM contact_messages ORDER BY created_at DESC LIMIT 1000');
-  return res.json(rows);
-});
-
-api.delete('/admin/contacts/:id', requireAdmin, async (req, res) => {
-  const [result] = await db.query('DELETE FROM contact_messages WHERE id = ?', [req.params.id]);
-  if (result.affectedRows === 0) return res.status(404).json({ detail: 'Сообщение не найдено' });
-  return res.json({ status: 'success' });
-});
-
 // ===== ADMIN STATS =====
 
 api.get('/admin/stats', requireAdmin, async (req, res) => {
@@ -890,7 +873,6 @@ api.get('/admin/stats', requireAdmin, async (req, res) => {
   const [[{ c: todayApps }]] = await db.query('SELECT COUNT(*) as c FROM applications WHERE created_at >= ?', [todayStart.toISOString()]);
   const [[{ c: totalParticipants }]] = await db.query('SELECT COUNT(*) as c FROM participants');
   const [[{ c: totalReviews }]] = await db.query('SELECT COUNT(*) as c FROM reviews');
-  const [[{ c: totalContacts }]] = await db.query('SELECT COUNT(*) as c FROM contact_messages');
 
   return res.json({
     total_applications: totalApps,
@@ -898,7 +880,6 @@ api.get('/admin/stats', requireAdmin, async (req, res) => {
     today_applications: todayApps,
     total_participants: totalParticipants,
     total_reviews: totalReviews,
-    total_contacts: totalContacts,
   });
 });
 

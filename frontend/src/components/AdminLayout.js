@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom';
-import { LayoutDashboard, FileText, Users, MessageSquare, HelpCircle, Settings, Search, LogOut, Menu, ClipboardList, Globe, Mail, Image, Video } from 'lucide-react';
+import { LayoutDashboard, FileText, Users, MessageSquare, HelpCircle, Settings, Search, LogOut, Menu, ClipboardList, Globe, Image, Video } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '../components/ui/sheet';
 import api from '../lib/api';
@@ -15,7 +15,6 @@ const ADMIN_NAV = [
   { path: '/admin/video', label: 'Видео', icon: Video },
   { path: '/admin/pages', label: 'Страницы', icon: FileText },
   { path: '/admin/seo', label: 'SEO', icon: Search },
-  { path: '/admin/contacts', label: 'Сообщения', icon: Mail },
   { path: '/admin/settings', label: 'Настройки', icon: Settings },
 ];
 

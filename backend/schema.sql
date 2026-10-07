@@ -23,15 +23,6 @@ CREATE TABLE `applications` (
   `created_at` datetime DEFAULT current_timestamp(),
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-CREATE TABLE `contact_messages` (
-  `id` varchar(36) NOT NULL,
-  `name` varchar(255) DEFAULT '',
-  `email` varchar(255) DEFAULT '',
-  `message` text DEFAULT NULL,
-  `status` varchar(50) DEFAULT 'new',
-  `created_at` datetime DEFAULT current_timestamp(),
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 CREATE TABLE `faq` (
   `id` varchar(36) NOT NULL,
   `question` text NOT NULL,

@@ -5,7 +5,6 @@ Requirements:
 - GET /api/admin/applications returns []
 - GET /api/admin/stats has total/new/today applications = 0
 - Validation still returns 400 for missing fields
-- POST /api/contact still persists in contact_messages
 """
 import os
 import time
@@ -147,41 +146,6 @@ class TestApplicationsValidation:
             detail = (r.json().get("detail") or "").lower()
             assert expected_msg_part.lower() in detail, \
                 f"Expected '{expected_msg_part}' in detail, got: {detail}"
-
-
-class TestContactMessagesStillWork:
-    """POST /api/contact MUST still persist in contact_messages."""
-
-    def test_contact_persists(self, api, admin_client):
-        # Count before
-        r_before = admin_client.get(f"{BASE_URL}/api/admin/contacts")
-        assert r_before.status_code == 200
-        before_count = len(r_before.json())
-
-        unique = uuid.uuid4().hex[:8]
-        payload = {
-            "name": f"TEST_Contact_{unique}",
-            "email": "+7 900 111 22 33",
-            "message": f"TEST_message_{unique}",
-        }
-        r = api.post(f"{BASE_URL}/api/contact", json=payload)
-        # Could be 429 due to contact rate limit (3/120s). Try once; accept either.
-        if r.status_code == 429:
-            pytest.skip("Contact endpoint rate-limited; skipping persistence check")
-        assert r.status_code == 200, f"Contact POST failed: {r.status_code} {r.text}"
-        assert r.json().get("status") == "success"
-
-        time.sleep(0.5)
-        r_after = admin_client.get(f"{BASE_URL}/api/admin/contacts")
-        assert r_after.status_code == 200
-        after = r_after.json()
-        assert len(after) == before_count + 1, \
-            f"Contact not persisted: before={before_count}, after={len(after)}"
-
-        # Cleanup TEST_ contact
-        new_msg = next((m for m in after if m.get("name", "").startswith(f"TEST_Contact_{unique}")), None)
-        if new_msg and new_msg.get("id"):
-            admin_client.delete(f"{BASE_URL}/api/admin/contacts/{new_msg['id']}")
 
 
 class TestFinalState:

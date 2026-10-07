@@ -200,9 +200,6 @@ class APITester:
         # Settings management
         self.run_test("Admin Settings Get", "GET", "admin/settings", 200)
         
-        # Contact messages
-        self.run_test("Admin Contact Messages", "GET", "admin/contacts", 200)
-        
         # Test page content update
         page_update = {
             "blocks": {

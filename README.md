@@ -23,7 +23,9 @@ GitHub Actions больше не пересобирает проект. Гото
 1. Установите зависимости фронтенда: в папке `frontend` выполните `npx yarn@1.22.22 install --frozen-lockfile`.
 2. Задайте `REACT_APP_BACKEND_URL` в `frontend/.env.production.local`. Пустое значение означает API на том же домене. При необходимости задайте `REACT_APP_SITE_URL` для canonical URL.
 3. В корне репозитория включите hook: `git config core.hooksPath .githooks`. Повторите это в каждом новом checkout.
-4. Выполните `npm --prefix frontend run build`. Скрипт очищает `backend/build`, создаёт свежую сборку и переименовывает `index.html` в `index.template.html` для серверной SEO-обработки.
-5. Добавьте исходники и всю сборку в коммит, включая удалённые файлы: `git add -A -- backend/build`, затем `git commit` и `git push`.
+4. Установите зависимости backend через `npx yarn@1.22.22 install --frozen-lockfile` в папке `backend`. Настройте локальную базу в `backend/.env` (`DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`). Для экспорта нужен `mysqldump` в PATH или путь в `DB_DUMP_BIN`; portable MariaDB в `.local` обнаруживается автоматически.
+5. Выполните `npm --prefix backend run db:dump`: полный дамп локальной базы сохраняется в `backend/dump.sql` через временный файл. Дамп предназначен для полного пересоздания базы на сервере.
+6. Выполните `npm --prefix frontend run build`. Скрипт очищает `backend/build`, создаёт свежую сборку и переименовывает `index.html` в `index.template.html` для серверной SEO-обработки.
+7. Добавьте исходники, дамп и всю сборку в коммит, включая удалённые файлы: `git add -A -- backend/build backend/dump.sql`, затем `git commit` и `git push`.
 
-Перед каждым push hook повторяет сборку. При ошибке или отличиях от закоммиченного `backend/build` отправка останавливается: закоммитьте обновлённую сборку и повторите push.
+Перед каждым push hook повторяет экспорт базы и сборку. При ошибке или отличиях от закоммиченных `backend/build` и `backend/dump.sql` отправка останавливается: закоммитьте обновлённые файлы и повторите push. Сам push не изменяет базу на сервере.

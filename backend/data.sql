@@ -1,12 +1,5 @@
 INSERT INTO `admin_users` VALUES
 ('097fd181-0ddf-4527-a561-76ffffd12312','nikoa2020@gmail.com','$2b$10$UJyfKtFHQUcVKW03WWHAcOt/f22dXxLayMfopSKrpIzzdQvE4yYyS','2026-03-06 17:33:19');
-INSERT INTO `contact_messages` VALUES
-('3ff6357d-7941-4043-95b7-d89fce530961','Тест Контакт','+7 999 888 77 66','Тестовое сообщение для проверки contact email','new','2026-05-27 12:57:39'),
-('577b5268-18f6-4edf-8b0f-a69762c3063e','Test User','test@example.com','E2E contact test','new','2026-07-20 10:50:21'),
-('816defd1-8273-4987-a655-2e1772ae7009','Тест','test@example.com','e2e','new','2026-07-20 11:55:01'),
-('8bf6622a-0a5c-424b-90b9-e8c84b0b3396','Debug','debug@test.com','debug','new','2026-07-20 11:02:49'),
-('c1b9c182-a1f4-4bdf-8378-789ed8fd8f3d','Fail','fail@test.com','should fail','new','2026-07-20 10:51:03'),
-('fac2646c-60c1-4f6d-8b34-ed34ebe5a3a4','Fail','fail@test.com','should fail','new','2026-07-20 10:51:27');
 INSERT INTO `faq` VALUES
 ('17f7f763-b072-4650-a2a0-f7cc2b459ee3','Все ли участники — настоящие экстрасенсы?','Все специалисты прошли строгий отбор и подтвердили свои способности.',8,1),
 ('389a2a72-38e5-4815-9f18-d118089f1f1d','Сколько стоит консультация экстрасенса?','Стоимость зависит от специалиста и формата проведения. Первичная консультация длится 60 минут. Точную стоимость уточняйте у администратора.',2,1),

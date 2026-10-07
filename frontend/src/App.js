@@ -27,7 +27,6 @@ const ReviewsAdmin = lazy(() => import("@/pages/admin/ReviewsAdmin"));
 const FAQAdmin = lazy(() => import("@/pages/admin/FAQAdmin"));
 const PagesAdmin = lazy(() => import("@/pages/admin/PagesAdmin"));
 const SEOAdmin = lazy(() => import("@/pages/admin/SEOAdmin"));
-const ContactsAdmin = lazy(() => import("@/pages/admin/ContactsAdmin"));
 const SettingsAdmin = lazy(() => import("@/pages/admin/SettingsAdmin"));
 const GalleryAdmin = lazy(() => import("@/pages/admin/GalleryAdmin"));
 const VideoAdmin = lazy(() => import("@/pages/admin/VideoAdmin"));
@@ -68,7 +67,6 @@ function App() {
             <Route path="faq" element={<FAQAdmin />} />
             <Route path="pages" element={<PagesAdmin />} />
             <Route path="seo" element={<SEOAdmin />} />
-            <Route path="contacts" element={<ContactsAdmin />} />
             <Route path="settings" element={<SettingsAdmin />} />
             <Route path="gallery" element={<GalleryAdmin />} />
             <Route path="video" element={<VideoAdmin />} />
