@@ -29,11 +29,13 @@ try {
   if (result.error) throw result.error;
   if (result.status !== 0) throw new Error(`Database export failed (exit ${result.status})`);
   if (!fs.statSync(tempFile).size) throw new Error('Database export is empty');
-  // MariaDB's client-only sandbox header breaks older mysql clients; it is not SQL data.
+  // The production importer rejects standalone MySQL/MariaDB version comments.
+  // Match whole directive lines so text inside INSERT values is left unchanged.
   const sql = fs.readFileSync(tempFile, 'utf8')
-    .replace(/^\/\*M!999999\\- enable the sandbox mode \*\/[ \t]*\r?\n/, '')
+    .replace(/^[ \t]*\/\*(?:!|M!)\d+[^\r\n]*\*\/;?[ \t]*(?:\r?\n|$)/gm, '')
+    .trimStart()
     .trimEnd();
-  fs.writeFileSync(tempFile, `${sql}\n`, 'utf8');
+  fs.writeFileSync(tempFile, `SET NAMES utf8mb4;\n${sql}\n`, 'utf8');
   fs.renameSync(tempFile, outFile);
   console.log('Full local database exported to backend/dump.sql.');
 } catch (error) {

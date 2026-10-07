@@ -20,6 +20,8 @@
 
 GitHub Actions больше не пересобирает проект. Готовые файлы в `backend/build` коммитятся локально.
 
+Перед каждой загрузкой на production обязательно обновляйте дамп (`npm --prefix backend run db:dump`) и затем пересобирайте фронтенд (`npm --prefix frontend run build`), даже если менялся только контент базы. Загружайте свежие `backend/dump.sql` и `backend/build` после их коммита и push. При ошибке экспорта или сборки загрузку нужно остановить.
+
 1. Установите зависимости фронтенда: в папке `frontend` выполните `npx yarn@1.22.22 install --frozen-lockfile`.
 2. Задайте `REACT_APP_BACKEND_URL` в `frontend/.env.production.local`. Пустое значение означает API на том же домене. При необходимости задайте `REACT_APP_SITE_URL` для canonical URL.
 3. В корне репозитория включите hook: `git config core.hooksPath .githooks`. Повторите это в каждом новом checkout.
